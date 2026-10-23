@@ -1,0 +1,23 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+.ministaut-token
+**/.ministaut-token
+**/*token*private*
+# Local scanning results and browser state
+**/output/
+**/historikk/
+**/kampoppsett/*.json
+**/lagrede_feltposisjoner.json
+**/ministaut_ventende_opplastinger.json
+**/profile*/
+**/user_data*/
+**/cookies*
+# Python and Node
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+.vercel/
+.DS_Store

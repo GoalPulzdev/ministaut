@@ -1,0 +1,654 @@
+{
+  "version": 16,
+  "description": "Only pitch-relative hover coordinates confirmed by public tooltips; never seat availability.",
+  "fields": {
+    "A": [
+      {
+        "ref": [
+          384.78,
+          483.0
+        ],
+        "source": "manual",
+        "sample": "start"
+      },
+      {
+        "ref": [
+          389.61,
+          482.43
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "AA": [
+      {
+        "ref": [
+          343.76,
+          506.49
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "AB": [
+      {
+        "ref": [
+          336.52,
+          469.2
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "B": [
+      {
+        "ref": [
+          413.74,
+          482.43
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "BA": [
+      {
+        "ref": [
+          370.3,
+          505.29
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "BB": [
+      {
+        "ref": [
+          361.86,
+          469.2
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "C": [
+      {
+        "ref": [
+          435.45,
+          482.43
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "CA": [
+      {
+        "ref": [
+          405.29,
+          506.49
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "CB": [
+      {
+        "ref": [
+          406.5,
+          469.2
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "D": [
+      {
+        "ref": [
+          458.38,
+          482.43
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "DA": [
+      {
+        "ref": [
+          455.97,
+          505.29
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "DB": [
+      {
+        "ref": [
+          457.17,
+          469.2
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "E": [
+      {
+        "ref": [
+          478.89,
+          482.43
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "EA": [
+      {
+        "ref": [
+          506.64,
+          506.49
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "EB": [
+      {
+        "ref": [
+          510.26,
+          469.2
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "F": [
+      {
+        "ref": [
+          500.61,
+          482.43
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "FA": [
+      {
+        "ref": [
+          551.28,
+          505.29
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "FB": [
+      {
+        "ref": [
+          552.49,
+          469.2
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "G": [
+      {
+        "ref": [
+          525.95,
+          482.43
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "GA": [
+      {
+        "ref": [
+          574.21,
+          505.29
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "GB": [
+      {
+        "ref": [
+          592.31,
+          467.99
+        ],
+        "source": "manual",
+        "sample": "molde"
+      },
+      {
+        "ref": [
+          568.18,
+          469.55
+        ],
+        "source": "auto",
+        "sample": "start"
+      }
+    ],
+    "HB": [
+      {
+        "ref": [
+          592.31,
+          454.88
+        ],
+        "source": "manual",
+        "sample": "start"
+      }
+    ],
+    "I": [
+      {
+        "ref": [
+          610.41,
+          405.43
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "IB": [
+      {
+        "ref": [
+          593.51,
+          424.68
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "J": [
+      {
+        "ref": [
+          610.41,
+          375.36
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "JB": [
+      {
+        "ref": [
+          593.51,
+          375.36
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "K": [
+      {
+        "ref": [
+          610.41,
+          344.08
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "KB": [
+      {
+        "ref": [
+          597.13,
+          328.44
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "LB": [
+      {
+        "ref": [
+          600.75,
+          299.56
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "MA": [
+      {
+        "ref": [
+          571.8,
+          240.61
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "MB": [
+      {
+        "ref": [
+          573.0,
+          271.89
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "N": [
+      {
+        "ref": [
+          533.19,
+          261.68
+        ],
+        "source": "manual",
+        "sample": "start"
+      }
+    ],
+    "NA": [
+      {
+        "ref": [
+          544.04,
+          241.82
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "NB": [
+      {
+        "ref": [
+          541.63,
+          270.69
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "O": [
+      {
+        "ref": [
+          492.16,
+          258.66
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "OA": [
+      {
+        "ref": [
+          504.23,
+          237.0
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "OB": [
+      {
+        "ref": [
+          501.82,
+          277.91
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "P": [
+      {
+        "ref": [
+          454.76,
+          258.66
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "PA": [
+      {
+        "ref": [
+          455.97,
+          234.6
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "PB": [
+      {
+        "ref": [
+          459.59,
+          276.71
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "PRESSE": [
+      {
+        "ref": [
+          459.59,
+          523.33
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "Q": [
+      {
+        "ref": [
+          390.81,
+          259.86
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "QA": [
+      {
+        "ref": [
+          406.5,
+          237.0
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "QB": [
+      {
+        "ref": [
+          416.15,
+          277.91
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "RA": [
+      {
+        "ref": [
+          371.51,
+          240.61
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "RB": [
+      {
+        "ref": [
+          335.31,
+          307.99
+        ],
+        "source": "manual",
+        "sample": "molde"
+      },
+      {
+        "ref": [
+          370.3,
+          273.91
+        ],
+        "source": "auto",
+        "sample": "start"
+      }
+    ],
+    "SA": [
+      {
+        "ref": [
+          348.58,
+          246.63
+        ],
+        "source": "manual",
+        "sample": "molde"
+      },
+      {
+        "ref": [
+          343.76,
+          240.9
+        ],
+        "source": "auto",
+        "sample": "start"
+      }
+    ],
+    "TA": [
+      {
+        "ref": [
+          294.29,
+          300.77
+        ],
+        "source": "manual",
+        "sample": "molde"
+      },
+      {
+        "ref": [
+          281.02,
+          314.26
+        ],
+        "source": "auto",
+        "sample": "start"
+      }
+    ],
+    "TB": [
+      {
+        "ref": [
+          306.35,
+          302.04
+        ],
+        "source": "manual",
+        "sample": "start"
+      }
+    ],
+    "U": [
+      {
+        "ref": [
+          306.35,
+          342.87
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "UA": [
+      {
+        "ref": [
+          278.6,
+          345.28
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "UB": [
+      {
+        "ref": [
+          319.63,
+          328.44
+        ],
+        "source": "auto",
+        "sample": "molde"
+      },
+      {
+        "ref": [
+          313.59,
+          313.04
+        ],
+        "source": "auto",
+        "sample": "start"
+      }
+    ],
+    "V": [
+      {
+        "ref": [
+          305.15,
+          376.56
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "VA": [
+      {
+        "ref": [
+          279.81,
+          375.36
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "VB": [
+      {
+        "ref": [
+          322.04,
+          375.36
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "W": [
+      {
+        "ref": [
+          306.35,
+          407.84
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "WA": [
+      {
+        "ref": [
+          279.81,
+          413.86
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "WB": [
+      {
+        "ref": [
+          318.42,
+          413.86
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "XA": [
+      {
+        "ref": [
+          279.81,
+          446.34
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ],
+    "XB": [
+      {
+        "ref": [
+          316.01,
+          451.15
+        ],
+        "source": "auto",
+        "sample": "molde"
+      }
+    ]
+  }
+}

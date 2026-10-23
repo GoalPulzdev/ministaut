@@ -1,0 +1,1 @@
+Låste bortefelt må bekreftes gjennom KONFIGURER_BORTEFELT.bat.

@@ -1,0 +1,22 @@
+<!doctype html><html lang="no"><head><meta charset="utf-8"><style>
+html,body{margin:0;height:100%;background:#101713;color:white;font:14px Arial}
+header{height:130px;background:#01563d;padding:12px;box-sizing:border-box}
+#map{position:relative;margin-left:50px;margin-top:10px;width:930px;height:700px;background:#eee;overflow:hidden}
+#stage{position:absolute;left:0;top:0;width:900px;height:660px;transform:translate(90px,0px) scale(.91);transform-origin:top left}
+#pitch{position:absolute;left:337px;top:298px;width:243px;height:157px;background:repeating-linear-gradient(90deg,#085940 0,#085940 21px,#198d69 21px,#198d69 42px);border:1px solid #eee}
+.zone{position:absolute;width:7px;height:7px;cursor:pointer;background:#b2a372;z-index:3}
+#popup{display:none;position:fixed;top:160px;left:995px;padding:15px;background:#113725;border:2px solid #2eb477;color:white;z-index:4;pointer-events:none}
+</style></head><body><header><h2>Test: 60 synthetic sections with coordinates verified on two screenshots</h2></header>
+<div id="map"><div id="stage"><div id="pitch"></div></div></div><div id="popup"></div>
+<script>
+const positions={"A": [384.78, 483.0], "AA": [343.76, 506.49], "AB": [336.52, 469.2], "B": [413.74, 482.43], "BA": [370.3, 505.29], "BB": [361.86, 469.2], "C": [435.45, 482.43], "CA": [405.29, 506.49], "CB": [406.5, 469.2], "D": [458.38, 482.43], "DA": [455.97, 505.29], "DB": [457.17, 469.2], "E": [478.89, 482.43], "EA": [506.64, 506.49], "EB": [510.26, 469.2], "F": [500.61, 482.43], "FA": [551.28, 505.29], "FB": [552.49, 469.2], "G": [525.95, 482.43], "GA": [574.21, 505.29], "GB": [568.18, 469.55], "HB": [592.31, 454.88], "I": [610.41, 405.43], "IB": [593.51, 424.68], "J": [610.41, 375.36], "JB": [593.51, 375.36], "K": [610.41, 344.08], "KB": [597.13, 328.44], "LB": [600.75, 299.56], "MA": [571.8, 240.61], "MB": [573.0, 271.89], "N": [533.19, 261.68], "NA": [544.04, 241.82], "NB": [541.63, 270.69], "O": [492.16, 258.66], "OA": [504.23, 237.0], "OB": [501.82, 277.91], "P": [454.76, 258.66], "PA": [455.97, 234.6], "PB": [459.59, 276.71], "PRESSE": [459.59, 523.33], "Q": [390.81, 259.86], "QA": [406.5, 237.0], "QB": [416.15, 277.91], "RA": [371.51, 240.61], "RB": [370.3, 273.91], "SA": [343.76, 240.9], "TA": [281.02, 314.26], "TB": [306.35, 302.04], "U": [306.35, 342.87], "UA": [278.6, 345.28], "UB": [319.63, 328.44], "V": [305.15, 376.56], "VA": [279.81, 375.36], "VB": [322.04, 375.36], "W": [306.35, 407.84], "WA": [279.81, 413.86], "WB": [318.42, 413.86], "XA": [279.81, 446.34], "XB": [316.01, 451.15]};
+const capacities={"A": 94, "AA": 216, "AB": 270, "B": 55, "BA": 501, "BB": 291, "C": 60, "CA": 566, "CB": 248, "D": 52, "DA": 320, "DB": 206, "E": 60, "EA": 567, "EB": 237, "F": 55, "FA": 501, "FB": 304, "G": 94, "GA": 217, "GB": 269, "HB": 320, "I": 75, "IB": 295, "J": 148, "JB": 192, "K": 75, "KB": 325, "LB": 338, "MA": 400, "MB": 396, "N": 98, "NA": 381, "NB": 558, "O": 156, "OA": 912, "OB": 420, "P": 209, "PA": 998, "PB": 420, "PRESSE": 153, "Q": 82, "QA": 912, "QB": 420, "RA": 380, "RB": 530, "SA": 401, "TA": 357, "TB": 287, "U": 66, "UA": 591, "UB": 397, "V": 148, "VA": 472, "VB": 211, "W": 75, "WA": 594, "WB": 399, "XA": 354, "XB": 287};
+const stage=document.getElementById('stage');const pop=document.getElementById('popup');
+for(const [field,[x,y]] of Object.entries(positions)){
+ const el=document.createElement('div');el.className='zone';el.style.left=(x-3)+'px';el.style.top=(y-3)+'px';
+ el.title=field;el.addEventListener('mouseenter',()=>{
+   pop.style.display='block';pop.textContent='SECTION '+field+' GATE 12 FREE SEATS '+Math.min(18,capacities[field])+' / '+capacities[field];
+ });
+ stage.appendChild(el);
+}
+</script></body></html>

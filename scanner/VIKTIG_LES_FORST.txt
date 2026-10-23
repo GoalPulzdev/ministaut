@@ -1,0 +1,10 @@
+RBK Billettmonitor V20
+
+Kjor START_BILLETTMONITOR.bat.
+
+NYTT: Automatisk skanning hver tredje time, graf over bekreftet ledige plasser,
+og forsiktig estimat ved kampstart naar datagrunnlaget er tilstrekkelig.
+
+Programmet maa holdes aapent i dedikert Edge-profil, og PC maa ikke sove.
+
+Les README.md for sikkerhet, oppsett og hvordan du flytter V19.1 historikk.
