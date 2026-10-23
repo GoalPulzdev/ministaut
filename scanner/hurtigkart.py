@@ -1,4 +1,4 @@
-"""RBK Billettmonitor V20: repeating 3-hour schedule and forecast charts.
+"""RBK Billettmonitor V20: repeating hourly schedule and forecast charts.
 
 Connects to an Edge instance started in remote-debugging mode. An isolated
 Edge profile is started automatically when needed. Never clicks on a seat.
@@ -501,7 +501,7 @@ def run(args):
                     except Exception as sync_error:
                         print('Ministaut: opplasting utsatt/feilet:',str(sync_error)[:250])
 
-                    update('Lagret · Graf oppdatert · Ny sjekk om 3 timer')
+                    update('Lagret · Graf oppdatert · Ny sjekk om 1 time')
                 else:
                     print('Intern rapport lagret. Publiseringskontroll:',post['reason'])
                     update('Rapport lagret · '+post['reason'][:80])
@@ -630,7 +630,7 @@ def run(args):
                         continue
                     elif command=='auto_toggle':
                         schedule.enable(not schedule.enabled)
-                        update('Automatisk sjekk: ' + ('på · hvert 3. time' if schedule.enabled else 'av'))
+                        update('Automatisk sjekk: ' + ('på · hver time' if schedule.enabled else 'av'))
                     elif command=='open_chart':
                         graph=ROOT/'historikk'/'grafer'/event_key(url)/'billettutvikling.html'
                         if graph.is_file():
@@ -663,7 +663,7 @@ def run(args):
                                 for hit in sampler.hover(x,y,'v16-clicked-missing'):
                                     register(hit,goal=name,phase='rescue')
                     if schedule.due():
-                        print('Automatisk 3-timerssjekk starter:',datetime.now().isoformat(timespec='seconds'),flush=True)
+                        print('Automatisk timesjekk starter:',datetime.now().isoformat(timespec='seconds'),flush=True)
                         update('Automatisk sjekk · laster inn ferskt billettkart')
                         finalize_cycle()
                         if start_next_cycle():
@@ -704,7 +704,7 @@ def run(args):
 def main():
     p=argparse.ArgumentParser(description='RBK Billettmonitor V20 – URL, ett punkt/felt, live mangelliste, sosial status')
     p.add_argument('--url',default='');p.add_argument('--port',type=int,default=9222)
-    p.add_argument('--auto-hours',type=float,default=3.0,help='Timer mellom automatiske sjekker (standard 3)')
+    p.add_argument('--auto-hours',type=float,default=1.0,help='Timer mellom automatiske sjekker (standard 1)')
     p.add_argument('--no-auto',action='store_true',help='Avslå automatiske sjekker til slått på i panelet')
     p.add_argument('--edge-path',default=None);p.add_argument('--attach-only',action='store_true')
     p.add_argument('--manual-only',action='store_true');p.add_argument('--extra',action='store_true')
