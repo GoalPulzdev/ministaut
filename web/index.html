@@ -91,6 +91,61 @@ tr:last-child td{border-bottom:0}
 @media (max-width:620px){.wrap{padding:17px 16px 38px}.hero{margin:24px 0 25px}.hero h1{font-size:clamp(32px,9vw,43px)}.hero p{font-size:14px}.section-heading{align-items:center}.section-help{display:none}.match-list{grid-template-columns:1fr;gap:10px}.match-tile{padding:16px 18px;min-height:129px;gap:11px}.tile-title{font-size:20px}.tile-value{font-size:28px}.tile-foot{font-size:11px}.results{margin-top:24px}.details-head h2{font-size:23px}.summary{grid-template-columns:1fr;gap:11px}.stack{grid-template-columns:1fr 1fr;grid-template-rows:auto;gap:10px}.card{padding:18px;border-radius:16px}.primary{min-height:204px}.big{font-size:clamp(48px,12vw,69px)}.small-card{min-height:105px}.value{font-size:28px}.caption{font-size:10px}.campaign-row{flex-direction:column;align-items:stretch;gap:10px;padding:14px}.ticket-link{width:100%;white-space:normal}.campaign-copy{align-items:center;text-align:center}.graph{padding:16px}.details-head{gap:11px}.actions{width:100%;justify-content:space-between}.badge{font-size:11px}.brand{font-size:11px}.team-mark{width:44px;height:44px}.table{font-size:12px}td,th{padding:10px 4px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.match-tile,.pill,.ticket-link,.progress>div{transition:none}.match-tile:hover,.ticket-link:hover{transform:none}}
 
+  
+
+/* V3 · Delikat supporter-UX, with lighter density and purposeful chart interaction */
+.hero{margin-bottom:25px}
+.hero h1{font-weight:830;letter-spacing:-.054em}
+.hero p{max-width:645px}
+.match-tile{gap:11px;min-height:150px}
+.tile-bottom{display:grid;grid-template-columns:minmax(0,1fr) 94px;grid-template-areas:"number spark" "meta meta";align-items:end;gap:5px 12px}
+.tile-summary{grid-area:number;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;min-width:0}
+.tile-value{font-size:clamp(25px,2.7vw,31px)}
+.tile-spark{grid-area:spark;display:block;width:94px;height:36px;justify-self:end;align-self:end;opacity:.83}
+.tile-spark svg{display:block;width:100%;height:100%}
+.tile-foot{grid-area:meta;margin:2px 0 0;line-height:1.5;overflow-wrap:break-word}
+.match-tile[aria-pressed="true"] .tile-spark{opacity:1}
+.match-tile[data-stale="true"] .tile-foot{color:#9aaa9d}
+.details-head{margin-bottom:12px}
+.badge{display:inline-flex;align-items:center;gap:7px}
+.badge:before{content:"";width:6px;height:6px;flex:none;background:#90deb0;border-radius:50%;box-shadow:0 0 0 3px #75c58b21}
+.badge[data-stale="true"]{background:#19251d;border-color:#3d4b40;color:#b2c0b3}
+.badge[data-stale="true"]:before{background:#8b9b8c;box-shadow:none}
+.summary{transition:opacity .18s ease,filter .18s ease}
+.summary[aria-busy="true"]{opacity:.74;filter:saturate(.85)}
+.graph-header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:9px}
+.graph-desc{margin:6px 0 12px}
+.graph-count{border:1px solid #3b5942;background:#1c3022;color:#b5d0bb;font-size:11px;font-variant-numeric:tabular-nums;padding:6px 9px;border-radius:999px;white-space:nowrap;line-height:1.3}
+.graph .chart-wrap{min-height:128px}
+.chart-wrap svg{touch-action:pan-y;cursor:crosshair;outline-offset:3px}
+.chart-wrap svg:focus-visible{outline:2px solid #b9eeae}
+.chart-wrap .chart-focus-guide{transition:opacity .12s linear}
+.chart-inspect{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:12px;padding:11px 13px;background:linear-gradient(100deg,#1c3424,#172a1e);border:1px solid #375141;border-radius:11px;font-variant-numeric:tabular-nums;min-height:40px}
+.chart-inspect .inspect-timestamp{font-size:11px;font-weight:730;color:#a8c8b0;letter-spacing:.01em}
+.chart-inspect .inspect-value{font-size:13px;font-weight:850;color:#f0fff2}
+.chart-inspect .inspect-delta{font-size:11px;color:#abccad}
+.chart-helper{font-size:11px;color:#94ae9d;margin-top:7px}
+.table-wrap{scrollbar-width:thin;scrollbar-color:#476451 transparent}
+.table tbody tr{transition:background .16s ease}
+.table tbody tr:hover{background:#1e3324}
+.table td:first-child{color:#b8cbbd}
+#chart svg .endpoint-halo{filter:drop-shadow(0 0 6px #b4ffd25c)}
+@media(max-width:620px){
+ .hero{margin-bottom:21px}
+ .match-tile{min-height:126px}
+ .tile-bottom{grid-template-columns:minmax(0,1fr) 86px;gap:4px 8px}
+ .tile-spark{width:86px;height:33px}
+ .tile-summary{gap:6px}
+ .tile-value{font-size:27px}
+ .tile-unit{font-size:11px}
+ .chart-inspect{align-items:flex-start;flex-direction:column;gap:3px;margin-top:9px;padding:9px 11px}
+ .chart-inspect .inspect-value{font-size:12px}
+ .graph-header{gap:8px}
+ .graph-count{font-size:10px;padding:5px 7px}
+ .table tbody tr:hover{background:transparent}
+}
+@media(prefers-reduced-motion:reduce){.summary,.table tbody tr,.chart-wrap .chart-focus-guide{transition:none}}
+
   </style>
 </head>
 <body>
@@ -134,10 +189,18 @@ tr:last-child td{border-bottom:0}
       <div class="campaign-copy"><strong>Ses på Lerkendal!</strong><span>Ta med noen på kamp. Sammen skaper vi trøkket.</span></div>
     </div>
     <section class="card graph" aria-labelledby="chart-title">
-      <div id="chart-title" class="caption">Billettpulsen mot avspark</div>
-      <p class="graph-desc">Slik har antallet ledige sitteplasser utviklet seg.</p>
+      <div class="graph-header">
+        <div><div id="chart-title" class="caption">Billettpulsen mot avspark</div>
+          <p class="graph-desc">Faktiske tellinger, fra venstre mot høyre.</p></div>
+        <span id="chartCount" class="graph-count">0 tellinger</span>
+      </div>
       <div id="chart" class="chart-wrap empty">Venter på første registrerte måling.</div>
-      <div id="forecast" class="state"></div>
+      <div class="chart-inspect" id="chartInspect" aria-live="polite">
+        <span id="inspectTime" class="inspect-timestamp">Siste måling</span>
+        <span id="inspectValue" class="inspect-value">—</span>
+        <span id="inspectDelta" class="inspect-delta">Trykk på grafen for å se detaljer</span>
+      </div>
+      <div id="forecast" class="chart-helper"></div>
     </section>
     <section class="card graph" aria-labelledby="history-title">
       <div id="history-title" class="caption">Siste målinger</div>
@@ -164,32 +227,88 @@ async function load(path){
   return res.json();
 }
 
+let chartSignature='';
 function graph(points){
-  const wrap=$('chart');
-  if(!points.length){wrap.className='chart-wrap empty';wrap.textContent='Ingen målinger registrert ennå.';return;}
-  const W=920,H=270,L=56,R=22,T=18,B=35;
+  const wrap=$('chart'),count=$('chartCount');
+  count.textContent=points.length+' '+(points.length===1?'telling':'tellinger');
+  const signature=String(current)+'|'+points.map(p=>p.observed_at+':'+p.available_seated+':'+(p.locked_fields||[]).join(',')).join('|');
+  if(signature===chartSignature)return;
+  chartSignature=signature;
+  if(!points.length){
+    wrap.className='chart-wrap empty';
+    wrap.textContent='Ingen målinger registrert ennå.';
+    $('inspectTime').textContent='Siste måling';
+    $('inspectValue').textContent='—';
+    $('inspectDelta').textContent='Grafen fylles når nye tellinger kommer inn';
+    return;
+  }
+  const W=920,H=273,L=56,R=28,T=19,B=39;
   const times=points.map(p=>new Date(p.observed_at).getTime());
-  const vals=points.map(p=>p.available_seated);
-  const t0=Math.min(...times),t1=Math.max(...times),start=t0,end=t1===t0?t0+1:t1;
-  const lo=Math.max(0,Math.min(...vals)-Math.max(35,(Math.max(...vals)-Math.min(...vals))*.17));
-  let hi=Math.max(...vals)+Math.max(35,(Math.max(...vals)-Math.min(...vals))*.17);
-  if(hi<=lo)hi=lo+100;
+  const values=points.map(p=>p.available_seated);
+  const start=Math.min(...times),lastTime=Math.max(...times),end=start===lastTime?start+1:lastTime;
+  const min=Math.min(...values),max=Math.max(...values),padding=Math.max(48,(max-min)*.16);
+  const lo=Math.max(0,min-padding),hi=Math.min(19015,Math.max(max+padding,lo+96));
   const x=t=>L+(t-start)/(end-start)*(W-L-R);
   const y=v=>T+(hi-v)/(hi-lo)*(H-T-B);
-  const path=points.map((p,i)=>(i?'L':'M')+x(times[i]).toFixed(1)+' '+y(p.available_seated).toFixed(1)).join(' ');
-  const area=path+' L'+x(times[times.length-1]).toFixed(1)+' '+(H-B)+' L'+x(times[0]).toFixed(1)+' '+(H-B)+' Z';
+  const px=times.map((t,i)=>({x:x(t),y:y(values[i])}));
+  const path=px.map((p,i)=>(i?'L':'M')+p.x.toFixed(2)+' '+p.y.toFixed(2)).join(' ');
+  const area=path+' L'+px[px.length-1].x.toFixed(2)+' '+(H-B)
+    +' L'+px[0].x.toFixed(2)+' '+(H-B)+' Z';
   const grid=Array.from({length:4},(_,i)=>{
-    const value=lo+(hi-lo)*i/3, yp=y(value);
-    return '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yp+'" y2="'+yp+'" stroke="#35513d" stroke-opacity=".68" />'
-      +'<text x="'+(L-9)+'" y="'+(yp+4)+'" text-anchor="end" fill="#95ae9a" font-size="12">'+fmt(Math.round(value))+'</text>';
+    const v=lo+(hi-lo)*i/3,py=y(v);
+    return '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+py.toFixed(2)+'" y2="'+py.toFixed(2)+'" stroke="#35523e" stroke-opacity=".64" />'
+      +'<text x="'+(L-10)+'" y="'+(py+4).toFixed(2)+'" text-anchor="end" fill="#99b49f" font-size="12">'+fmt(Math.round(v))+'</text>';
   }).join('');
-  const dots=points.map((p,i)=>'<circle cx="'+x(times[i])+'" cy="'+y(p.available_seated)+'" r="'+(i===points.length-1?5.5:3.5)+'" fill="'+(i===points.length-1?'#daffd9':'#8fcda5')+'" />').join('');
-  const labels='<text x="'+L+'" y="'+(H-9)+'" fill="#91ac98" font-size="12">'+date(points[0].observed_at)+'</text>'
-    + (points.length>1?'<text x="'+(W-R)+'" y="'+(H-9)+'" text-anchor="end" fill="#91ac98" font-size="12">'+date(points[points.length-1].observed_at)+'</text>':'');
+  const dot=px.length===1?'<circle cx="'+px[0].x.toFixed(2)+'" cy="'+px[0].y.toFixed(2)+'" r="4" fill="#bdebc5" />':'';
+  const xlabels='<text x="'+L+'" y="'+(H-11)+'" fill="#9db9a4" font-size="12">'+date(points[0].observed_at)+'</text>'
+    +(points.length>1?'<text x="'+(W-R)+'" y="'+(H-11)+'" text-anchor="end" fill="#9db9a4" font-size="12">'+date(points[points.length-1].observed_at)+'</text>':'');
   wrap.className='chart-wrap';
-  wrap.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Historikk over ledige sitteplasser">'
-    +'<defs><linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#9eebad" stop-opacity=".18" /><stop offset="1" stop-color="#9eebad" stop-opacity="0" /></linearGradient></defs>'
-    +grid+'<path d="'+area+'" fill="url(#chartFill)"/><path d="'+path+'" fill="none" stroke="#9cddb0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'+dots+labels+'</svg>';
+  wrap.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" tabindex="0" aria-label="Interaktiv graf over ledige sitteplasser. Bruk piltastene for å bla mellom målingene.">'
+    +'<defs><linearGradient id="pulseFill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#99efb2" stop-opacity=".27" /><stop offset="1" stop-color="#99efb2" stop-opacity=".012" /></linearGradient></defs>'
+    +grid+'<path d="'+area+'" fill="url(#pulseFill)"/><path d="'+path+'" fill="none" stroke="#b6edc3" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>'
+    +dot+'<line id="chartFocusLine" class="chart-focus-guide" x1="0" x2="0" y1="'+T+'" y2="'+(H-B)+'" stroke="#c8f7d0" stroke-opacity=".65" stroke-width="1.5" stroke-dasharray="4 5"/>'
+    +'<circle id="chartFocusHalo" class="endpoint-halo" cx="0" cy="0" r="10" fill="#adf1be" opacity=".16" />'
+    +'<circle id="chartFocusPoint" cx="0" cy="0" r="5.6" fill="#e8ffdf" stroke="#427952" stroke-width="2"/>'
+    +xlabels+'</svg>';
+  const svg=wrap.querySelector('svg'),line=wrap.querySelector('#chartFocusLine'),
+    halo=wrap.querySelector('#chartFocusHalo'),focus=wrap.querySelector('#chartFocusPoint');
+  let index=-1,sticky=false;
+  function inspect(i){
+    if(!Number.isInteger(i)||i<0||i>=points.length)return;
+    if(i===index)return;
+    index=i;
+    const point=points[i],prev=points[i-1],diff=prev?point.available_seated-prev.available_seated:null,position=px[i];
+    $('inspectTime').textContent=date(point.observed_at);
+    $('inspectValue').textContent=fmt(point.available_seated)+' ledige sitteplasser';
+    $('inspectDelta').textContent=diff===null?'Første måling'
+      :diff<0?fmt(-diff)+' færre ledige siden forrige'
+      :diff>0?fmt(diff)+' flere ledige siden forrige':'Uendret siden forrige';
+    line.setAttribute('x1',position.x.toFixed(2));line.setAttribute('x2',position.x.toFixed(2));
+    halo.setAttribute('cx',position.x.toFixed(2));halo.setAttribute('cy',position.y.toFixed(2));
+    focus.setAttribute('cx',position.x.toFixed(2));focus.setAttribute('cy',position.y.toFixed(2));
+  }
+  function fromPointer(ev){
+    const box=svg.getBoundingClientRect();
+    if(!box.width)return;
+    const virtualX=Math.max(L,Math.min(W-R,(ev.clientX-box.left)*W/box.width));
+    let nearest=0,dist=Infinity;
+    for(let i=0;i<px.length;i++){
+      const d=Math.abs(px[i].x-virtualX);
+      if(d<dist){dist=d;nearest=i;}
+    }
+    inspect(nearest);
+  }
+  svg.addEventListener('pointermove',ev=>{if(ev.pointerType==='mouse'||ev.pointerType==='pen')fromPointer(ev);});
+  svg.addEventListener('pointerdown',ev=>{sticky=true;fromPointer(ev);});
+  svg.addEventListener('pointerleave',()=>{if(!sticky)inspect(points.length-1);});
+  svg.addEventListener('keydown',ev=>{
+    if(!['ArrowLeft','ArrowRight','Home','End'].includes(ev.key))return;
+    ev.preventDefault();
+    sticky=true;
+    inspect(ev.key==='Home'?0:ev.key==='End'?points.length-1
+      :Math.max(0,Math.min(points.length-1,index+(ev.key==='ArrowRight'?1:-1))));
+  });
+  inspect(points.length-1);
 }
 
 function render(scans){
@@ -197,6 +316,7 @@ function render(scans){
   const last=records.at(-1),prev=records.at(-2);
   $('available').textContent=last?fmt(last.available_seated):'—';
   $('age').textContent=last?'Sist målt '+date(last.observed_at):'Ingen måling ennå';
+  $('age').setAttribute('data-stale',String(last ? Date.now()-new Date(last.observed_at).getTime()>3*3600*1000 : true));
   $('bar').style.width=last?Math.min(100,last.available_seated/19015*100)+'%':'0%';
   const scoped=last?records.filter(p=>comparable(p,last)):[];
   const sinceFirst=last && scoped.length?last.available_seated-scoped[0].available_seated:null;
@@ -220,7 +340,9 @@ function render(scans){
     rows.append(line);
   }
   graph(scoped);
-  $('forecast').textContent=records.length>1?records.length+' tellinger registrert for denne kampen.':'';
+  $('forecast').textContent=scoped.length>1
+    ?'Kurven viser '+scoped.length+' sammenlignbare tellinger for valgt kamp.'
+    :'Grafen oppdateres når flere godkjente tellinger kommer inn.';
 }
 
 function createCard(match){
@@ -233,13 +355,16 @@ function createCard(match){
   const pill=document.createElement('span');pill.className='tile-pill';pill.textContent='SE KAMP';top.append(pill);
   const title=document.createElement('span');title.className='tile-title';title.textContent=match.title;
   const bottom=document.createElement('span');bottom.className='tile-bottom';
+  const summary=document.createElement('span');summary.className='tile-summary';
   const value=document.createElement('span');value.className='tile-value';value.textContent='—';
   const unit=document.createElement('span');unit.className='tile-unit';unit.textContent='ledige seter';
+  summary.append(value,unit);
+  const spark=document.createElement('span');spark.className='tile-spark';spark.setAttribute('aria-hidden','true');
   const foot=document.createElement('span');foot.className='tile-foot';foot.textContent='Henter siste telling …';
-  bottom.append(value,unit,foot);
+  bottom.append(summary,spark,foot);
   button.append(top,title,bottom);
   button.addEventListener('click',()=>{if(match.id!==current)void selectMatch(match.id);});
-  return {button,pill,value,foot};
+  return {button,pill,value,foot,spark};
 }
 
 function updateSelectedCards(){
@@ -262,18 +387,44 @@ function buildCards(){
   updateSelectedCards();
 }
 
+function drawSparkline(target, readings){
+  const values=readings.map(p=>Number(p.available_seated)).filter(Number.isFinite);
+  if(values.length<2){target.replaceChildren();return;}
+  const W=94,H=36,P=3;
+  const minimum=Math.min(...values),maximum=Math.max(...values);
+  const spread=Math.max(12,maximum-minimum);
+  const x=i=>P+(i/(values.length-1))*(W-2*P);
+  const y=v=>P+((maximum+spread*.12-v)/(spread*1.24))*(H-2*P);
+  const dots=values.map((v,i)=>[x(i).toFixed(1),y(v).toFixed(1)]);
+  const line=dots.map((p,i)=>(i?'L':'M')+p[0]+' '+p[1]).join(' ');
+  target.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true">'
+    +'<path d="'+line+'" stroke="#a8eabb" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
+    +'<circle cx="'+dots[dots.length-1][0]+'" cy="'+dots[dots.length-1][1]+'" r="3.1" fill="#e2ffe6"/></svg>';
+}
 async function refreshCardData(){
   await Promise.all(matches.map(async match=>{
     const card=cards.get(match.id);
     if(!card)return;
     try{
-      const data=await load('ministaut_scans?select=observed_at,available_seated,locked_fields&reading_status=eq.accepted&match_id=eq.'+encodeURIComponent(match.id)+'&order=observed_at.desc&limit=2');
+      const data=await load('ministaut_scans?select=observed_at,available_seated,locked_fields&reading_status=eq.accepted&match_id=eq.'+encodeURIComponent(match.id)+'&order=observed_at.desc&limit=24');
       if(cards.get(match.id)!==card)return;
-      if(!data.length){card.value.textContent='—';card.foot.textContent='Venter på første telling';return;}
-      const latest=data[0],prev=data[1];
+      if(!data.length){
+        card.value.textContent='—';
+        card.foot.textContent='Venter på første telling';
+        card.spark.replaceChildren();
+        card.button.setAttribute('data-stale','true');
+        return;
+      }
+      const latest=data[0],previous=data[1];
       card.value.textContent=fmt(latest.available_seated);
-      const delta=comparable(latest,prev)?latest.available_seated-prev.available_seated:null;
-      card.foot.textContent='Målt '+date(latest.observed_at)+(delta===null?'':' · '+signed(delta)+' siden sist');
+      const delta=comparable(latest,previous)?latest.available_seated-previous.available_seated:null;
+      const wording=delta===null?''
+        :delta<0?' · '+fmt(-delta)+' færre ledige'
+        :delta>0?' · '+fmt(delta)+' flere ledige':' · Uendret';
+      card.foot.textContent='Målt '+date(latest.observed_at)+wording;
+      const sameConfig=data.filter(p=>comparable(p,latest)).reverse();
+      drawSparkline(card.spark,sameConfig);
+      card.button.setAttribute('data-stale',String(Date.now()-new Date(latest.observed_at).getTime()>3*3600*1000));
     }catch(error){card.foot.textContent='Oppdatering ikke tilgjengelig';}
   }));
 }
@@ -290,7 +441,7 @@ async function selectMatch(id){
   if(changed)render([]);
   $('stats').setAttribute('aria-busy','true');
   try{
-    const data=await load('ministaut_scans?select=observed_at,available_seated,locked_fields&reading_status=eq.accepted&match_id=eq.'+encodeURIComponent(id)+'&order=observed_at.asc&limit=500');
+    const data=await load('ministaut_scans?select=observed_at,available_seated,locked_fields&reading_status=eq.accepted&match_id=eq.'+encodeURIComponent(id)+'&order=observed_at.desc&limit=500');
     if(version!==selectionVersion || id!==current)return;
     render(data);
   }catch(error){if(version===selectionVersion)$('error').textContent='Kunne ikke hente tall for valgt kamp. Prøv Oppdater.';}
