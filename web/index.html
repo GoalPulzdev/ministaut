@@ -231,7 +231,7 @@ let chartSignature='';
 function graph(points){
   const wrap=$('chart'),count=$('chartCount');
   count.textContent=points.length+' '+(points.length===1?'telling':'tellinger');
-  const signature=String(current)+'|'+points.map(p=>p.observed_at+':'+p.available_seated).join('|');
+  const signature=String(current)+'|'+points.map(p=>p.observed_at+':'+p.available_seated+':'+(p.locked_fields||[]).join(',')).join('|');
   if(signature===chartSignature)return;
   chartSignature=signature;
   if(!points.length){
@@ -272,9 +272,10 @@ function graph(points){
     +xlabels+'</svg>';
   const svg=wrap.querySelector('svg'),line=wrap.querySelector('#chartFocusLine'),
     halo=wrap.querySelector('#chartFocusHalo'),focus=wrap.querySelector('#chartFocusPoint');
-  let index=points.length-1,sticky=false;
+  let index=-1,sticky=false;
   function inspect(i){
     if(!Number.isInteger(i)||i<0||i>=points.length)return;
+    if(i===index)return;
     index=i;
     const point=points[i],prev=points[i-1],diff=prev?point.available_seated-prev.available_seated:null,position=px[i];
     $('inspectTime').textContent=date(point.observed_at);
@@ -307,7 +308,7 @@ function graph(points){
     inspect(ev.key==='Home'?0:ev.key==='End'?points.length-1
       :Math.max(0,Math.min(points.length-1,index+(ev.key==='ArrowRight'?1:-1))));
   });
-  inspect(index);
+  inspect(points.length-1);
 }
 
 function render(scans){
