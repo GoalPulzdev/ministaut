@@ -239,7 +239,7 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
         <p id="pulseMessage" class="pulse-message">Følg billettpulsen fram mot avspark.</p>
       </article>
       <div class="stack">
-        <article class="card small-card"><div class="caption">Siden første måling</div><div class="value" id="sinceFirst">—</div><div class="minor" id="sinceFirstNote">Venter på flere målinger</div></article>
+        <article class="card small-card"><div class="caption">Siden første viste telling</div><div class="value" id="sinceFirst">—</div><div class="minor" id="sinceFirstNote">Venter på flere målinger</div></article>
         <article class="card small-card"><div class="caption">Siden forrige måling</div><div class="value" id="delta">—</div><div class="minor" id="deltaNote">Venter på flere målinger</div></article>
       </div>
     </div>
@@ -283,7 +283,7 @@ const ageLabel = time => {
     :minutes<180?'for '+Math.floor(minutes/60)+' t'+(minutes%60?' '+(minutes%60)+' min':'')+' siden'
     :minutes<1440?'for '+Math.floor(minutes/60)+' timer siden'
     :'den '+date(time);
-  return overdue(time)?'Ny telling avventes · sist '+elapsed:'Sist målt '+elapsed;
+  return overdue(time)?'Ny telling avventes · målt '+elapsed:'Sist målt '+elapsed;
 };
 function showTrend(valueId,noteId,change){
   const value=$(valueId),note=$(noteId);
@@ -430,7 +430,7 @@ function render(scans){
   showTrend('sinceFirst','sinceFirstNote',sinceFirst);
   showTrend('delta','deltaNote',sinceLast);
   $('pulseMessage').textContent=!last?'Følg billettpulsen fram mot avspark.'
-    :sinceFirst<0?fmt(-sinceFirst)+' færre ledige sitteplasser siden første telling.'
+    :sinceFirst<0?fmt(-sinceFirst)+' færre ledige sitteplasser siden første viste telling.'
     :sinceFirst>0?'Flere sitteplasser tilgjengelige enn ved første telling.'
     :'Følg utviklingen og bli med på kampdag.';
   graph(scoped);
@@ -552,7 +552,7 @@ async function selectMatch(id){
   $('kickoff').textContent=match.kickoff_at?'Avspark '+date(match.kickoff_at):'Avspark ikke registrert';
   const key=String(match.event_key||'');
   $('tickets').href=/^[A-Za-z0-9_-]{8,100}$/.test(key)?'https://billett.rbk.no/checkout/'+key:'https://billett.rbk.no/';
-  if(changed)render([]);
+  if(changed){$('error').textContent='';render([]);}
   $('stats').setAttribute('aria-busy','true');
   try{
     const data=await load('ministaut_scans?select=observed_at,available_seated,locked_fields&reading_status=eq.accepted&match_id=eq.'+encodeURIComponent(id)+'&order=observed_at.desc&limit=500');
