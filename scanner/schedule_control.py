@@ -1,4 +1,4 @@
-"""In-process 3-hour schedule; never performs scans without the Edge session.
+"""In-process configurable schedule; never performs scans without the Edge session.
 
 Uses monotonic time so local clock edits/DST do not cause drift or repeated jobs.
 Missed intervals are coalesced into one scan; no catch-up storms.
@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 from time import monotonic
 
-DEFAULT_HOURS=3
+DEFAULT_HOURS=1
 
 class ScanSchedule:
     def __init__(self, path:Path, hours=DEFAULT_HOURS, enabled=True):
