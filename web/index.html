@@ -78,17 +78,17 @@ button:focus-visible,a:focus-visible{outline:3px solid #d1ffbe;outline-offset:4p
 .chart-wrap{min-height:110px}
 .empty{min-height:120px;display:grid;place-items:center;color:#91a494;font-size:13px}
 .state{margin-top:8px;font-size:11px;color:#8da591}
-.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
-td,th{padding:11px 6px;text-align:left;border-bottom:1px solid #294032;white-space:nowrap}
-td:nth-child(2),th:nth-child(2){text-align:right}
-td:nth-child(3),th:nth-child(3){text-align:right}
-th{font-size:11px;color:#a6c8ac;font-weight:850;letter-spacing:.07em;text-transform:uppercase}
-tr:last-child td{border-bottom:0}
+
+
+
+
+
+
+
 .fan-footer{margin-top:22px;border-top:1px solid #2b4434;padding-top:15px;font-size:11px;line-height:1.6;color:#8b9f90}
 #error:not(:empty){margin-top:12px;color:#ffceaa;font-size:12px}
 @media (max-width:800px){.summary{grid-template-columns:1.13fr .87fr}.actions{justify-content:flex-start}.details-head{align-items:flex-start;flex-direction:column}.match-tile{min-height:148px}}
-@media (max-width:620px){.wrap{padding:17px 16px 38px}.hero{margin:24px 0 25px}.hero h1{font-size:clamp(32px,9vw,43px)}.hero p{font-size:14px}.section-heading{align-items:center}.section-help{display:none}.match-list{grid-template-columns:1fr;gap:10px}.match-tile{padding:16px 18px;min-height:129px;gap:11px}.tile-title{font-size:20px}.tile-value{font-size:28px}.tile-foot{font-size:11px}.results{margin-top:24px}.details-head h2{font-size:23px}.summary{grid-template-columns:1fr;gap:11px}.stack{grid-template-columns:1fr 1fr;grid-template-rows:auto;gap:10px}.card{padding:18px;border-radius:16px}.primary{min-height:204px}.big{font-size:clamp(48px,12vw,69px)}.small-card{min-height:105px}.value{font-size:28px}.caption{font-size:10px}.campaign-row{flex-direction:column;align-items:stretch;gap:10px;padding:14px}.ticket-link{width:100%;white-space:normal}.campaign-copy{align-items:center;text-align:center}.graph{padding:16px}.details-head{gap:11px}.actions{width:100%;justify-content:space-between}.badge{font-size:11px}.brand{font-size:11px}.team-mark{width:44px;height:44px}.table{font-size:12px}td,th{padding:10px 4px}}
+@media (max-width:620px){.wrap{padding:17px 16px 38px}.hero{margin:24px 0 25px}.hero h1{font-size:clamp(32px,9vw,43px)}.hero p{font-size:14px}.section-heading{align-items:center}.section-help{display:none}.match-list{grid-template-columns:1fr;gap:10px}.match-tile{padding:16px 18px;min-height:129px;gap:11px}.tile-title{font-size:20px}.tile-value{font-size:28px}.tile-foot{font-size:11px}.results{margin-top:24px}.details-head h2{font-size:23px}.summary{grid-template-columns:1fr;gap:11px}.stack{grid-template-columns:1fr 1fr;grid-template-rows:auto;gap:10px}.card{padding:18px;border-radius:16px}.primary{min-height:204px}.big{font-size:clamp(48px,12vw,69px)}.small-card{min-height:105px}.value{font-size:28px}.caption{font-size:10px}.campaign-row{flex-direction:column;align-items:stretch;gap:10px;padding:14px}.ticket-link{width:100%;white-space:normal}.campaign-copy{align-items:center;text-align:center}.graph{padding:16px}.details-head{gap:11px}.actions{width:100%;justify-content:space-between}.badge{font-size:11px}.brand{font-size:11px}.team-mark{width:44px;height:44px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.match-tile,.pill,.ticket-link,.progress>div{transition:none}.match-tile:hover,.ticket-link:hover{transform:none}}
 
   
@@ -125,10 +125,10 @@ tr:last-child td{border-bottom:0}
 .chart-inspect .inspect-value{font-size:13px;font-weight:850;color:#f0fff2}
 .chart-inspect .inspect-delta{font-size:11px;color:#abccad}
 .chart-helper{font-size:11px;color:#94ae9d;margin-top:7px}
-.table-wrap{scrollbar-width:thin;scrollbar-color:#476451 transparent}
-.table tbody tr{transition:background .16s ease}
-.table tbody tr:hover{background:#1e3324}
-.table td:first-child{color:#b8cbbd}
+
+
+
+
 #chart svg .endpoint-halo{filter:drop-shadow(0 0 6px #b4ffd25c)}
 @media(max-width:620px){
  .hero{margin-bottom:21px}
@@ -144,7 +144,7 @@ tr:last-child td{border-bottom:0}
  .graph-count{font-size:10px;padding:5px 7px}
  .table tbody tr:hover{background:transparent}
 }
-@media(prefers-reduced-motion:reduce){.summary,.table tbody tr,.chart-wrap .chart-focus-guide{transition:none}}
+@media(prefers-reduced-motion:reduce){.summary,.chart-wrap .chart-focus-guide{transition:none}}
 
   </style>
 </head>
@@ -201,10 +201,6 @@ tr:last-child td{border-bottom:0}
         <span id="inspectDelta" class="inspect-delta">Trykk på grafen for å se detaljer</span>
       </div>
       <div id="forecast" class="chart-helper"></div>
-    </section>
-    <section class="card graph" aria-labelledby="history-title">
-      <div id="history-title" class="caption">Siste målinger</div>
-      <div class="table-wrap"><table class="table"><thead><tr><th>Tidspunkt</th><th>Ledige</th><th>Endring</th></tr></thead><tbody id="rows"><tr><td colspan="3">Henter billettdata …</td></tr></tbody></table></div>
     </section>
   </section>
   <footer class="fan-footer">Ministaut er en uavhengig supporteroversikt. Tallene viser sist målte ledige sitteplasser, ikke ståplasser eller bekreftede salg.</footer>
@@ -327,18 +323,6 @@ function render(scans){
     :sinceFirst<0?fmt(-sinceFirst)+' færre ledige sitteplasser siden første telling.'
     :sinceFirst>0?'Flere sitteplasser tilgjengelige enn ved første telling.'
     :'Følg utviklingen og bli med på kampdag.';
-  const rows=$('rows');rows.replaceChildren();
-  if(!records.length){
-    const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=3;td.textContent='Venter på første måling.';tr.append(td);rows.append(tr);
-  }
-  for(let i=records.length-1;i>=0 && i>=records.length-12;i--){
-    const record=records[i],previous=records[i-1];
-    const line=document.createElement('tr');
-    for(const text of [date(record.observed_at),fmt(record.available_seated),signed(comparable(record,previous)?record.available_seated-previous.available_seated:null)]){
-      const td=document.createElement('td');td.textContent=text;line.append(td);
-    }
-    rows.append(line);
-  }
   graph(scoped);
   $('forecast').textContent=scoped.length>1
     ?'Kurven viser '+scoped.length+' sammenlignbare tellinger for valgt kamp.'
