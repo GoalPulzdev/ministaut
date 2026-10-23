@@ -8,145 +8,205 @@
   <title>Ministaut · Billettpulsen på Lerkendal</title>
   <style>
 
-:root{color-scheme:dark;--bg:#0a110d;--panel:#141f17;--panel2:#19291e;--line:#304338;--line-strong:#5f9770;--accent:#aeecb9;--text:#f4f8f2;--muted:#a2b6a7}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
-body:before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse 720px 440px at 78% -13%,#20553751,transparent 70%),radial-gradient(ellipse 560px 480px at -17% 45%,#19482a23,transparent 70%);z-index:-1}
-button,a{-webkit-tap-highlight-color:transparent}
-button{font:inherit}
-button:focus-visible,a:focus-visible{outline:3px solid #d1ffbe;outline-offset:4px}
-.wrap{max-width:1080px;margin:auto;padding:22px 26px 52px}
-.top{display:flex;justify-content:space-between;align-items:center;gap:20px;min-height:50px}
-.brand{font-size:12px;letter-spacing:.14em;font-weight:900;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
-.brand .slash{color:#77c28c;font-weight:700}
-.independent{color:#9bad9f;font-size:10px;font-weight:700;letter-spacing:.06em;padding:4px 7px;border:1px solid #365241;border-radius:7px}
-.team-mark{width:48px;height:48px;border-radius:13px;background:#f1f4ed;display:grid;place-items:center;padding:5px;box-shadow:0 5px 24px #0004;flex:none}
-.team-mark img{max-width:100%;max-height:100%;object-fit:contain}
-.hero{margin:30px 0 30px;max-width:760px}
-.overline{font-size:11px;letter-spacing:.18em;font-weight:850;text-transform:uppercase;color:var(--accent)}
-.hero .overline{display:flex;gap:10px;align-items:center}
-.pulse-dot{width:7px;height:7px;background:#9befad;border-radius:50%;box-shadow:0 0 0 4px #6dcc8520,0 0 16px #8fefab80}
-.hero h1{font-size:clamp(34px,4.5vw,57px);line-height:1.08;letter-spacing:-.056em;font-weight:850;margin:11px 0 12px}
-.hero p{color:#bfcec2;font-size:clamp(14px,1.5vw,17px);line-height:1.62;max-width:660px;margin:0}
-.section-heading{display:flex;justify-content:space-between;align-items:baseline;gap:18px;margin:0 0 13px}
-.section-title{font-size:19px;letter-spacing:-.026em;font-weight:800;line-height:1.24;margin:0}
-.section-help{font-size:12px;color:#849a8b}
-.match-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin:0}
-.match-tile{text-align:left;display:flex;flex-direction:column;align-items:stretch;justify-content:space-between;gap:13px;min-height:155px;padding:20px 22px;border:1px solid #35503e;background:linear-gradient(145deg,#18271d,#111a14);color:var(--text);border-radius:18px;cursor:pointer;position:relative;overflow:hidden;transition:border-color .22s ease,background .22s ease,box-shadow .22s ease,transform .22s ease}
-.match-tile:after{content:"";position:absolute;right:-30px;bottom:-73px;width:175px;height:175px;border-radius:50%;background:radial-gradient(circle,#76d69516,transparent 73%);pointer-events:none}
-.match-tile:hover{transform:translateY(-2px);border-color:#638c6c;background:linear-gradient(145deg,#1d3124,#142218)}
-.match-tile[aria-pressed="true"]{background:linear-gradient(132deg,#204632,#182a20 73%);border-color:#9ddfa9;box-shadow:0 0 0 1px #9ddfa923,inset 0 1px 0 #cbffd71f,0 14px 32px #0003}
-.tile-top{display:flex;justify-content:space-between;align-items:center;gap:16px;color:#adbcaf;font-size:12px;line-height:1.4}
-.tile-pill{font-size:10px;font-weight:850;letter-spacing:.1em;text-transform:uppercase;border-radius:999px;padding:5px 9px;border:1px solid #3e684a;color:#b3ceb9;white-space:nowrap}
-.match-tile[aria-pressed="true"] .tile-pill{background:#b7efbf;color:#11251a;border-color:#b7efbf}
-.tile-title{font-size:clamp(18px,2.1vw,23px);font-weight:800;letter-spacing:-.03em;line-height:1.14}
-.tile-bottom{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:9px;row-gap:2px}
-.tile-value{font-size:clamp(26px,3vw,33px);line-height:1;letter-spacing:-.052em;font-weight:880;font-variant-numeric:tabular-nums;color:#d9ffe0}
-.tile-unit{font-size:12px;color:#bed4c2}
-.tile-foot{width:100%;font-size:11px;color:#91af9a;margin-top:4px}
-.results{margin-top:30px;scroll-margin-top:12px}
-.details-head{display:flex;align-items:flex-end;justify-content:space-between;gap:15px;margin-bottom:14px}
-.details-head h2{font-size:clamp(21px,2.8vw,27px);letter-spacing:-.038em;line-height:1.22;margin:6px 0 5px}
-.details-head p{font-size:12px;color:#a3b9a8;margin:0}
-.actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:9px}
-.badge{color:#a8d8b7;background:#1a3021;border:1px solid #3d6248;font-size:11px;border-radius:20px;padding:9px 12px;white-space:nowrap}
-.pill{background:#17271c;border:1px solid #416449;color:#e4f6e7;border-radius:11px;cursor:pointer;padding:9px 12px;min-height:37px;font-size:12px;font-weight:750;transition:background .2s ease,border-color .2s ease}
-.pill:hover{background:#22412c;border-color:#a4dfad}
-.card{background:linear-gradient(148deg,#17251a,#111c15);border:1px solid var(--line);border-radius:18px;padding:22px;min-width:0}
-.summary{display:grid;grid-template-columns:1.22fr .78fr;gap:13px}
-.primary{background:linear-gradient(131deg,#1a3c2b,#10251a 72%);border-color:#5c9170;display:flex;flex-direction:column;justify-content:center}
-.caption{font-size:11px;font-weight:850;letter-spacing:.12em;color:#9dd3aa;text-transform:uppercase}
-.big{font-size:clamp(48px,6.5vw,80px);line-height:1.08;letter-spacing:-.065em;font-weight:900;font-variant-numeric:tabular-nums;margin:8px 0 14px}
-.progress{width:100%;height:7px;border-radius:99px;overflow:hidden;background:#3e5344}
-.progress>div{width:0;height:100%;border-radius:99px;background:linear-gradient(90deg,#55bd7d,#a8f0b2);transition:width .65s ease}
-.minor{font-size:12px;color:#a8bdaf;margin-top:9px}
-.pulse-message{font-size:13px;color:#cfebd3;line-height:1.47;margin:14px 0 0}
-.stack{display:grid;grid-template-rows:1fr 1fr;gap:13px}
-.small-card{display:flex;flex-direction:column;justify-content:center}
-.value{font-size:clamp(27px,3vw,36px);line-height:1.14;font-weight:850;letter-spacing:-.045em;font-variant-numeric:tabular-nums;margin-top:9px}
-.campaign-row{display:flex;align-items:center;justify-content:space-between;gap:22px;margin:15px 0 0;padding:18px 21px;border:1px solid #346a43;border-radius:16px;background:linear-gradient(95deg,#173925,#122519)}
-.ticket-link{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:12px 17px;background:linear-gradient(115deg,#d2f1b5,#a4e9b9);border:1px solid #c3efb5;color:#102219;text-decoration:none;border-radius:11px;font-size:14px;font-weight:850;line-height:1.3;transition:transform .2s ease,box-shadow .2s ease;white-space:nowrap}
-.ticket-link:hover{transform:translateY(-2px);box-shadow:0 8px 24px #86d99930}
-.campaign-copy{display:flex;flex-direction:column;gap:2px;align-items:flex-end;text-align:right}
-.campaign-copy strong{font-size:15px;letter-spacing:-.015em}
-.campaign-copy span{font-size:12px;color:#a7bbac}
-.graph{margin-top:15px;padding:22px 24px}
-.graph .caption{font-size:12px}
-.graph-desc{margin:6px 0 16px;font-size:12px;color:#a8b8a9}
-.graph svg{display:block;width:100%;height:auto;overflow:visible}
-.chart-wrap{min-height:110px}
-.empty{min-height:120px;display:grid;place-items:center;color:#91a494;font-size:13px}
-.state{margin-top:8px;font-size:11px;color:#8da591}
-
-
-
-
-
-
-
-.fan-footer{margin-top:22px;border-top:1px solid #2b4434;padding-top:15px;font-size:11px;line-height:1.6;color:#8b9f90}
-#error:not(:empty){margin-top:12px;color:#ffceaa;font-size:12px}
-@media (max-width:800px){.summary{grid-template-columns:1.13fr .87fr}.actions{justify-content:flex-start}.details-head{align-items:flex-start;flex-direction:column}.match-tile{min-height:148px}}
-@media (max-width:620px){.wrap{padding:17px 16px 38px}.hero{margin:24px 0 25px}.hero h1{font-size:clamp(32px,9vw,43px)}.hero p{font-size:14px}.section-heading{align-items:center}.section-help{display:none}.match-list{grid-template-columns:1fr;gap:10px}.match-tile{padding:16px 18px;min-height:129px;gap:11px}.tile-title{font-size:20px}.tile-value{font-size:28px}.tile-foot{font-size:11px}.results{margin-top:24px}.details-head h2{font-size:23px}.summary{grid-template-columns:1fr;gap:11px}.stack{grid-template-columns:1fr 1fr;grid-template-rows:auto;gap:10px}.card{padding:18px;border-radius:16px}.primary{min-height:204px}.big{font-size:clamp(48px,12vw,69px)}.small-card{min-height:105px}.value{font-size:28px}.caption{font-size:10px}.campaign-row{flex-direction:column;align-items:stretch;gap:10px;padding:14px}.ticket-link{width:100%;white-space:normal}.campaign-copy{align-items:center;text-align:center}.graph{padding:16px}.details-head{gap:11px}.actions{width:100%;justify-content:space-between}.badge{font-size:11px}.brand{font-size:11px}.team-mark{width:44px;height:44px}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.match-tile,.pill,.ticket-link,.progress>div{transition:none}.match-tile:hover,.ticket-link:hover{transform:none}}
-
-  
-
-/* V3 · Delikat supporter-UX, with lighter density and purposeful chart interaction */
-.hero{margin-bottom:25px}
-.hero h1{font-weight:830;letter-spacing:-.054em}
-.hero p{max-width:645px}
-.match-tile{gap:11px;min-height:150px}
-.tile-bottom{display:grid;grid-template-columns:minmax(0,1fr) 94px;grid-template-areas:"number spark" "meta meta";align-items:end;gap:5px 12px}
-.tile-summary{grid-area:number;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;min-width:0}
-.tile-value{font-size:clamp(25px,2.7vw,31px)}
-.tile-spark{grid-area:spark;display:block;width:94px;height:36px;justify-self:end;align-self:end;opacity:.83}
-.tile-spark svg{display:block;width:100%;height:100%}
-.tile-foot{grid-area:meta;margin:2px 0 0;line-height:1.5;overflow-wrap:break-word}
-.match-tile[aria-pressed="true"] .tile-spark{opacity:1}
-.match-tile[data-stale="true"] .tile-foot{color:#9aaa9d}
-.details-head{margin-bottom:12px}
-.badge{display:inline-flex;align-items:center;gap:7px}
-.badge:before{content:"";width:6px;height:6px;flex:none;background:#90deb0;border-radius:50%;box-shadow:0 0 0 3px #75c58b21}
-.badge[data-stale="true"]{background:#19251d;border-color:#3d4b40;color:#b2c0b3}
-.badge[data-stale="true"]:before{background:#8b9b8c;box-shadow:none}
-.summary{transition:opacity .18s ease,filter .18s ease}
-.summary[aria-busy="true"]{opacity:.74;filter:saturate(.85)}
-.graph-header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:9px}
-.graph-desc{margin:6px 0 12px}
-.graph-count{border:1px solid #3b5942;background:#1c3022;color:#b5d0bb;font-size:11px;font-variant-numeric:tabular-nums;padding:6px 9px;border-radius:999px;white-space:nowrap;line-height:1.3}
-.graph .chart-wrap{min-height:128px}
-.chart-wrap svg{touch-action:pan-y;cursor:crosshair;outline-offset:3px}
-.chart-wrap svg:focus-visible{outline:2px solid #b9eeae}
-.chart-wrap .chart-focus-guide{transition:opacity .12s linear}
-.chart-inspect{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:12px;padding:11px 13px;background:linear-gradient(100deg,#1c3424,#172a1e);border:1px solid #375141;border-radius:11px;font-variant-numeric:tabular-nums;min-height:40px}
-.chart-inspect .inspect-timestamp{font-size:11px;font-weight:730;color:#a8c8b0;letter-spacing:.01em}
-.chart-inspect .inspect-value{font-size:13px;font-weight:850;color:#f0fff2}
-.chart-inspect .inspect-delta{font-size:11px;color:#abccad}
-.chart-helper{font-size:11px;color:#94ae9d;margin-top:7px}
-
-
-
-
-#chart svg .endpoint-halo{filter:drop-shadow(0 0 6px #b4ffd25c)}
-@media(max-width:620px){
- .hero{margin-bottom:21px}
- .match-tile{min-height:126px}
- .tile-bottom{grid-template-columns:minmax(0,1fr) 86px;gap:4px 8px}
- .tile-spark{width:86px;height:33px}
- .tile-summary{gap:6px}
- .tile-value{font-size:27px}
- .tile-unit{font-size:11px}
- .chart-inspect{align-items:flex-start;flex-direction:column;gap:3px;margin-top:9px;padding:9px 11px}
- .chart-inspect .inspect-value{font-size:12px}
- .graph-header{gap:8px}
- .graph-count{font-size:10px;padding:5px 7px}
- .table tbody tr:hover{background:transparent}
+:root {
+  color-scheme: dark;
+  --page: #09150e;
+  --panel: #142619;
+  --panel-deep: #102016;
+  --panel-active: #1a3a27;
+  --stroke: #314e3b;
+  --stroke-strong: #7cbd8d;
+  --ink: #f5f9f4;
+  --secondary: #bbd0bf;
+  --subtle: #9eb8a5;
+  --mint: #b6f0c1;
+  --accent: #96e2ab;
+  --warm: #f6ddaa;
+  --radius: 18px;
+  --ease: cubic-bezier(.22,1,.36,1);
 }
-@media(prefers-reduced-motion:reduce){.summary,.chart-wrap .chart-focus-guide{transition:none}}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  min-width: 320px;
+  background: radial-gradient(ellipse 52% 33% at 91% -10%, #2c65412b, transparent 80%), var(--page);
+  color: var(--ink);
+  font: 16px/1.5 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+button, a { -webkit-tap-highlight-color: transparent; }
+button { font: inherit; }
+button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
+  outline: 3px solid #e4ffcb;
+  outline-offset: 4px;
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding: 24px 28px 56px; }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.brand { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; font-size: 12px; font-weight: 870; letter-spacing: .135em; }
+.slash { color: var(--accent); }
+.independent { font-size: 10px; padding: 5px 7px; border: 1px solid #36523f; border-radius: 6px; font-weight: 700; letter-spacing: .04em; color: #b4c6b8; }
+.team-mark { flex: none; width: 50px; height: 50px; display: grid; place-items: center; background: #f2f5ee; border-radius: 12px; padding: 6px; }
+.team-mark img { width: 100%; height: 100%; object-fit: contain; }
+.hero { margin: 34px 0 30px; max-width: 710px; }
+.overline { color: var(--accent); font-size: 12px; font-weight: 830; line-height: 1.35; letter-spacing: .125em; text-transform: uppercase; }
+.hero .overline { display: flex; align-items: center; gap: 10px; }
+.pulse-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: #a8f5b8; box-shadow: 0 0 0 4px #83d89920, 0 0 18px #74daa977; }
+.hero h1 { max-width: 670px; margin: 10px 0 11px; font-size: clamp(35px, 4.15vw, 54px); line-height: 1.065; letter-spacing: -.054em; font-weight: 840; text-wrap: balance; }
+.hero p { max-width: 650px; margin: 0; color: var(--secondary); font-size: clamp(15px, 1.5vw, 16px); line-height: 1.65; }
+.section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+.section-title { margin: 0; font-size: 20px; font-weight: 790; line-height: 1.2; letter-spacing: -.03em; }
+.section-help { color: var(--subtle); font-size: 13px; }
+.match-list { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.match-tile {
+  min-width: 0; min-height: 163px; border-radius: var(--radius);
+  display: flex; flex-direction: column; justify-content: space-between; gap: 12px;
+  padding: 20px 21px; position: relative; overflow: hidden; cursor: pointer;
+  color: var(--ink); background: var(--panel-deep); text-align: left;
+  border: 1px solid var(--stroke);
+  transition: background-color .24s var(--ease), border-color .24s var(--ease), box-shadow .24s var(--ease), transform .24s var(--ease);
+}
+.match-tile::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: transparent; transition: background-color .24s; }
+.match-tile:hover { transform: translateY(-2px); border-color: #668e6e; background: #172d1e; }
+.match-tile:active { transform: translateY(0); }
+.match-tile[aria-pressed="true"] { border-color: var(--stroke-strong); background: var(--panel-active); box-shadow: 0 0 0 1px #a4deb01d, 0 12px 28px #00000026; }
+.match-tile[aria-pressed="true"]::before { background: var(--mint); }
+.tile-top { display: flex; align-items: center; justify-content: space-between; gap: 9px; color: var(--secondary); font-size: 13px; line-height: 1.35; }
+.tile-pill { flex: none; border: 1px solid #5a7b61; padding: 5px 10px; border-radius: 999px; font-size: 11px; font-weight: 820; color: #c5e0ca; letter-spacing: .055em; line-height: 1.4; }
+.match-tile[aria-pressed="true"] .tile-pill { background: #c8f5cd; color: #0c2414; border-color: #c8f5cd; }
+.tile-matchup { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.tile-title { min-width: 0; overflow-wrap: anywhere; font-weight: 825; letter-spacing: -.027em; font-size: clamp(19px, 2.2vw, 24px); line-height: 1.22; }
+.tile-opponent { flex: none; display: grid; place-items: center; width: 39px; height: 39px; padding: 5px; background: #f6f8f3; border-radius: 10px; }
+.tile-opponent[hidden] { display: none; }
+.tile-opponent img { width: 100%; height: 100%; object-fit: contain; }
+.tile-bottom { display: grid; grid-template-columns: minmax(0,1fr) 92px; grid-template-areas: "number spark" "meta meta"; align-items: end; gap: 5px 8px; }
+.tile-summary { grid-area: number; min-width: 0; display: flex; align-items: baseline; flex-wrap: wrap; gap: 7px; }
+.tile-value { font-size: clamp(27px, 3.1vw, 32px); font-weight: 850; line-height: 1; letter-spacing: -.045em; color: #d9fddd; font-variant-numeric: tabular-nums; }
+.tile-unit { color: var(--secondary); font-size: 13px; }
+.tile-spark { grid-area: spark; align-self: end; justify-self: end; display: block; width: 92px; height: 34px; }
+.tile-spark svg { width: 100%; height: 100%; display: block; }
+.tile-foot { grid-area: meta; color: var(--subtle); font-size: 12px; line-height: 1.4; overflow-wrap: break-word; }
+.match-tile[data-stale="true"] .tile-foot { color: #dac69e; }
+.results { scroll-margin-top: 16px; margin-top: 34px; }
+.details-head { display: flex; justify-content: space-between; align-items: end; gap: 18px; margin-bottom: 15px; }
+.details-head h2 { margin: 6px 0 5px; font-size: clamp(23px,2.8vw,29px); font-weight: 780; letter-spacing: -.035em; line-height: 1.18; }
+.details-head p { margin: 0; color: var(--secondary); font-size: 13px; }
+.actions { display: flex; align-items: center; justify-content: end; flex-wrap: wrap; gap: 9px; }
+.badge {
+  max-width: 100%; display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 12px; border: 1px solid #375640; border-radius: 999px;
+  color: #bddcc3; background: #13271a; font-size: 12px;
+  font-variant-numeric: tabular-nums; line-height: 1.4;
+}
+.badge::before { content:""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: #91e0aa; box-shadow: 0 0 0 3px #8fda9b16; }
+.badge[data-stale="true"] { color: #e5cca8; border-color: #776349; background: #28231a; }
+.badge[data-stale="true"]::before { background: #e7bc7a; box-shadow: none; }
+.pill { min-width: 44px; min-height: 44px; border: 1px solid #517159; border-radius: 10px; padding: 11px 16px; font-size: 13px; font-weight: 740; background: #203628; color: #e8f6e8; cursor: pointer; transition: background-color .2s, border-color .2s, opacity .2s; }
+.pill:hover { background: #284632; border-color: #9fdfac; }
+.pill:disabled { cursor: wait; opacity: .6; }
+.summary { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,.8fr); gap: 14px; transition: opacity .2s var(--ease); }
+.summary[aria-busy="true"] { opacity: .65; }
+.card { min-width: 0; padding: 24px; border: 1px solid var(--stroke); border-radius: var(--radius); background: var(--panel); }
+.primary { display: flex; flex-direction: column; justify-content: center; min-height: 244px; background: linear-gradient(125deg,#204a30 0%,#173724 48%,#10251a 100%); border-color: #629a70; }
+.caption { color: #a2d8af; font-size: 12px; line-height: 1.35; letter-spacing: .11em; font-weight: 825; text-transform: uppercase; }
+.big { margin: 8px 0 5px; font-size: clamp(54px,6.7vw,79px); font-weight: 870; letter-spacing: -.063em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.primary .minor { margin-top: 0; }
+.minor { font-size: 13px; color: var(--secondary); }
+.pulse-message { margin: 17px 0 0; color: #def4de; font-size: 14px; line-height: 1.5; }
+.stack { display: grid; grid-template-rows: repeat(2,minmax(0,1fr)); border: 1px solid var(--stroke); border-radius: var(--radius); background: var(--panel); overflow: hidden; }
+.stack .small-card { display: flex; flex-direction: column; justify-content: center; padding: 22px 24px; background: transparent; border: 0; border-radius: 0; }
+.stack .small-card + .small-card { border-top: 1px solid var(--stroke); }
+.stack .small-card .minor { margin-top: 2px; }
+.value { color: var(--ink); font-size: clamp(28px,3.2vw,35px); line-height: 1.13; font-weight: 835; font-variant-numeric: tabular-nums; letter-spacing: -.042em; margin-top: 7px; }
+.value[data-direction="down"] { color: var(--warm); }
+.value[data-direction="up"] { color: #aaf2c0; }
+.value[data-direction="flat"] { color: var(--secondary); }
+.campaign-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; border: 1px solid #416b4c; border-radius: 15px; padding: 17px 20px; margin: 14px 0 0; background: #152c1c; }
+.ticket-link { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 13px 20px; border-radius: 10px; border: 1px solid #d6efc6; background: #d3efbb; color: #10291a; font-size: 14px; font-weight: 850; text-decoration: none; text-align: center; transition: background-color .2s, box-shadow .2s, transform .2s var(--ease); }
+.ticket-link:hover { transform: translateY(-1px); background: #e1f8cd; box-shadow: 0 8px 24px #9af1b02c; }
+.ticket-link:active { transform: translateY(0); }
+.campaign-copy { display: flex; flex-direction: column; gap: 2px; align-items: end; text-align: right; }
+.campaign-copy strong { font-size: 16px; font-weight: 825; }
+.campaign-copy span { color: var(--secondary); font-size: 13px; }
+.graph { margin-top: 16px; padding: 24px 26px 22px; }
+.graph-header { display: flex; justify-content: space-between; align-items: start; gap: 16px; }
+.graph-desc { margin: 5px 0 13px; font-size: 13px; color: var(--secondary); }
+.graph-count { flex: none; border: 1px solid #41644a; background: #203727; border-radius: 999px; padding: 6px 10px; color: #c2dec7; font-size: 12px; font-variant-numeric: tabular-nums; }
+.chart-wrap { min-height: 110px; }
+.chart-wrap.empty { display: grid; place-items: center; padding: 30px 0; font-size: 14px; color: var(--subtle); }
+.graph svg { display: block; width: 100%; height: auto; overflow: visible; touch-action: pan-y; cursor: crosshair; }
+.chart-wrap svg:focus-visible { outline-offset: 3px; }
+.chart-inspect { display: flex; flex-wrap: wrap; align-items: baseline; gap: 7px 22px; margin-top: 12px; padding: 13px 0 0; border-top: 1px solid #375340; font-variant-numeric: tabular-nums; }
+.inspect-timestamp { color: var(--secondary); font-size: 13px; font-weight: 650; }
+.inspect-value { font-size: 15px; font-weight: 845; color: var(--ink); }
+.inspect-delta { font-size: 13px; color: #b5cebb; }
+.fan-footer { margin-top: 23px; border-top: 1px solid #2e4736; padding-top: 16px; color: var(--subtle); font-size: 12px; line-height: 1.6; }
+#error { margin-top: 12px; font-size: 13px; color: #ffcfaf; }
+#error:empty { display: none; }
+@media(max-width:840px) {
+  .details-head { align-items: start; flex-direction: column; }
+  .actions { justify-content: start; }
+  .match-tile { padding: 18px; }
+  .summary { grid-template-columns: minmax(0,1.08fr) minmax(0,.92fr); }
+}
+@media(max-width:640px) {
+  .wrap { padding: 18px 16px calc(36px + env(safe-area-inset-bottom)); }
+  .top { gap: 12px; }
+  .brand { font-size: 11px; gap: 7px; }
+  .team-mark { width: 45px; height: 45px; }
+  .hero { margin: 27px 0 25px; }
+  .hero h1 { font-size: clamp(33px,8vw,44px); line-height: 1.08; }
+  .hero p { font-size: 15px; }
+  .section-heading { margin-bottom: 11px; }
+  .section-title { font-size: 19px; }
+  .section-help { display: none; }
+  .match-list { grid-template-columns: 1fr; gap: 11px; }
+  .match-tile { min-height: 143px; gap: 9px; padding: 16px 18px; }
+  .tile-top { font-size: 12px; }
+  .tile-title { font-size: 21px; }
+  .tile-opponent { width: 36px; height: 36px; }
+  .tile-value { font-size: 28px; }
+  .tile-spark { width: 86px; height: 32px; }
+  .tile-bottom { grid-template-columns: minmax(0,1fr) 86px; }
+  .results { margin-top: 29px; }
+  .details-head { gap: 11px; }
+  .details-head h2 { font-size: 23px; }
+  .actions { width: 100%; gap: 8px; }
+  .badge { font-size: 12px; flex: 1 1 auto; justify-content: center; }
+  .pill { padding: 11px 14px; }
+  .summary { grid-template-columns: 1fr; gap: 11px; }
+  .primary { min-height: 187px; }
+  .card { padding: 21px; }
+  .big { font-size: clamp(54px,12vw,70px); }
+  .stack { grid-template-columns: repeat(2,minmax(0,1fr)); grid-template-rows: auto; }
+  .stack .small-card { min-width: 0; min-height: 119px; padding: 15px 14px; }
+  .stack .small-card + .small-card { border-top: 0; border-left: 1px solid var(--stroke); }
+  .value { font-size: clamp(27px,7vw,33px); }
+  .caption { font-size: 11px; letter-spacing: .07em; }
+  .campaign-row { flex-direction: column; align-items: stretch; padding: 14px; gap: 12px; }
+  .ticket-link { width: 100%; }
+  .campaign-copy { align-items: center; text-align: center; }
+  .graph { padding: 19px 17px; }
+  .graph-header { gap: 9px; }
+  .graph-count { padding: 5px 8px; font-size: 11px; }
+  .chart-inspect { display: grid; grid-template-columns: 1fr; gap: 3px; }
+  .inspect-value { font-size: 15px; }
+}
+@media(max-width:365px) {
+  .independent { font-size: 9px; }
+  .tile-unit { font-size: 12px; }
+  .tile-summary { gap: 5px; }
+  .tile-title { font-size: 20px; }
+  .stack .small-card { padding: 14px 11px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  .match-tile:hover, .ticket-link:hover { transform: none; }
+}
 
-  </style>
+</style>
 </head>
 <body>
 <main class="wrap">
@@ -155,7 +215,7 @@ button:focus-visible,a:focus-visible{outline:3px solid #d1ffbe;outline-offset:4p
     <div class="team-mark"><img src="https://cdn.sportmonks.com/images/soccer/teams/23/1335.png" alt="Rosenborg BK" width="45" height="45"></div>
   </header>
   <section class="hero" aria-labelledby="page-title">
-    <div class="overline"><span class="pulse-dot" aria-hidden="true"></span>BILLETT­PULSEN PÅ LERKENDAL</div>
+    <div class="overline"><span class="pulse-dot" aria-hidden="true"></span>BILLETT PÅ LERKENDAL</div>
     <h1 id="page-title">Bli med og fyll Lerkendal.</h1>
     <p>Se hvordan de ledige plassene utvikler seg fram mot avspark. Velg kampen du vil følge – og bli med på å skape stemningen på tribunen.</p>
   </section>
@@ -163,7 +223,7 @@ button:focus-visible,a:focus-visible{outline:3px solid #d1ffbe;outline-offset:4p
     <div class="section-heading"><h2 id="picker-title" class="section-title">Velg kampen</h2><span class="section-help">Trykk på et kampkort for å se utviklingen</span></div>
     <div class="match-list" id="matchCards" role="group" aria-label="Velg Rosenborg-kamp"><div class="empty">Henter kampene …</div></div>
   </section>
-  <section class="results" aria-labelledby="selectedMatchTitle">
+  <section class="results" id="match-details" aria-labelledby="selectedMatchTitle">
     <div class="details-head">
       <div>
         <div class="overline">BILLETTSTATUS FOR VALGT KAMP</div>
@@ -175,13 +235,12 @@ button:focus-visible,a:focus-visible{outline:3px solid #d1ffbe;outline-offset:4p
     <div class="summary" id="stats">
       <article class="card primary">
         <div class="caption">Ledige sitteplasser</div><div id="available" class="big">—</div>
-        <div class="progress" aria-hidden="true"><div id="bar"></div></div>
-        <div class="minor">Sist registrert i billettkartet</div>
+        <div class="minor">Fra siste godkjente telling</div>
         <p id="pulseMessage" class="pulse-message">Følg billettpulsen fram mot avspark.</p>
       </article>
       <div class="stack">
-        <article class="card small-card"><div class="caption">Siden første måling</div><div class="value" id="sinceFirst">—</div><div class="minor">Endring i ledige plasser</div></article>
-        <article class="card small-card"><div class="caption">Siden forrige måling</div><div class="value" id="delta">—</div><div class="minor">Endring i ledige plasser</div></article>
+        <article class="card small-card"><div class="caption">Siden første viste telling</div><div class="value" id="sinceFirst">—</div><div class="minor" id="sinceFirstNote">Venter på flere målinger</div></article>
+        <article class="card small-card"><div class="caption">Siden forrige måling</div><div class="value" id="delta">—</div><div class="minor" id="deltaNote">Venter på flere målinger</div></article>
       </div>
     </div>
     <div class="campaign-row">
@@ -191,16 +250,15 @@ button:focus-visible,a:focus-visible{outline:3px solid #d1ffbe;outline-offset:4p
     <section class="card graph" aria-labelledby="chart-title">
       <div class="graph-header">
         <div><div id="chart-title" class="caption">Billettpulsen mot avspark</div>
-          <p class="graph-desc">Faktiske tellinger, fra venstre mot høyre.</p></div>
+          <p class="graph-desc">Følg ledige plasser over tid. Trykk på grafen for detaljer.</p></div>
         <span id="chartCount" class="graph-count">0 tellinger</span>
       </div>
       <div id="chart" class="chart-wrap empty">Venter på første registrerte måling.</div>
       <div class="chart-inspect" id="chartInspect" aria-live="polite">
         <span id="inspectTime" class="inspect-timestamp">Siste måling</span>
         <span id="inspectValue" class="inspect-value">—</span>
-        <span id="inspectDelta" class="inspect-delta">Trykk på grafen for å se detaljer</span>
+        <span id="inspectDelta" class="inspect-delta">Velg et punkt i grafen</span>
       </div>
-      <div id="forecast" class="chart-helper"></div>
     </section>
   </section>
   <footer class="fan-footer">Ministaut er en uavhengig supporteroversikt. Tallene viser sist målte ledige sitteplasser, ikke ståplasser eller bekreftede salg.</footer>
@@ -215,7 +273,60 @@ const fmt = value => typeof value === 'number' && Number.isFinite(value) ? new I
 const date = value => new Date(value).toLocaleString('nb-NO', {timeZone:'Europe/Oslo',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
 const comparable = (a,b) => !!(a && b && JSON.stringify([...(a.locked_fields||[])].sort())===JSON.stringify([...(b.locked_fields||[])].sort()));
 const signed = n => n===null || n===undefined ? '—' : (n>0?'+':'')+fmt(n);
-let matches=[], current=null, cards=new Map(), cardSignature='', selectionVersion=0, refreshPromise=null;
+const ageInMinutes = time => Math.max(0,Math.floor((Date.now()-new Date(time).getTime())/60000));
+const overdue = time => !time || ageInMinutes(time)>95;
+const ageLabel = time => {
+  if(!time)return 'Venter på første telling';
+  const minutes=ageInMinutes(time);
+  const elapsed=minutes<2?'akkurat nå'
+    :minutes<60?'for '+minutes+' min siden'
+    :minutes<180?'for '+Math.floor(minutes/60)+' t'+(minutes%60?' '+(minutes%60)+' min':'')+' siden'
+    :minutes<1440?'for '+Math.floor(minutes/60)+' timer siden'
+    :'den '+date(time);
+  return overdue(time)?'Ny telling avventes · målt '+elapsed:'Sist målt '+elapsed;
+};
+function showTrend(valueId,noteId,change){
+  const value=$(valueId),note=$(noteId);
+  if(change===null||change===undefined){
+    value.textContent='—';value.dataset.direction='unknown';note.textContent='Venter på flere målinger';return;
+  }
+  if(change===0){
+    value.textContent='0';value.dataset.direction='flat';note.textContent='ingen endring i ledige plasser';return;
+  }
+  value.textContent=fmt(Math.abs(change));
+  value.dataset.direction=change<0?'down':'up';
+  note.textContent=change<0?'færre ledige sitteplasser':'flere ledige sitteplasser';
+}
+function chooseByLink(available){
+  try{
+    if(typeof window==='undefined')return null;
+    const key=new URLSearchParams(window.location.search).get('kamp');
+    return available.find(m=>m.event_key===key)?.id || null;
+  }catch{return null;}
+}
+function updateShareLink(key){
+  try{
+    if(typeof window==='undefined'||!window.history?.replaceState||!(/^[A-Za-z0-9_-]{8,100}$/).test(key))return;
+    const url=new URL(window.location.href);
+    if(url.searchParams.get('kamp')===key)return;
+    url.searchParams.set('kamp',key);
+    window.history.replaceState(null,'',url.pathname+url.search+url.hash);
+  }catch{/* URL state is optional; navigation still works. */}
+}
+const knownOpponentCrests={
+  molde:'https://cdn.sportmonks.com/images/soccer/teams/2/290.png',
+  start:'https://cdn.sportmonks.com/images/soccer/teams/15/2735.png'
+};
+function crestFor(title){
+  const lower=String(title||'').toLowerCase();
+  return Object.keys(knownOpponentCrests).find(name=>lower.includes(name)) || null;
+}
+let matches=[], current=null, cards=new Map(), cardSignature='', selectionVersion=0, refreshPromise=null, lastObservedAt=null;
+function updateAgeIndicator(){
+  const badge=$('age');
+  badge.textContent=ageLabel(lastObservedAt);
+  badge.setAttribute('data-stale',String(overdue(lastObservedAt)));
+}
 
 async function load(path){
   const res=await fetch(DB+'/rest/v1/'+path,{headers:{apikey:KEY},cache:'no-store'});
@@ -311,22 +422,20 @@ function render(scans){
   const records=scans.slice().sort((a,b)=>new Date(a.observed_at)-new Date(b.observed_at));
   const last=records.at(-1),prev=records.at(-2);
   $('available').textContent=last?fmt(last.available_seated):'—';
-  $('age').textContent=last?'Sist målt '+date(last.observed_at):'Ingen måling ennå';
-  $('age').setAttribute('data-stale',String(last ? Date.now()-new Date(last.observed_at).getTime()>3*3600*1000 : true));
-  $('bar').style.width=last?Math.min(100,last.available_seated/19015*100)+'%':'0%';
+  lastObservedAt=last?.observed_at||null;
+  updateAgeIndicator();
   const scoped=last?records.filter(p=>comparable(p,last)):[];
   const sinceFirst=last && scoped.length?last.available_seated-scoped[0].available_seated:null;
   const sinceLast=comparable(last,prev)?last.available_seated-prev.available_seated:null;
-  $('sinceFirst').textContent=signed(sinceFirst);
-  $('delta').textContent=signed(sinceLast);
+  showTrend('sinceFirst','sinceFirstNote',sinceFirst);
+  showTrend('delta','deltaNote',sinceLast);
   $('pulseMessage').textContent=!last?'Følg billettpulsen fram mot avspark.'
-    :sinceFirst<0?fmt(-sinceFirst)+' færre ledige sitteplasser siden første telling.'
+    :sinceFirst<0?fmt(-sinceFirst)+' færre ledige sitteplasser siden første viste telling.'
     :sinceFirst>0?'Flere sitteplasser tilgjengelige enn ved første telling.'
     :'Følg utviklingen og bli med på kampdag.';
   graph(scoped);
-  $('forecast').textContent=scoped.length>1
-    ?'Kurven viser '+scoped.length+' sammenlignbare tellinger for valgt kamp.'
-    :'Grafen oppdateres når flere godkjente tellinger kommer inn.';
+  // The chart count and inspected point already communicate history.
+  // Avoid another text block repeating the same information.
 }
 
 function createCard(match){
@@ -337,7 +446,17 @@ function createCard(match){
   const top=document.createElement('span');top.className='tile-top';
   const kickoff=document.createElement('span');kickoff.textContent=match.kickoff_at?'Avspark '+date(match.kickoff_at):'Kampstart kommer';top.append(kickoff);
   const pill=document.createElement('span');pill.className='tile-pill';pill.textContent='SE KAMP';top.append(pill);
-  const title=document.createElement('span');title.className='tile-title';title.textContent=match.title;
+  const matchup=document.createElement('span');matchup.className='tile-matchup';
+  const title=document.createElement('span');title.className='tile-title';title.textContent=match.title;matchup.append(title);
+  const opponent=crestFor(match.title);
+  if(opponent){
+    const crest=document.createElement('span');crest.className='tile-opponent';
+    const img=document.createElement('img');
+    img.src=knownOpponentCrests[opponent];img.alt=opponent+' klubbmerke';
+    img.width=32;img.height=32;img.loading='lazy';img.decoding='async';
+    img.addEventListener('error',()=>{crest.hidden=true;});
+    crest.append(img);matchup.append(crest);
+  }
   const bottom=document.createElement('span');bottom.className='tile-bottom';
   const summary=document.createElement('span');summary.className='tile-summary';
   const value=document.createElement('span');value.className='tile-value';value.textContent='—';
@@ -346,8 +465,16 @@ function createCard(match){
   const spark=document.createElement('span');spark.className='tile-spark';spark.setAttribute('aria-hidden','true');
   const foot=document.createElement('span');foot.className='tile-foot';foot.textContent='Henter siste telling …';
   bottom.append(summary,spark,foot);
-  button.append(top,title,bottom);
-  button.addEventListener('click',()=>{if(match.id!==current)void selectMatch(match.id);});
+  button.append(top,matchup,bottom);
+  button.addEventListener('click',()=>{
+    if(match.id===current)return;
+    updateShareLink(match.event_key);
+    void selectMatch(match.id);
+    if(typeof window!=='undefined'&&window.matchMedia?.('(max-width: 640px)').matches){
+      const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      $('match-details').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
+    }
+  });
   return {button,pill,value,foot,spark};
 }
 
@@ -372,6 +499,9 @@ function buildCards(){
 }
 
 function drawSparkline(target, readings){
+  const signature=readings.map(p=>p.observed_at+':'+p.available_seated).join('|');
+  if(target.dataset.series===signature)return;
+  target.dataset.series=signature;
   const values=readings.map(p=>Number(p.available_seated)).filter(Number.isFinite);
   if(values.length<2){target.replaceChildren();return;}
   const W=94,H=36,P=3;
@@ -395,7 +525,7 @@ async function refreshCardData(){
       if(!data.length){
         card.value.textContent='—';
         card.foot.textContent='Venter på første telling';
-        card.spark.replaceChildren();
+        card.spark.replaceChildren();card.spark.dataset.series='';
         card.button.setAttribute('data-stale','true');
         return;
       }
@@ -405,10 +535,10 @@ async function refreshCardData(){
       const wording=delta===null?''
         :delta<0?' · '+fmt(-delta)+' færre ledige'
         :delta>0?' · '+fmt(delta)+' flere ledige':' · Uendret';
-      card.foot.textContent='Målt '+date(latest.observed_at)+wording;
+      card.foot.textContent='Målt '+date(latest.observed_at)+wording+(overdue(latest.observed_at)?' · avventer ny telling':'');
       const sameConfig=data.filter(p=>comparable(p,latest)).reverse();
       drawSparkline(card.spark,sameConfig);
-      card.button.setAttribute('data-stale',String(Date.now()-new Date(latest.observed_at).getTime()>3*3600*1000));
+      card.button.setAttribute('data-stale',String(overdue(latest.observed_at)));
     }catch(error){card.foot.textContent='Oppdatering ikke tilgjengelig';}
   }));
 }
@@ -422,7 +552,7 @@ async function selectMatch(id){
   $('kickoff').textContent=match.kickoff_at?'Avspark '+date(match.kickoff_at):'Avspark ikke registrert';
   const key=String(match.event_key||'');
   $('tickets').href=/^[A-Za-z0-9_-]{8,100}$/.test(key)?'https://billett.rbk.no/checkout/'+key:'https://billett.rbk.no/';
-  if(changed)render([]);
+  if(changed){$('error').textContent='';render([]);}
   $('stats').setAttribute('aria-busy','true');
   try{
     const data=await load('ministaut_scans?select=observed_at,available_seated,locked_fields&reading_status=eq.accepted&match_id=eq.'+encodeURIComponent(id)+'&order=observed_at.desc&limit=500');
@@ -440,15 +570,22 @@ async function refresh(){
     matches=published;
     buildCards();
     if(!matches.length){render([]);$('selectedMatchTitle').textContent='Ingen kamper ennå';return;}
-    const chosen=matches.some(m=>m.id===current)?current:matches[0].id;
+    const chosen=matches.some(m=>m.id===current)?current:(chooseByLink(matches)||matches[0].id);
     await Promise.all([selectMatch(chosen),refreshCardData()]);
   })().catch(error=>{$('error').textContent='Kunne ikke hente billettdata. Prøv Oppdater.';})
     .finally(()=>{refreshPromise=null;});
   return refreshPromise;
 }
-$('refresh').addEventListener('click',()=>{void refresh();});
+$('refresh').addEventListener('click',()=>{
+  const btn=$('refresh');
+  btn.disabled=true;btn.textContent='Henter…';btn.setAttribute('aria-busy','true');
+  void refresh().finally(()=>{
+    btn.disabled=false;btn.textContent='↻ Oppdater';btn.removeAttribute('aria-busy');
+  });
+});
 void refresh();
-setInterval(()=>{if(!document.hidden)void refresh();},60000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)void refresh();});
+setInterval(()=>{updateAgeIndicator();if(!document.hidden)void refresh();},60000);
 
 </script>
 </body>
