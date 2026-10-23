@@ -321,7 +321,12 @@ function crestFor(title){
   const lower=String(title||'').toLowerCase();
   return Object.keys(knownOpponentCrests).find(name=>lower.includes(name)) || null;
 }
-let matches=[], current=null, cards=new Map(), cardSignature='', selectionVersion=0, refreshPromise=null;
+let matches=[], current=null, cards=new Map(), cardSignature='', selectionVersion=0, refreshPromise=null, lastObservedAt=null;
+function updateAgeIndicator(){
+  const badge=$('age');
+  badge.textContent=ageLabel(lastObservedAt);
+  badge.setAttribute('data-stale',String(overdue(lastObservedAt)));
+}
 
 async function load(path){
   const res=await fetch(DB+'/rest/v1/'+path,{headers:{apikey:KEY},cache:'no-store'});
@@ -417,8 +422,8 @@ function render(scans){
   const records=scans.slice().sort((a,b)=>new Date(a.observed_at)-new Date(b.observed_at));
   const last=records.at(-1),prev=records.at(-2);
   $('available').textContent=last?fmt(last.available_seated):'—';
-  $('age').textContent=ageLabel(last?.observed_at);
-  $('age').setAttribute('data-stale',String(overdue(last?.observed_at)));
+  lastObservedAt=last?.observed_at||null;
+  updateAgeIndicator();
   const scoped=last?records.filter(p=>comparable(p,last)):[];
   const sinceFirst=last && scoped.length?last.available_seated-scoped[0].available_seated:null;
   const sinceLast=comparable(last,prev)?last.available_seated-prev.available_seated:null;
@@ -579,7 +584,8 @@ $('refresh').addEventListener('click',()=>{
   });
 });
 void refresh();
-setInterval(()=>{if(!document.hidden)void refresh();},60000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)void refresh();});
+setInterval(()=>{updateAgeIndicator();if(!document.hidden)void refresh();},60000);
 
 </script>
 </body>
