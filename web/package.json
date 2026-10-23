@@ -1,1 +1,8 @@
-{"name":"ministaut","version":"1.0.0","private":true,"scripts":{"build":"echo static-site"}}
+{
+  "name": "ministaut",
+  "version": "1.0.1",
+  "private": true,
+  "scripts": {
+    "build": "node build.js"
+  }
+}
