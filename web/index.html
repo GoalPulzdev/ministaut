@@ -273,6 +273,54 @@ const fmt = value => typeof value === 'number' && Number.isFinite(value) ? new I
 const date = value => new Date(value).toLocaleString('nb-NO', {timeZone:'Europe/Oslo',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
 const comparable = (a,b) => !!(a && b && JSON.stringify([...(a.locked_fields||[])].sort())===JSON.stringify([...(b.locked_fields||[])].sort()));
 const signed = n => n===null || n===undefined ? '—' : (n>0?'+':'')+fmt(n);
+const ageInMinutes = time => Math.max(0,Math.floor((Date.now()-new Date(time).getTime())/60000));
+const overdue = time => !time || ageInMinutes(time)>95;
+const ageLabel = time => {
+  if(!time)return 'Venter på første telling';
+  const minutes=ageInMinutes(time);
+  const elapsed=minutes<2?'akkurat nå'
+    :minutes<60?'for '+minutes+' min siden'
+    :minutes<180?'for '+Math.floor(minutes/60)+' t'+(minutes%60?' '+(minutes%60)+' min':'')+' siden'
+    :minutes<1440?'for '+Math.floor(minutes/60)+' timer siden'
+    :'den '+date(time);
+  return overdue(time)?'Ny telling avventes · sist '+elapsed:'Sist målt '+elapsed;
+};
+function showTrend(valueId,noteId,change){
+  const value=$(valueId),note=$(noteId);
+  if(change===null||change===undefined){
+    value.textContent='—';value.dataset.direction='unknown';note.textContent='Venter på flere målinger';return;
+  }
+  if(change===0){
+    value.textContent='0';value.dataset.direction='flat';note.textContent='ingen endring i ledige plasser';return;
+  }
+  value.textContent=fmt(Math.abs(change));
+  value.dataset.direction=change<0?'down':'up';
+  note.textContent=change<0?'færre ledige sitteplasser':'flere ledige sitteplasser';
+}
+function chooseByLink(available){
+  try{
+    if(typeof window==='undefined')return null;
+    const key=new URLSearchParams(window.location.search).get('kamp');
+    return available.find(m=>m.event_key===key)?.id || null;
+  }catch{return null;}
+}
+function updateShareLink(key){
+  try{
+    if(typeof window==='undefined'||!window.history?.replaceState||!(/^[A-Za-z0-9_-]{8,100}$/).test(key))return;
+    const url=new URL(window.location.href);
+    if(url.searchParams.get('kamp')===key)return;
+    url.searchParams.set('kamp',key);
+    window.history.replaceState(null,'',url.pathname+url.search+url.hash);
+  }catch{/* URL state is optional; navigation still works. */}
+}
+const knownOpponentCrests={
+  molde:'https://cdn.sportmonks.com/images/soccer/teams/2/290.png',
+  start:'https://cdn.sportmonks.com/images/soccer/teams/15/2735.png'
+};
+function crestFor(title){
+  const lower=String(title||'').toLowerCase();
+  return Object.keys(knownOpponentCrests).find(name=>lower.includes(name)) || null;
+}
 let matches=[], current=null, cards=new Map(), cardSignature='', selectionVersion=0, refreshPromise=null;
 
 async function load(path){
@@ -369,22 +417,20 @@ function render(scans){
   const records=scans.slice().sort((a,b)=>new Date(a.observed_at)-new Date(b.observed_at));
   const last=records.at(-1),prev=records.at(-2);
   $('available').textContent=last?fmt(last.available_seated):'—';
-  $('age').textContent=last?'Sist målt '+date(last.observed_at):'Ingen måling ennå';
-  $('age').setAttribute('data-stale',String(last ? Date.now()-new Date(last.observed_at).getTime()>3*3600*1000 : true));
-  $('bar').style.width=last?Math.min(100,last.available_seated/19015*100)+'%':'0%';
+  $('age').textContent=ageLabel(last?.observed_at);
+  $('age').setAttribute('data-stale',String(overdue(last?.observed_at)));
   const scoped=last?records.filter(p=>comparable(p,last)):[];
   const sinceFirst=last && scoped.length?last.available_seated-scoped[0].available_seated:null;
   const sinceLast=comparable(last,prev)?last.available_seated-prev.available_seated:null;
-  $('sinceFirst').textContent=signed(sinceFirst);
-  $('delta').textContent=signed(sinceLast);
+  showTrend('sinceFirst','sinceFirstNote',sinceFirst);
+  showTrend('delta','deltaNote',sinceLast);
   $('pulseMessage').textContent=!last?'Følg billettpulsen fram mot avspark.'
     :sinceFirst<0?fmt(-sinceFirst)+' færre ledige sitteplasser siden første telling.'
     :sinceFirst>0?'Flere sitteplasser tilgjengelige enn ved første telling.'
     :'Følg utviklingen og bli med på kampdag.';
   graph(scoped);
-  $('forecast').textContent=scoped.length>1
-    ?'Kurven viser '+scoped.length+' sammenlignbare tellinger for valgt kamp.'
-    :'Grafen oppdateres når flere godkjente tellinger kommer inn.';
+  // The chart count and inspected point already communicate history.
+  // Avoid another text block repeating the same information.
 }
 
 function createCard(match){
@@ -395,7 +441,17 @@ function createCard(match){
   const top=document.createElement('span');top.className='tile-top';
   const kickoff=document.createElement('span');kickoff.textContent=match.kickoff_at?'Avspark '+date(match.kickoff_at):'Kampstart kommer';top.append(kickoff);
   const pill=document.createElement('span');pill.className='tile-pill';pill.textContent='SE KAMP';top.append(pill);
-  const title=document.createElement('span');title.className='tile-title';title.textContent=match.title;
+  const matchup=document.createElement('span');matchup.className='tile-matchup';
+  const title=document.createElement('span');title.className='tile-title';title.textContent=match.title;matchup.append(title);
+  const opponent=crestFor(match.title);
+  if(opponent){
+    const crest=document.createElement('span');crest.className='tile-opponent';
+    const img=document.createElement('img');
+    img.src=knownOpponentCrests[opponent];img.alt=opponent+' klubbmerke';
+    img.width=32;img.height=32;img.loading='lazy';img.decoding='async';
+    img.addEventListener('error',()=>{crest.hidden=true;});
+    crest.append(img);matchup.append(crest);
+  }
   const bottom=document.createElement('span');bottom.className='tile-bottom';
   const summary=document.createElement('span');summary.className='tile-summary';
   const value=document.createElement('span');value.className='tile-value';value.textContent='—';
@@ -404,8 +460,16 @@ function createCard(match){
   const spark=document.createElement('span');spark.className='tile-spark';spark.setAttribute('aria-hidden','true');
   const foot=document.createElement('span');foot.className='tile-foot';foot.textContent='Henter siste telling …';
   bottom.append(summary,spark,foot);
-  button.append(top,title,bottom);
-  button.addEventListener('click',()=>{if(match.id!==current)void selectMatch(match.id);});
+  button.append(top,matchup,bottom);
+  button.addEventListener('click',()=>{
+    if(match.id===current)return;
+    updateShareLink(match.event_key);
+    void selectMatch(match.id);
+    if(typeof window!=='undefined'&&window.matchMedia?.('(max-width: 640px)').matches){
+      const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      $('match-details').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
+    }
+  });
   return {button,pill,value,foot,spark};
 }
 
@@ -430,6 +494,9 @@ function buildCards(){
 }
 
 function drawSparkline(target, readings){
+  const signature=readings.map(p=>p.observed_at+':'+p.available_seated).join('|');
+  if(target.dataset.series===signature)return;
+  target.dataset.series=signature;
   const values=readings.map(p=>Number(p.available_seated)).filter(Number.isFinite);
   if(values.length<2){target.replaceChildren();return;}
   const W=94,H=36,P=3;
@@ -453,7 +520,7 @@ async function refreshCardData(){
       if(!data.length){
         card.value.textContent='—';
         card.foot.textContent='Venter på første telling';
-        card.spark.replaceChildren();
+        card.spark.replaceChildren();card.spark.dataset.series='';
         card.button.setAttribute('data-stale','true');
         return;
       }
@@ -463,10 +530,10 @@ async function refreshCardData(){
       const wording=delta===null?''
         :delta<0?' · '+fmt(-delta)+' færre ledige'
         :delta>0?' · '+fmt(delta)+' flere ledige':' · Uendret';
-      card.foot.textContent='Målt '+date(latest.observed_at)+wording;
+      card.foot.textContent='Målt '+date(latest.observed_at)+wording+(overdue(latest.observed_at)?' · avventer ny telling':'');
       const sameConfig=data.filter(p=>comparable(p,latest)).reverse();
       drawSparkline(card.spark,sameConfig);
-      card.button.setAttribute('data-stale',String(Date.now()-new Date(latest.observed_at).getTime()>3*3600*1000));
+      card.button.setAttribute('data-stale',String(overdue(latest.observed_at)));
     }catch(error){card.foot.textContent='Oppdatering ikke tilgjengelig';}
   }));
 }
@@ -498,13 +565,19 @@ async function refresh(){
     matches=published;
     buildCards();
     if(!matches.length){render([]);$('selectedMatchTitle').textContent='Ingen kamper ennå';return;}
-    const chosen=matches.some(m=>m.id===current)?current:matches[0].id;
+    const chosen=matches.some(m=>m.id===current)?current:(chooseByLink(matches)||matches[0].id);
     await Promise.all([selectMatch(chosen),refreshCardData()]);
   })().catch(error=>{$('error').textContent='Kunne ikke hente billettdata. Prøv Oppdater.';})
     .finally(()=>{refreshPromise=null;});
   return refreshPromise;
 }
-$('refresh').addEventListener('click',()=>{void refresh();});
+$('refresh').addEventListener('click',()=>{
+  const btn=$('refresh');
+  btn.disabled=true;btn.textContent='Henter…';btn.setAttribute('aria-busy','true');
+  void refresh().finally(()=>{
+    btn.disabled=false;btn.textContent='↻ Oppdater';btn.removeAttribute('aria-busy');
+  });
+});
 void refresh();
 setInterval(()=>{if(!document.hidden)void refresh();},60000);
 
