@@ -1,71 +1,320 @@
-<!doctype html><html lang="nb"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b0b0c"><title>Ministaut · Billettpulsen på Lerkendal</title><meta name="description" content="Følg billettpulsen på Lerkendal. Se tilgjengelige sitteplasser, utviklingen mot kampstart og finn billetter til Rosenborgs hjemmekamper."><style>
-:root{color-scheme:dark;--gold:#81ca9c;--muted:#a6a5a3;--line:#343434}*{box-sizing:border-box}body{margin:0;background:#0b0b0c;color:#f8f7f5;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}body:before{content:'';position:fixed;inset:0;pointer-events:none;opacity:.3;background:radial-gradient(circle at 80% -10%,#1c5a3330,transparent 45%),repeating-linear-gradient(0deg,transparent 0 75px,#ffffff08 76px 77px)}.wrap{max-width:1130px;margin:auto;padding:34px 23px 85px;position:relative}.top{display:flex;justify-content:space-between;align-items:center;gap:20px}.brand{letter-spacing:.22em;font-size:12px;font-weight:900}.badge{border:1px solid #255b3c;background:#17291c;color:var(--gold);border-radius:50px;padding:8px 12px;font-size:12px}.diamond{font-weight:1000;letter-spacing:-.08em;border:2px solid white;transform:rotate(45deg);width:36px;height:36px;display:grid;place-items:center}.diamond span{transform:rotate(-45deg);font-size:11px;letter-spacing:0}.subtitle{text-transform:uppercase;letter-spacing:.2em;font-size:11px;color:var(--gold);margin:42px 0 8px}.heading{font-size:clamp(40px,6.2vw,72px);letter-spacing:-.065em;margin:0 0 8px;font-weight:900}.muted{color:var(--muted)}.card{background:linear-gradient(145deg,#202020,#141414);border:1px solid var(--line);border-radius:21px;padding:24px}.summary{margin-top:30px;display:grid;grid-template-columns:1.3fr .7fr;gap:16px}.primary{border-color:#386f4f;padding:32px;background:linear-gradient(135deg,#1b2921,#111)}.caption{font-size:12px;font-weight:850;letter-spacing:.12em;color:var(--gold);text-transform:uppercase}.big{font-size:clamp(59px,9vw,106px);line-height:1.12;font-weight:950;letter-spacing:-.065em;margin:13px 0 24px}.progress{height:9px;background:#3e3e3e;border-radius:20px;overflow:hidden}.progress>div{background:linear-gradient(90deg,#4e986b,#8ed3a6);height:100%;width:0}.minor{font-size:13px;color:#b7b4ae;margin-top:12px}.stack{display:grid;grid-template-rows:1fr 1fr;gap:16px}.value{font-size:39px;letter-spacing:-.04em;font-weight:900;margin-top:14px}.graph{margin-top:16px}.graph svg{width:100%;height:auto;overflow:visible}.toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin:22px 0}.pill{background:#222;border:1px solid #484747;color:white;padding:9px 14px;border-radius:11px;font-size:13px;cursor:pointer}select.pill{max-width:100%}.empty{padding:65px 20px;text-align:center;color:#bbb;font-size:16px}.note{font-size:12px;line-height:1.65;color:#999}.table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:12px 4px;text-align:left;border-bottom:1px solid #333}th{color:var(--gold);font-size:12px;letter-spacing:.07em}.state{margin-top:10px;font-size:13px;color:#bbb}@media(max-width:720px){.summary{grid-template-columns:1fr}.stack{grid-template-columns:1fr 1fr;grid-template-rows:auto}.card{padding:18px}.primary{padding:23px}.value{font-size:29px}.wrap{padding:25px 15px}.subtitle{margin-top:32px}}
-.team-mark{width:74px;height:74px;display:grid;place-items:center;background:#f5f5f3;border-radius:16px;padding:7px}.team-mark img{height:100%;width:100%;object-fit:contain}.fixture{display:flex;align-items:center;gap:15px;margin:28px 0 5px;flex-wrap:wrap}.fixture img{width:54px;height:54px;background:#f4f5f3;padding:5px;border-radius:12px;object-fit:contain}.fixture strong{font-size:clamp(18px,3vw,27px)}.fixture .versus{font-size:19px;color:#83cd9b}.unofficial{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#d5d8d4;border:1px solid #53655a;border-radius:18px;padding:7px 11px}.brand{letter-spacing:.13em}@media(max-width:720px){.team-mark{width:58px;height:58px}.fixture img{width:39px;height:39px}.fixture{gap:9px}} .match-list{margin:24px 0 12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:12px}.match-tile{display:block;text-align:left;background:#151b17;border:1px solid #35463b;border-radius:16px;padding:17px;color:#f2f6f1;cursor:pointer;font:inherit;min-width:0}.match-tile:hover,.match-tile[aria-current="true"]{border-color:#82ce9d;background:#203027}.match-tile .tile-head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:#c0cfc6}.match-tile .tile-main{font-weight:800;font-size:17px;margin:12px 0 10px;overflow-wrap:anywhere}.match-tile .tile-number{font-weight:950;font-size:29px;letter-spacing:-.04em}.match-tile .tile-foot{font-size:12px;color:#aab9af;margin-top:5px}.section-title{font-size:15px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#e3f4e8;margin-top:28px}
-body{background:#08130d}
-body:before{opacity:.56;background:radial-gradient(circle at 80% 0%,#215d345e,transparent 47%),radial-gradient(circle at 5% 45%,#10371c5b,transparent 41%),repeating-linear-gradient(0deg,transparent 0 75px,#ffffff08 76px 77px)}
-.wrap{max-width:1160px}
-.heading{max-width:1000px;line-height:1.02}
-.subtitle{display:flex;align-items:center;gap:12px;letter-spacing:.2em;margin-top:35px}
-.heartbeat{display:inline-block;width:9px;height:9px;border-radius:50%;background:#9af5aa;box-shadow:0 0 12px #59df84,0 0 24px #59df8488}
-.hero-intro{margin:15px 0 17px;font-size:clamp(15px,1.75vw,19px);line-height:1.55;max-width:760px;color:#bdd5c5}
-.card{box-shadow:inset 0 1px 0 #ffffff08,0 14px 34px #00000030}
-.primary{background:linear-gradient(122deg,#183e29,#10241a 70%,#0c1712);border-color:#579b64}
-.big{color:#f8fff9;text-shadow:0 0 45px #a6ffc225}
-.progress{margin:0 0 10px;background:#33463a}
-.progress>div{background:linear-gradient(90deg,#43b86c,#b1f4a6)}
-.pulse-message{font-size:14px;color:#b8e4c5;line-height:1.55;min-height:20px;margin:10px 0 0}
-.campaign-row{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:17px 0 26px;padding:19px 22px;background:linear-gradient(90deg,#153f23,#10251a);border:1px solid #346e43;border-radius:19px}
-.ticket-link{display:inline-flex;align-items:center;justify-content:center;gap:9px;background:linear-gradient(140deg,#d0ff91,#88eab0);border:1px solid #d5ffa5;color:#102318;box-shadow:0 8px 30px #53d66f29;font-size:16px;font-weight:900;text-decoration:none;border-radius:12px;padding:16px 23px;min-height:52px;transition:transform .2s ease,box-shadow .2s ease}
-.ticket-link:hover{transform:translateY(-2px);box-shadow:0 12px 36px #53d66f55}
-.ticket-link:focus-visible{outline:3px solid white;outline-offset:4px}
-.campaign-copy{display:flex;flex-direction:column;gap:4px;align-items:flex-end;text-align:right}
-.campaign-copy strong{font-size:19px;color:#e8ffea}
-.campaign-copy span{font-size:13px;color:#b1cbb9}
-.match-tile{background:linear-gradient(145deg,#192a1d,#101b14);border-color:#3b6047;transition:border-color .2s,transform .2s}
-.match-tile:hover{transform:translateY(-2px)}
-.match-tile[aria-current="true"]{border-color:#bbffab;box-shadow:0 0 0 1px #a2ff992b;background:#23452e}
-.match-tile .tile-number{color:#c4ffc4}
-.toolbar{margin:21px 0 16px}
-.section-title{margin-top:23px;margin-bottom:14px}
-.fan-footer{margin:30px 0 0;border-top:1px solid #243d2b;padding-top:18px;font-size:12px;color:#869d90;line-height:1.6}
-@media(max-width:720px){.heading{font-size:clamp(35px,9vw,56px)}.campaign-row{flex-direction:column;align-items:stretch;padding:15px}.campaign-copy{align-items:center;text-align:center;order:-1}.ticket-link{width:100%}.hero-intro{margin-top:12px}.match-tile{min-height:119px}.section-title{margin-top:20px}}
-</style></head><body><main class="wrap"><header class="top"><div class="brand">MINISTAUT <span style="color:var(--gold)">/</span> LERKENDAL <span class="unofficial">Uavhengig</span></div><div class="team-mark"><img src="https://cdn.sportmonks.com/images/soccer/teams/23/1335.png" alt="Rosenborg BK-logo" width="60" height="60"></div></header><div class="fixture"><img src="https://cdn.sportmonks.com/images/soccer/teams/23/1335.png" alt="Rosenborg-logo"><strong>Rosenborg</strong><span class="versus">–</span><strong id="opponentName">Motstander</strong><img id="opponentLogo" src="" alt="" hidden></div><div class="subtitle">KAMPDAG BEGYNNER HER <span class="heartbeat" aria-hidden="true"></span></div><h1 id="title" class="heading">Bli med og fyll Lerkendal.</h1><p class="hero-intro">Følg billettpulsen mot avspark. Se hvordan de ledige plassene endrer seg, velg kampen din – og bli med på å skape stemningen fra tribunen.</p><div class="muted" id="kickoff">Kampen nærmer seg</div><div class="toolbar"><label><span class="muted">Velg kamp: </span><select class="pill" id="match"><option>Henter kamper …</option></select></label><div><span id="age" class="badge">Ingen skanning ennå</span> <button id="refresh" class="pill">Hent siste tall</button></div></div><h2 class="section-title">Følg plassene mot avspark</h2><section class="summary"><article class="card primary"><div class="caption">Ledige sitteplasser</div><div id="available" class="big">—</div><div class="progress"><div id="bar"></div></div><div class="minor">Sist registrert i sitteplasskartet</div><p id="pulseMessage" class="pulse-message">Se utviklingen fram mot avspark.</p></article><div class="stack"><article class="card"><div class="caption">Endring siden første måling</div><div class="value" id="sinceFirst">—</div><div class="minor">Ledige sitteplasser</div></article><article class="card"><div class="caption">Siden forrige måling</div><div class="value" id="delta">—</div><div class="minor">Ledige plasser</div></article></div></section><div class="campaign-row"><a id="tickets" class="ticket-link" href="https://billett.rbk.no/" target="_blank" rel="noopener noreferrer" aria-label="Gå til billettsalg for valgt Rosenborg-kamp">🎟️ Finn din plass på Lerkendal <span aria-hidden="true">↗</span></a><div class="campaign-copy"><strong>Ses på Lerkendal!</strong><span>Ta med deg noen på kamp. Sammen skaper vi trøkket.</span></div></div><h2 class="section-title">Velg kampen din</h2><div class="match-list" id="matchCards" aria-live="polite"><div class="muted">Henter kampoversikt …</div></div><section class="card graph"><div class="caption">Billettpulsen fram mot avspark</div><p class="muted" style="font-size:13px">Grønn kurve viser ledige sitteplasser ved hver telling.</p><div id="chart" class="empty">Ingen målinger er registrert ennå.</div><div id="forecast" class="state"></div></section><section class="card graph"><div class="caption">Siste målinger</div><div style="overflow:auto"><table class="table"><thead><tr><th>Tidspunkt</th><th>Ledige</th><th>Endring</th></tr></thead><tbody id="rows"><tr><td colspan="3">Venter på måledata fra PC-en.</td></tr></tbody></table></div></section><footer class="fan-footer">Ministaut er en uavhengig supporteroversikt. Tallene viser sist registrerte ledige sitteplasser i billettkartet, ikke ståplasser.</footer><p class="note" id="error"></p></main><script>
-const DB='https://khetbokxbcujwcurvviu.supabase.co', KEY='sb_publishable_0JuYQgbiXWfx103zy7j85Q_muDiicIL';
-const $=id=>document.getElementById(id),fmt=x=>typeof x==='number'?new Intl.NumberFormat('nb-NO').format(x):'—';
-const date=x=>new Date(x).toLocaleString('nb-NO',{timeZone:'Europe/Oslo',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
-async function load(path){const r=await fetch(DB+'/rest/v1/'+path,{headers:{apikey:KEY}});if(!r.ok)throw Error('Supabase svarte '+r.status);return r.json()}
-let matches=[],current=null;
-function graph(points){if(!points.length){$('chart').textContent='Ingen målinger ennå';return} const W=950,H=320,L=58,R=16,T=23,B=38;let vals=points.map(p=>p.available_seated),lo=Math.max(0,Math.min(...vals)-100),hi=Math.max(...vals)+100;if(lo===hi)hi=lo+100;let times=points.map(p=>new Date(p.observed_at).getTime()),t0=Math.min(...times),t1=Math.max(...times);if(t0===t1)t1=t0+1;const x=t=>L+(t-t0)/(t1-t0)*(W-L-R),y=v=>T+(hi-v)/(hi-lo)*(H-T-B);let path=points.map((p,i)=>(i?'L':'M')+x(times[i]).toFixed(1)+' '+y(p.available_seated).toFixed(1)).join(' ');let dots=points.map((p,i)=>'<circle r="4" cx="'+x(times[i])+'" cy="'+y(p.available_seated)+'" fill="#8ed3a6"><title>'+date(p.observed_at)+' · '+fmt(p.available_seated)+' ledige</title></circle>').join('');let grid=Array.from({length:5},(_,i)=>{let v=lo+(hi-lo)*i/4,yp=y(v);return '<line x1="'+L+'" y1="'+yp+'" x2="'+(W-R)+'" y2="'+yp+'" stroke="#373737"/><text x="'+(L-7)+'" y="'+(yp+4)+'" text-anchor="end" fill="#aaa" font-size="12">'+fmt(Math.round(v))+'</text>'}).join('');$('chart').className='';$('chart').innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Graf for ledige plasser">'+grid+'<path fill="none" stroke="#81ca9c" stroke-width="3.5" d="'+path+'"/>'+dots+'</svg>'}
-function render(scans){scans=scans.slice().sort((a,b)=>new Date(a.observed_at)-new Date(b.observed_at));let last=scans.at(-1),previous=scans.at(-2);$('available').textContent=last?fmt(last.available_seated):'—';const sameScope=(p,q)=>p&&q&&JSON.stringify([...(p.locked_fields||[])].sort())===JSON.stringify([...(q.locked_fields||[])].sort());const baseline=last?scans.find(p=>sameScope(p,last)):null;const firstDelta=last&&baseline?last.available_seated-baseline.available_seated:null;$('sinceFirst').textContent=firstDelta===null?'—':(firstDelta>0?'+':'')+fmt(firstDelta);$('pulseMessage').textContent=!last?'Følg billettpulsen fram mot avspark.':firstDelta<0?fmt(-firstDelta)+' færre ledige sitteplasser siden første telling. Skal du bli med?':firstDelta>0?'Det er flere ledige sitteplasser enn ved første telling. Finn din plass!':'Følg billettpulsen og bli med på kampdag.';$('bar').style.width=last?Math.min(100,last.available_seated/19015*100)+'%':'0%';$('age').textContent=last?'Sist målt '+date(last.observed_at):'Venter på første skanning';let comparable=last&&previous&&JSON.stringify([...last.locked_fields].sort())===JSON.stringify([...previous.locked_fields].sort());$('delta').textContent=comparable?(last.available_seated-previous.available_seated>0?'+':'')+fmt(last.available_seated-previous.available_seated):'—';$('rows').replaceChildren();for(let i=scans.length-1;i>=0&&i>=scans.length-18;i--){let p=scans[i],prev=scans[i-1],tr=document.createElement('tr');for(let cell of [date(p.observed_at),fmt(p.available_seated),prev&&JSON.stringify([...p.locked_fields].sort())===JSON.stringify([...prev.locked_fields].sort())?fmt(p.available_seated-prev.available_seated):'—']){let td=document.createElement('td');td.textContent=cell;tr.append(td)}$('rows').append(tr)}if(!scans.length){let tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=3;td.textContent='Ingen godkjente skanninger ennå';tr.append(td);$('rows').append(tr)}graph(scans.filter(p=>last&&JSON.stringify([...p.locked_fields].sort())===JSON.stringify([...last.locked_fields].sort())));$('forecast').textContent=last?'Nye godkjente tellinger tegner utviklingen fram mot kampstart.':'Venter på første registrerte måling.';}
-const opponentLogos={molde:'https://cdn.sportmonks.com/images/soccer/teams/2/290.png',start:'https://cdn.sportmonks.com/images/soccer/teams/15/2735.png'};
-function setFixture(title){const clean=String(title||'').replace(/^rosenborg\s*[–\-:]\s*/i,'').trim();const match=Object.keys(opponentLogos).find(k=>clean.toLowerCase().includes(k));$('opponentName').textContent=clean||'Motstander';const img=$('opponentLogo');img.hidden=!match;if(match){img.src=opponentLogos[match];img.alt=clean+'-logo'}else{img.removeAttribute('src');img.alt=''}}
-async function select(id){current=id;let m=matches.find(x=>x.id===id);if(!m)return;setFixture(m.title);const key=String(m.event_key||'');$('tickets').href=/^[A-Za-z0-9_-]{8,100}$/.test(key)?'https://billett.rbk.no/checkout/'+key:'https://billett.rbk.no/';$('kickoff').textContent=m.kickoff_at?'Avspark: '+date(m.kickoff_at):'Kampstart ikke registrert';let scans=await load('ministaut_scans?select=observed_at,available_seated,locked_fields&match_id=eq.'+encodeURIComponent(id)+'&order=observed_at.asc&limit=500');render(scans)}
-async function renderMatchCards(){
- const holder=$('matchCards');holder.replaceChildren();
- if(!matches.length){holder.textContent='Ingen kamper er registrert ennå.';return;}
- await Promise.all(matches.map(async m=>{
-  const card=document.createElement('button');card.type='button';card.className='match-tile';
-  card.setAttribute('aria-current',String(m.id===current));
-  const head=document.createElement('div');head.className='tile-head';
-  const dateLabel=document.createElement('span');dateLabel.textContent=m.kickoff_at?'Avspark '+date(m.kickoff_at):'Kampstart ikke bekreftet';
-  const label=document.createElement('span');label.textContent='Billettstatus';head.append(dateLabel,label);
-  const main=document.createElement('div');main.className='tile-main';main.textContent=m.title;
-  const stat=document.createElement('div');stat.className='tile-number';stat.textContent='—';
-  const foot=document.createElement('div');foot.className='tile-foot';foot.textContent='Venter på skanning';
-  card.append(head,main,stat,foot);holder.append(card);
-  card.onclick=()=>select(m.id).then(()=>renderMatchCards()).catch(err=>$('error').textContent=err.message);
-  try{
-   const records=await load('ministaut_scans?select=observed_at,available_seated,locked_fields&match_id=eq.'+encodeURIComponent(m.id)+'&order=observed_at.desc&limit=2');
-   if(!records.length)return;
-   const latest=records[0],previous=records[1];
-   stat.textContent=fmt(latest.available_seated)+' ledige seter';
-   const comparable=previous&&JSON.stringify([...latest.locked_fields].sort())===JSON.stringify([...previous.locked_fields].sort());
-   const delta=comparable?latest.available_seated-previous.available_seated:null;
-   foot.textContent='Sist '+date(latest.observed_at)+(delta===null?'':(' · Endring '+(delta>0?'+':'')+fmt(delta)));
-  }catch(err){foot.textContent='Kunne ikke hente måling';}
- }));
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0a110d">
+  <meta name="description" content="Følg billettpulsen før Rosenborgs hjemmekamper. Velg kamp, se utviklingen og finn din plass på Lerkendal.">
+  <title>Ministaut · Billettpulsen på Lerkendal</title>
+  <style>
+
+:root{color-scheme:dark;--bg:#0a110d;--panel:#141f17;--panel2:#19291e;--line:#304338;--line-strong:#5f9770;--accent:#aeecb9;--text:#f4f8f2;--muted:#a2b6a7}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse 720px 440px at 78% -13%,#20553751,transparent 70%),radial-gradient(ellipse 560px 480px at -17% 45%,#19482a23,transparent 70%);z-index:-1}
+button,a{-webkit-tap-highlight-color:transparent}
+button{font:inherit}
+button:focus-visible,a:focus-visible{outline:3px solid #d1ffbe;outline-offset:4px}
+.wrap{max-width:1080px;margin:auto;padding:22px 26px 52px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:20px;min-height:50px}
+.brand{font-size:12px;letter-spacing:.14em;font-weight:900;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.brand .slash{color:#77c28c;font-weight:700}
+.independent{color:#9bad9f;font-size:10px;font-weight:700;letter-spacing:.06em;padding:4px 7px;border:1px solid #365241;border-radius:7px}
+.team-mark{width:48px;height:48px;border-radius:13px;background:#f1f4ed;display:grid;place-items:center;padding:5px;box-shadow:0 5px 24px #0004;flex:none}
+.team-mark img{max-width:100%;max-height:100%;object-fit:contain}
+.hero{margin:30px 0 30px;max-width:760px}
+.overline{font-size:11px;letter-spacing:.18em;font-weight:850;text-transform:uppercase;color:var(--accent)}
+.hero .overline{display:flex;gap:10px;align-items:center}
+.pulse-dot{width:7px;height:7px;background:#9befad;border-radius:50%;box-shadow:0 0 0 4px #6dcc8520,0 0 16px #8fefab80}
+.hero h1{font-size:clamp(34px,4.5vw,57px);line-height:1.08;letter-spacing:-.056em;font-weight:850;margin:11px 0 12px}
+.hero p{color:#bfcec2;font-size:clamp(14px,1.5vw,17px);line-height:1.62;max-width:660px;margin:0}
+.section-heading{display:flex;justify-content:space-between;align-items:baseline;gap:18px;margin:0 0 13px}
+.section-title{font-size:19px;letter-spacing:-.026em;font-weight:800;line-height:1.24;margin:0}
+.section-help{font-size:12px;color:#849a8b}
+.match-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin:0}
+.match-tile{text-align:left;display:flex;flex-direction:column;align-items:stretch;justify-content:space-between;gap:13px;min-height:155px;padding:20px 22px;border:1px solid #35503e;background:linear-gradient(145deg,#18271d,#111a14);color:var(--text);border-radius:18px;cursor:pointer;position:relative;overflow:hidden;transition:border-color .22s ease,background .22s ease,box-shadow .22s ease,transform .22s ease}
+.match-tile:after{content:"";position:absolute;right:-30px;bottom:-73px;width:175px;height:175px;border-radius:50%;background:radial-gradient(circle,#76d69516,transparent 73%);pointer-events:none}
+.match-tile:hover{transform:translateY(-2px);border-color:#638c6c;background:linear-gradient(145deg,#1d3124,#142218)}
+.match-tile[aria-pressed="true"]{background:linear-gradient(132deg,#204632,#182a20 73%);border-color:#9ddfa9;box-shadow:0 0 0 1px #9ddfa923,inset 0 1px 0 #cbffd71f,0 14px 32px #0003}
+.tile-top{display:flex;justify-content:space-between;align-items:center;gap:16px;color:#adbcaf;font-size:12px;line-height:1.4}
+.tile-pill{font-size:10px;font-weight:850;letter-spacing:.1em;text-transform:uppercase;border-radius:999px;padding:5px 9px;border:1px solid #3e684a;color:#b3ceb9;white-space:nowrap}
+.match-tile[aria-pressed="true"] .tile-pill{background:#b7efbf;color:#11251a;border-color:#b7efbf}
+.tile-title{font-size:clamp(18px,2.1vw,23px);font-weight:800;letter-spacing:-.03em;line-height:1.14}
+.tile-bottom{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:9px;row-gap:2px}
+.tile-value{font-size:clamp(26px,3vw,33px);line-height:1;letter-spacing:-.052em;font-weight:880;font-variant-numeric:tabular-nums;color:#d9ffe0}
+.tile-unit{font-size:12px;color:#bed4c2}
+.tile-foot{width:100%;font-size:11px;color:#91af9a;margin-top:4px}
+.results{margin-top:30px;scroll-margin-top:12px}
+.details-head{display:flex;align-items:flex-end;justify-content:space-between;gap:15px;margin-bottom:14px}
+.details-head h2{font-size:clamp(21px,2.8vw,27px);letter-spacing:-.038em;line-height:1.22;margin:6px 0 5px}
+.details-head p{font-size:12px;color:#a3b9a8;margin:0}
+.actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:9px}
+.badge{color:#a8d8b7;background:#1a3021;border:1px solid #3d6248;font-size:11px;border-radius:20px;padding:9px 12px;white-space:nowrap}
+.pill{background:#17271c;border:1px solid #416449;color:#e4f6e7;border-radius:11px;cursor:pointer;padding:9px 12px;min-height:37px;font-size:12px;font-weight:750;transition:background .2s ease,border-color .2s ease}
+.pill:hover{background:#22412c;border-color:#a4dfad}
+.card{background:linear-gradient(148deg,#17251a,#111c15);border:1px solid var(--line);border-radius:18px;padding:22px;min-width:0}
+.summary{display:grid;grid-template-columns:1.22fr .78fr;gap:13px}
+.primary{background:linear-gradient(131deg,#1a3c2b,#10251a 72%);border-color:#5c9170;display:flex;flex-direction:column;justify-content:center}
+.caption{font-size:11px;font-weight:850;letter-spacing:.12em;color:#9dd3aa;text-transform:uppercase}
+.big{font-size:clamp(48px,6.5vw,80px);line-height:1.08;letter-spacing:-.065em;font-weight:900;font-variant-numeric:tabular-nums;margin:8px 0 14px}
+.progress{width:100%;height:7px;border-radius:99px;overflow:hidden;background:#3e5344}
+.progress>div{width:0;height:100%;border-radius:99px;background:linear-gradient(90deg,#55bd7d,#a8f0b2);transition:width .65s ease}
+.minor{font-size:12px;color:#a8bdaf;margin-top:9px}
+.pulse-message{font-size:13px;color:#cfebd3;line-height:1.47;margin:14px 0 0}
+.stack{display:grid;grid-template-rows:1fr 1fr;gap:13px}
+.small-card{display:flex;flex-direction:column;justify-content:center}
+.value{font-size:clamp(27px,3vw,36px);line-height:1.14;font-weight:850;letter-spacing:-.045em;font-variant-numeric:tabular-nums;margin-top:9px}
+.campaign-row{display:flex;align-items:center;justify-content:space-between;gap:22px;margin:15px 0 0;padding:18px 21px;border:1px solid #346a43;border-radius:16px;background:linear-gradient(95deg,#173925,#122519)}
+.ticket-link{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:12px 17px;background:linear-gradient(115deg,#d2f1b5,#a4e9b9);border:1px solid #c3efb5;color:#102219;text-decoration:none;border-radius:11px;font-size:14px;font-weight:850;line-height:1.3;transition:transform .2s ease,box-shadow .2s ease;white-space:nowrap}
+.ticket-link:hover{transform:translateY(-2px);box-shadow:0 8px 24px #86d99930}
+.campaign-copy{display:flex;flex-direction:column;gap:2px;align-items:flex-end;text-align:right}
+.campaign-copy strong{font-size:15px;letter-spacing:-.015em}
+.campaign-copy span{font-size:12px;color:#a7bbac}
+.graph{margin-top:15px;padding:22px 24px}
+.graph .caption{font-size:12px}
+.graph-desc{margin:6px 0 16px;font-size:12px;color:#a8b8a9}
+.graph svg{display:block;width:100%;height:auto;overflow:visible}
+.chart-wrap{min-height:110px}
+.empty{min-height:120px;display:grid;place-items:center;color:#91a494;font-size:13px}
+.state{margin-top:8px;font-size:11px;color:#8da591}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+td,th{padding:11px 6px;text-align:left;border-bottom:1px solid #294032;white-space:nowrap}
+td:nth-child(2),th:nth-child(2){text-align:right}
+td:nth-child(3),th:nth-child(3){text-align:right}
+th{font-size:11px;color:#a6c8ac;font-weight:850;letter-spacing:.07em;text-transform:uppercase}
+tr:last-child td{border-bottom:0}
+.fan-footer{margin-top:22px;border-top:1px solid #2b4434;padding-top:15px;font-size:11px;line-height:1.6;color:#8b9f90}
+#error:not(:empty){margin-top:12px;color:#ffceaa;font-size:12px}
+@media (max-width:800px){.summary{grid-template-columns:1.13fr .87fr}.actions{justify-content:flex-start}.details-head{align-items:flex-start;flex-direction:column}.match-tile{min-height:148px}}
+@media (max-width:620px){.wrap{padding:17px 16px 38px}.hero{margin:24px 0 25px}.hero h1{font-size:clamp(32px,9vw,43px)}.hero p{font-size:14px}.section-heading{align-items:center}.section-help{display:none}.match-list{grid-template-columns:1fr;gap:10px}.match-tile{padding:16px 18px;min-height:129px;gap:11px}.tile-title{font-size:20px}.tile-value{font-size:28px}.tile-foot{font-size:11px}.results{margin-top:24px}.details-head h2{font-size:23px}.summary{grid-template-columns:1fr;gap:11px}.stack{grid-template-columns:1fr 1fr;grid-template-rows:auto;gap:10px}.card{padding:18px;border-radius:16px}.primary{min-height:204px}.big{font-size:clamp(48px,12vw,69px)}.small-card{min-height:105px}.value{font-size:28px}.caption{font-size:10px}.campaign-row{flex-direction:column;align-items:stretch;gap:10px;padding:14px}.ticket-link{width:100%;white-space:normal}.campaign-copy{align-items:center;text-align:center}.graph{padding:16px}.details-head{gap:11px}.actions{width:100%;justify-content:space-between}.badge{font-size:11px}.brand{font-size:11px}.team-mark{width:44px;height:44px}.table{font-size:12px}td,th{padding:10px 4px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.match-tile,.pill,.ticket-link,.progress>div{transition:none}.match-tile:hover,.ticket-link:hover{transform:none}}
+
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <header class="top">
+    <div class="brand">MINISTAUT <span class="slash">/</span> LERKENDAL <span class="independent">UAVHENGIG</span></div>
+    <div class="team-mark"><img src="https://cdn.sportmonks.com/images/soccer/teams/23/1335.png" alt="Rosenborg BK" width="45" height="45"></div>
+  </header>
+  <section class="hero" aria-labelledby="page-title">
+    <div class="overline"><span class="pulse-dot" aria-hidden="true"></span>BILLETT­PULSEN PÅ LERKENDAL</div>
+    <h1 id="page-title">Bli med og fyll Lerkendal.</h1>
+    <p>Se hvordan de ledige plassene utvikler seg fram mot avspark. Velg kampen du vil følge – og bli med på å skape stemningen på tribunen.</p>
+  </section>
+  <section class="picker-section" aria-labelledby="picker-title">
+    <div class="section-heading"><h2 id="picker-title" class="section-title">Velg kampen</h2><span class="section-help">Trykk på et kampkort for å se utviklingen</span></div>
+    <div class="match-list" id="matchCards" role="group" aria-label="Velg Rosenborg-kamp"><div class="empty">Henter kampene …</div></div>
+  </section>
+  <section class="results" aria-labelledby="selectedMatchTitle">
+    <div class="details-head">
+      <div>
+        <div class="overline">BILLETTSTATUS FOR VALGT KAMP</div>
+        <h2 id="selectedMatchTitle">Velg en kamp over</h2>
+        <p id="kickoff">Kampstart</p>
+      </div>
+      <div class="actions"><span id="age" class="badge" role="status">Henter siste måling …</span><button class="pill" type="button" id="refresh" aria-label="Hent oppdaterte billettmålinger">↻ Oppdater</button></div>
+    </div>
+    <div class="summary" id="stats">
+      <article class="card primary">
+        <div class="caption">Ledige sitteplasser</div><div id="available" class="big">—</div>
+        <div class="progress" aria-hidden="true"><div id="bar"></div></div>
+        <div class="minor">Sist registrert i billettkartet</div>
+        <p id="pulseMessage" class="pulse-message">Følg billettpulsen fram mot avspark.</p>
+      </article>
+      <div class="stack">
+        <article class="card small-card"><div class="caption">Siden første måling</div><div class="value" id="sinceFirst">—</div><div class="minor">Endring i ledige plasser</div></article>
+        <article class="card small-card"><div class="caption">Siden forrige måling</div><div class="value" id="delta">—</div><div class="minor">Endring i ledige plasser</div></article>
+      </div>
+    </div>
+    <div class="campaign-row">
+      <a id="tickets" class="ticket-link" href="https://billett.rbk.no/" target="_blank" rel="noopener noreferrer" aria-label="Gå til billettsalget for valgt Rosenborg-kamp">Finn din plass på Lerkendal <span aria-hidden="true">↗</span></a>
+      <div class="campaign-copy"><strong>Ses på Lerkendal!</strong><span>Ta med noen på kamp. Sammen skaper vi trøkket.</span></div>
+    </div>
+    <section class="card graph" aria-labelledby="chart-title">
+      <div id="chart-title" class="caption">Billettpulsen mot avspark</div>
+      <p class="graph-desc">Slik har antallet ledige sitteplasser utviklet seg.</p>
+      <div id="chart" class="chart-wrap empty">Venter på første registrerte måling.</div>
+      <div id="forecast" class="state"></div>
+    </section>
+    <section class="card graph" aria-labelledby="history-title">
+      <div id="history-title" class="caption">Siste målinger</div>
+      <div class="table-wrap"><table class="table"><thead><tr><th>Tidspunkt</th><th>Ledige</th><th>Endring</th></tr></thead><tbody id="rows"><tr><td colspan="3">Henter billettdata …</td></tr></tbody></table></div>
+    </section>
+  </section>
+  <footer class="fan-footer">Ministaut er en uavhengig supporteroversikt. Tallene viser sist målte ledige sitteplasser, ikke ståplasser eller bekreftede salg.</footer>
+  <p id="error" role="alert"></p>
+</main>
+<script>
+
+const DB = 'https://khetbokxbcujwcurvviu.supabase.co';
+const KEY = 'sb_publishable_0JuYQgbiXWfx103zy7j85Q_muDiicIL';
+const $ = id => document.getElementById(id);
+const fmt = value => typeof value === 'number' && Number.isFinite(value) ? new Intl.NumberFormat('nb-NO').format(value) : '—';
+const date = value => new Date(value).toLocaleString('nb-NO', {timeZone:'Europe/Oslo',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+const comparable = (a,b) => !!(a && b && JSON.stringify([...(a.locked_fields||[])].sort())===JSON.stringify([...(b.locked_fields||[])].sort()));
+const signed = n => n===null || n===undefined ? '—' : (n>0?'+':'')+fmt(n);
+let matches=[], current=null, cards=new Map(), cardSignature='', selectionVersion=0, refreshPromise=null;
+
+async function load(path){
+  const res=await fetch(DB+'/rest/v1/'+path,{headers:{apikey:KEY},cache:'no-store'});
+  if(!res.ok)throw new Error('Datakilden svarte '+res.status);
+  return res.json();
 }
 
-async function start(){try{$('error').textContent='';matches=await load('ministaut_matches?select=id,event_key,title,kickoff_at&is_published=eq.true&order=created_at.desc');let sel=$('match');sel.replaceChildren();for(let m of matches){let o=document.createElement('option');o.value=m.id;o.textContent=m.title;sel.append(o)}if(!matches.length){let o=document.createElement('option');o.textContent='Venter på første kamp';sel.append(o);$('chart').textContent='Ingen publiserte målinger ennå';return}await select(matches.some(m=>m.id===current)?current:matches[0].id);sel.value=current;await renderMatchCards()}catch(e){$('error').textContent='Kunne ikke hente billettdata: '+e.message}}
-$('match').addEventListener('change',e=>select(e.target.value).then(renderMatchCards).catch(err=>$('error').textContent=err.message));$('refresh').onclick=start;start();setInterval(()=>{if(!document.hidden)start()},60000);
-</script></body></html>
+function graph(points){
+  const wrap=$('chart');
+  if(!points.length){wrap.className='chart-wrap empty';wrap.textContent='Ingen målinger registrert ennå.';return;}
+  const W=920,H=270,L=56,R=22,T=18,B=35;
+  const times=points.map(p=>new Date(p.observed_at).getTime());
+  const vals=points.map(p=>p.available_seated);
+  const t0=Math.min(...times),t1=Math.max(...times),start=t0,end=t1===t0?t0+1:t1;
+  const lo=Math.max(0,Math.min(...vals)-Math.max(35,(Math.max(...vals)-Math.min(...vals))*.17));
+  let hi=Math.max(...vals)+Math.max(35,(Math.max(...vals)-Math.min(...vals))*.17);
+  if(hi<=lo)hi=lo+100;
+  const x=t=>L+(t-start)/(end-start)*(W-L-R);
+  const y=v=>T+(hi-v)/(hi-lo)*(H-T-B);
+  const path=points.map((p,i)=>(i?'L':'M')+x(times[i]).toFixed(1)+' '+y(p.available_seated).toFixed(1)).join(' ');
+  const area=path+' L'+x(times[times.length-1]).toFixed(1)+' '+(H-B)+' L'+x(times[0]).toFixed(1)+' '+(H-B)+' Z';
+  const grid=Array.from({length:4},(_,i)=>{
+    const value=lo+(hi-lo)*i/3, yp=y(value);
+    return '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yp+'" y2="'+yp+'" stroke="#35513d" stroke-opacity=".68" />'
+      +'<text x="'+(L-9)+'" y="'+(yp+4)+'" text-anchor="end" fill="#95ae9a" font-size="12">'+fmt(Math.round(value))+'</text>';
+  }).join('');
+  const dots=points.map((p,i)=>'<circle cx="'+x(times[i])+'" cy="'+y(p.available_seated)+'" r="'+(i===points.length-1?5.5:3.5)+'" fill="'+(i===points.length-1?'#daffd9':'#8fcda5')+'" />').join('');
+  const labels='<text x="'+L+'" y="'+(H-9)+'" fill="#91ac98" font-size="12">'+date(points[0].observed_at)+'</text>'
+    + (points.length>1?'<text x="'+(W-R)+'" y="'+(H-9)+'" text-anchor="end" fill="#91ac98" font-size="12">'+date(points[points.length-1].observed_at)+'</text>':'');
+  wrap.className='chart-wrap';
+  wrap.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Historikk over ledige sitteplasser">'
+    +'<defs><linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#9eebad" stop-opacity=".18" /><stop offset="1" stop-color="#9eebad" stop-opacity="0" /></linearGradient></defs>'
+    +grid+'<path d="'+area+'" fill="url(#chartFill)"/><path d="'+path+'" fill="none" stroke="#9cddb0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'+dots+labels+'</svg>';
+}
+
+function render(scans){
+  const records=scans.slice().sort((a,b)=>new Date(a.observed_at)-new Date(b.observed_at));
+  const last=records.at(-1),prev=records.at(-2);
+  $('available').textContent=last?fmt(last.available_seated):'—';
+  $('age').textContent=last?'Sist målt '+date(last.observed_at):'Ingen måling ennå';
+  $('bar').style.width=last?Math.min(100,last.available_seated/19015*100)+'%':'0%';
+  const scoped=last?records.filter(p=>comparable(p,last)):[];
+  const sinceFirst=last && scoped.length?last.available_seated-scoped[0].available_seated:null;
+  const sinceLast=comparable(last,prev)?last.available_seated-prev.available_seated:null;
+  $('sinceFirst').textContent=signed(sinceFirst);
+  $('delta').textContent=signed(sinceLast);
+  $('pulseMessage').textContent=!last?'Følg billettpulsen fram mot avspark.'
+    :sinceFirst<0?fmt(-sinceFirst)+' færre ledige sitteplasser siden første telling.'
+    :sinceFirst>0?'Flere sitteplasser tilgjengelige enn ved første telling.'
+    :'Følg utviklingen og bli med på kampdag.';
+  const rows=$('rows');rows.replaceChildren();
+  if(!records.length){
+    const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=3;td.textContent='Venter på første måling.';tr.append(td);rows.append(tr);
+  }
+  for(let i=records.length-1;i>=0 && i>=records.length-12;i--){
+    const record=records[i],previous=records[i-1];
+    const line=document.createElement('tr');
+    for(const text of [date(record.observed_at),fmt(record.available_seated),signed(comparable(record,previous)?record.available_seated-previous.available_seated:null)]){
+      const td=document.createElement('td');td.textContent=text;line.append(td);
+    }
+    rows.append(line);
+  }
+  graph(scoped);
+  $('forecast').textContent=records.length>1?records.length+' tellinger registrert for denne kampen.':'';
+}
+
+function createCard(match){
+  const button=document.createElement('button');
+  button.type='button';button.className='match-tile';button.dataset.matchId=match.id;
+  button.setAttribute('aria-label','Vis billettstatus for '+match.title);
+  button.setAttribute('aria-pressed','false');
+  const top=document.createElement('span');top.className='tile-top';
+  const kickoff=document.createElement('span');kickoff.textContent=match.kickoff_at?'Avspark '+date(match.kickoff_at):'Kampstart kommer';top.append(kickoff);
+  const pill=document.createElement('span');pill.className='tile-pill';pill.textContent='SE KAMP';top.append(pill);
+  const title=document.createElement('span');title.className='tile-title';title.textContent=match.title;
+  const bottom=document.createElement('span');bottom.className='tile-bottom';
+  const value=document.createElement('span');value.className='tile-value';value.textContent='—';
+  const unit=document.createElement('span');unit.className='tile-unit';unit.textContent='ledige seter';
+  const foot=document.createElement('span');foot.className='tile-foot';foot.textContent='Henter siste telling …';
+  bottom.append(value,unit,foot);
+  button.append(top,title,bottom);
+  button.addEventListener('click',()=>{if(match.id!==current)void selectMatch(match.id);});
+  return {button,pill,value,foot};
+}
+
+function updateSelectedCards(){
+  for(const [id,item] of cards){
+    const selected=id===current;
+    item.button.setAttribute('aria-pressed',String(selected));
+    item.pill.textContent=selected?'VALGT KAMP':'SE KAMP';
+  }
+}
+
+function buildCards(){
+  const signature=matches.map(m=>m.id+'|'+m.title+'|'+m.kickoff_at).join(';');
+  if(signature===cardSignature){updateSelectedCards();return;}
+  cardSignature=signature;
+  cards=new Map();
+  const target=$('matchCards');
+  target.replaceChildren();
+  if(!matches.length){const empty=document.createElement('p');empty.className='empty';empty.textContent='Ingen kamper er publisert ennå.';target.append(empty);return;}
+  for(const m of matches){const card=createCard(m);cards.set(m.id,card);target.append(card.button);}
+  updateSelectedCards();
+}
+
+async function refreshCardData(){
+  await Promise.all(matches.map(async match=>{
+    const card=cards.get(match.id);
+    if(!card)return;
+    try{
+      const data=await load('ministaut_scans?select=observed_at,available_seated,locked_fields&reading_status=eq.accepted&match_id=eq.'+encodeURIComponent(match.id)+'&order=observed_at.desc&limit=2');
+      if(cards.get(match.id)!==card)return;
+      if(!data.length){card.value.textContent='—';card.foot.textContent='Venter på første telling';return;}
+      const latest=data[0],prev=data[1];
+      card.value.textContent=fmt(latest.available_seated);
+      const delta=comparable(latest,prev)?latest.available_seated-prev.available_seated:null;
+      card.foot.textContent='Målt '+date(latest.observed_at)+(delta===null?'':' · '+signed(delta)+' siden sist');
+    }catch(error){card.foot.textContent='Oppdatering ikke tilgjengelig';}
+  }));
+}
+
+async function selectMatch(id){
+  const match=matches.find(m=>m.id===id);
+  if(!match)return;
+  const changed=current!==id,version=++selectionVersion;
+  current=id;updateSelectedCards();
+  $('selectedMatchTitle').textContent=match.title;
+  $('kickoff').textContent=match.kickoff_at?'Avspark '+date(match.kickoff_at):'Avspark ikke registrert';
+  const key=String(match.event_key||'');
+  $('tickets').href=/^[A-Za-z0-9_-]{8,100}$/.test(key)?'https://billett.rbk.no/checkout/'+key:'https://billett.rbk.no/';
+  if(changed)render([]);
+  $('stats').setAttribute('aria-busy','true');
+  try{
+    const data=await load('ministaut_scans?select=observed_at,available_seated,locked_fields&reading_status=eq.accepted&match_id=eq.'+encodeURIComponent(id)+'&order=observed_at.asc&limit=500');
+    if(version!==selectionVersion || id!==current)return;
+    render(data);
+  }catch(error){if(version===selectionVersion)$('error').textContent='Kunne ikke hente tall for valgt kamp. Prøv Oppdater.';}
+  finally{if(version===selectionVersion)$('stats').removeAttribute('aria-busy');}
+}
+
+async function refresh(){
+  if(refreshPromise)return refreshPromise;
+  refreshPromise=(async()=>{
+    $('error').textContent='';
+    const published=await load('ministaut_matches?select=id,event_key,title,kickoff_at&is_published=eq.true&order=kickoff_at.asc');
+    matches=published;
+    buildCards();
+    if(!matches.length){render([]);$('selectedMatchTitle').textContent='Ingen kamper ennå';return;}
+    const chosen=matches.some(m=>m.id===current)?current:matches[0].id;
+    await Promise.all([selectMatch(chosen),refreshCardData()]);
+  })().catch(error=>{$('error').textContent='Kunne ikke hente billettdata. Prøv Oppdater.';})
+    .finally(()=>{refreshPromise=null;});
+  return refreshPromise;
+}
+$('refresh').addEventListener('click',()=>{void refresh();});
+void refresh();
+setInterval(()=>{if(!document.hidden)void refresh();},60000);
+
+</script>
+</body>
+</html>
