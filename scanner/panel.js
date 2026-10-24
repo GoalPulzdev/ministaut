@@ -125,6 +125,9 @@
       <label for="rbk-saved-events" style="margin-top:11px">Mine kamper · uten omstart</label>
       <div class="inline"><select id="rbk-saved-events" style="min-width:0;flex:1;background:#112a20;color:#fff;border:1px solid #507a63;border-radius:6px;padding:8px"><option value="">Velg lagret kamp</option></select>
       <button data-action="select_registered">Åpne</button></div>
+      <label for="rbk-kickoff" style="margin-top:11px">Avspark for valgt kamp (norsk tid)</label>
+      <div class="inline"><input type="datetime-local" id="rbk-kickoff" style="min-width:0;flex:1"/><button data-action="save_kickoff">Lagre</button></div>
+      <div class="tiny">Kampen telles til avspark og arkiveres automatisk. Koteng krever eget kontrollert kart.</div>
       <label for="rbk-switch-url" style="margin-top:11px">Legg til en ny kamp</label>
       <div class="inline"><input id="rbk-switch-url" placeholder="https://billett.rbk.no/checkout/…" spellcheck="false" autocomplete="off"/>
       <button data-action="switch">Bytt</button></div></details>
@@ -180,7 +183,14 @@
           'Felt: '+(value||'Ingen')+'.\nBare bekreftet låste felt kan registreres. Det starter deretter en ny skanning.');
       return;
     }
-    if(action==='select_registered'){
+    if(action==='save_kickoff'){
+      const key=root.querySelector('#rbk-saved-events').value;
+      const time=root.querySelector('#rbk-kickoff').value;
+      if(!key||!time){notice('Velg kamp og angi avspark.',true);return;}
+      ask('kickoff:'+key+'|'+time,'Lagre kampstart?','Kampen overvåkes bare fram til dette tidspunktet (norsk tid).');
+      return;
+    }
+        if(action==='select_registered'){
       const key=root.querySelector('#rbk-saved-events').value;
       if(!key){notice('Velg en kamp fra listen først.',true);return;}
       ask('select_registered:'+key,'Åpne lagret kamp?','Den aktive målingen lagres før du bytter kamp.');
