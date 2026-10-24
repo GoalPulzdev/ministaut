@@ -217,7 +217,14 @@
     }
     cmd(action);
   });
-  function renderNext(){
+  const savedEvents=root.querySelector('#rbk-saved-events');
+  if(savedEvents) savedEvents.addEventListener('change',()=>{
+    const selected=savedEvents.selectedOptions[0];
+    const kickoff=root.querySelector('#rbk-kickoff');
+    // A timestamp belongs to one fixture; never carry it into another match.
+    if(kickoff) kickoff.value='';
+  });
+    function renderNext(){
     const target=Number(root.dataset.nextScanAt||0),enabled=root.dataset.autoEnabled==='true';
     const node=root.querySelector('#rbk-auto-next');if(!node)return;
     if(!enabled){node.textContent='Avslått · bare manuelle sjekker';return;}
