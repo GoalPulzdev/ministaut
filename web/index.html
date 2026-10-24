@@ -1129,8 +1129,10 @@ async function loadSections(scan,version,id,scans){
     if(version!==selectionVersion||current!==id)return;
     const byId=new Map(snapshots.map(x=>[x.id,x.rows]));
     const rows=byId.get(scan.id);if(!rows){renderSections(null,null);return;}
-    const prev=new Map((prior?byId.get(prior.id):null||[]).map(r=>[r.section_code,r]));
-    const daily=new Map((day?byId.get(day.id):null||[]).map(r=>[r.section_code,r]));
+    // Do not use a comparison snapshot if it covers different field capacities.
+    // Full-snapshot checks above already reject missing rows and bad totals.
+    const prev=new Map(((prior&&byId.get(prior.id))||[]).map(r=>[r.section_code,r]));
+    const daily=new Map(((day&&byId.get(day.id))||[]).map(r=>[r.section_code,r]));
     sectionDeltas=new Map(rows.map(r=>{
      const a=prev.get(r.section_code),b=daily.get(r.section_code);
      return [r.section_code,{previous:a&&a.capacity===r.capacity?r.free-a.free:null,day:b&&b.capacity===r.capacity?r.free-b.free:null}];
