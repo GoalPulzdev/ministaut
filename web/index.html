@@ -237,6 +237,20 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
 .pulse-insights{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 18px;margin-top:13px;padding-top:10px;border-top:1px solid #49785a}
 .pulse-insights .daily-pulse{margin:0;padding:3px 0;border:0;flex:1 1 225px}
 @media(max-width:640px){.pulse-insights{gap:2px 0}.pulse-insights .daily-pulse{flex:1 1 100%;font-size:12px}}
+
+.sections-panel{margin-top:16px}.section-intro{color:#b5cbb9;font-size:13px;line-height:1.5;margin:6px 0 17px}
+.section-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:9px}
+.section-cell{min-width:0;min-height:90px;text-align:left;border:1px solid #3f644b;background:#192d20;border-radius:12px;padding:12px;cursor:pointer;color:#f0f9f0;display:flex;flex-direction:column;gap:3px}
+.section-cell:hover,.section-cell:focus-visible{border-color:#c0ecc8;background:#24422f}
+.section-cell[aria-pressed="true"]{border-color:#c2f0c9;box-shadow:inset 0 0 0 1px #a2d6ac80}
+.section-code{font-size:12px;font-weight:800;color:#b0d6b8;letter-spacing:.05em}
+.section-free{font-size:24px;line-height:1.1;font-weight:850;font-variant-numeric:tabular-nums}
+.section-meta{font-size:11px;color:#b2c5b3}
+.section-cell[data-level="few"]{border-color:#ba8950;background:#352919}
+.section-cell[data-level="none"]{background:#312322;border-color:#955e5e}
+.section-detail{margin-top:13px;padding:12px 14px;border:1px solid #385943;border-radius:11px;background:#14261b;font-size:13px;color:#c5dfc9}
+.section-loading{font-size:13px;color:#b5cbb9}
+@media(max-width:640px){.section-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.section-cell{padding:10px;min-height:86px}.section-free{font-size:22px}}
 </style>
 </head>
 <body>
@@ -288,6 +302,12 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
         <strong class="forecast-number" id="projection-value">For tidlig å anslå</strong>
         <span class="forecast-range" id="projection-range">Oppdateres når datagrunnlaget er tilstrekkelig</span>
       </div>
+    </section>
+    <section class="card sections-panel" aria-labelledby="sections-title">
+      <div class="section-heading"><h2 id="sections-title" class="section-title">Tribuneoversikt</h2><span class="section-help" id="sectionStatus">Henter feltdata …</span></div>
+      <p class="section-intro">Alle avleste sittefelt for valgt kamp, sortert etter feltkode. Dette er ikke et geografisk stadionkart.</p>
+      <div class="section-grid" id="sectionGrid"><p class="section-loading">Venter på seksjonsdata …</p></div>
+      <div id="sectionDetail" class="section-detail" aria-live="polite">Velg et felt for flere detaljer.</div>
     </section>
     <section class="card graph" aria-labelledby="chart-title">
       <div class="graph-header">
@@ -364,7 +384,7 @@ function crestFor(title){
   const lower=String(title||'').toLowerCase();
   return Object.keys(knownOpponentCrests).find(name=>lower.includes(name)) || null;
 }
-let matches=[], current=null, cards=new Map(), cardSignature='', selectionVersion=0, refreshPromise=null, lastObservedAt=null, selectedKickoff=null;
+let matches=[], current=null, cards=new Map(), cardSignature='', selectionVersion=0, refreshPromise=null, lastObservedAt=null, selectedKickoff=null, sectionSelection=null;
 function updateAgeIndicator(){
   const badge=$('age');
   badge.textContent=ageLabel(lastObservedAt);
@@ -758,6 +778,62 @@ async function refreshCardData(){
   }));
 }
 
+function renderSections(rows,scan){
+  const grid=$('sectionGrid'),status=$('sectionStatus'),detail=$('sectionDetail');
+  grid.replaceChildren();
+  if(!scan || !Array.isArray(rows)){
+    status.textContent='Feltdata ikke tilgjengelige';
+    detail.textContent='Velg en kamp for å se sittefeltene.';
+    return;
+  }
+  const valid=rows.filter(r=>typeof r.section_code==='string'&&Number.isInteger(r.free)&&
+      Number.isInteger(r.capacity)&&r.capacity>0&&r.free>=0&&r.free<=r.capacity);
+  const codes=new Set(valid.map(r=>r.section_code));
+  const total=valid.reduce((sum,r)=>sum+r.free,0);
+  const complete=codes.size===valid.length &&
+    valid.length+((scan.locked_fields||[]).length)===60 &&
+    total===scan.available_seated;
+  if(!complete){
+    status.textContent='Feltkontroll mangler';
+    detail.textContent='Seksjonstallene vises ikke før summen stemmer med godkjent telling.';
+    return;
+  }
+  status.textContent=valid.length+' avleste felt · '+date(scan.observed_at);
+  valid.sort((a,b)=>a.section_code.localeCompare(b.section_code,'nb',{numeric:true}));
+  sectionSelection=null;
+  detail.textContent='Velg et felt for å se ledige plasser og størrelse.';
+  for(const r of valid){
+    const btn=document.createElement('button');
+    btn.type='button';btn.className='section-cell';btn.setAttribute('aria-pressed','false');
+    btn.dataset.level=r.free===0?'none':r.free<=10?'few':'normal';
+    const name=document.createElement('span');name.className='section-code';name.textContent='Felt '+r.section_code;
+    const value=document.createElement('span');value.className='section-free';value.textContent=fmt(r.free);
+    const meta=document.createElement('span');meta.className='section-meta';meta.textContent='ledige av '+fmt(r.capacity);
+    btn.append(name,value,meta);
+    btn.addEventListener('click',()=>{
+      if(sectionSelection)sectionSelection.setAttribute('aria-pressed','false');
+      sectionSelection=btn;btn.setAttribute('aria-pressed','true');
+      detail.textContent='Felt '+r.section_code+': '+fmt(r.free)+' ledige sitteplasser av '+fmt(r.capacity)+' registrerte plasser.';
+    });
+    grid.append(btn);
+  }
+}
+async function loadSections(scan,version,id){
+  const grid=$('sectionGrid');
+  grid.textContent='Henter seksjonstall …';
+  $('sectionStatus').textContent='Henter feltdata …';
+  if(!scan){renderSections(null,null);return;}
+  try{
+    const rows=await load('ministaut_section_measurements?select=section_code,free,capacity&scan_id=eq.'+
+      encodeURIComponent(scan.id)+'&order=section_code.asc&limit=80');
+    if(version!==selectionVersion||current!==id)return;
+    renderSections(rows,scan);
+  }catch(error){
+    if(version!==selectionVersion||current!==id)return;
+    renderSections(null,null);
+    $('sectionDetail').textContent='Kunne ikke hente seksjonsdata nå.';
+  }
+}
 async function selectMatch(id){
   const match=matches.find(m=>m.id===id);
   if(!match)return;
@@ -768,12 +844,13 @@ async function selectMatch(id){
   $('kickoff').textContent=match.kickoff_at?'Avspark '+date(match.kickoff_at):'Avspark ikke registrert';
   const key=String(match.event_key||'');
   $('tickets').href=/^[A-Za-z0-9_-]{8,100}$/.test(key)?'https://billett.rbk.no/checkout/'+key:'https://billett.rbk.no/';
-  if(changed){$('error').textContent='';render([]);}
+  if(changed){$('error').textContent='';render([]);renderSections(null,null);}
   $('stats').setAttribute('aria-busy','true');
   try{
-    const data=await load('ministaut_scans?select=observed_at,available_seated,locked_fields&reading_status=eq.accepted&match_id=eq.'+encodeURIComponent(id)+'&order=observed_at.desc&limit=500');
+    const data=await load('ministaut_scans?select=id,observed_at,available_seated,locked_fields&reading_status=eq.accepted&match_id=eq.'+encodeURIComponent(id)+'&order=observed_at.desc&limit=500');
     if(version!==selectionVersion || id!==current)return;
     render(data);
+    await loadSections(data[0]||null,version,id);
   }catch(error){if(version===selectionVersion)$('error').textContent='Kunne ikke hente tall for valgt kamp. Prøv Oppdater.';}
   finally{if(version===selectionVersion)$('stats').removeAttribute('aria-busy');}
 }
