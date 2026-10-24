@@ -142,15 +142,31 @@ def train(url=KOTENG_URL, max_points=450, step=38):
                 print("ADVARSEL: Kapasitetskonflikter. Ingen profil blir godkjent.")
             if not measurements:
                 print("Ingen felter kunne leses. Kontroller at kartet er synlig og viser felt-tooltip.")
-            elif profile_file.exists():
-                print("Eksisterende Koteng-profil overskrives IKKE automatisk:", profile_file)
-                print("Ny diagnostikk:", report_path)
             else:
-                profile = StadiumProfile("koteng_arena", 1, "vivenu",
-                                         {k:v["capacity"] for k,v in measurements.items()},
-                                         dict(anchors), False)
-                profile.save(profile_file)
-                print("LAGRET PROFILUTKAST:", profile_file)
+                current_sections = {k: v["capacity"] for k, v in measurements.items()}
+                current_anchors = dict(anchors)
+                if profile_file.exists():
+                    old = StadiumProfile.load(profile_file)
+                    if old.verified:
+                        raise ValueError("Godkjent Koteng-profil kan ikke oppdateres fra en treningsrunde")
+                    for key, capacity in old.sections.items():
+                        if key in current_sections and current_sections[key] != capacity:
+                            conflicts[key] = [capacity, current_sections[key]]
+                        current_sections[key] = capacity
+                        current_anchors[key] = list(old.anchors.get(key, [])) + [
+                            point for point in current_anchors.get(key, [])
+                            if all(math.dist(point["ref"], previous["ref"]) > .015
+                                   for previous in old.anchors.get(key, []))
+                        ]
+                        current_anchors[key] = current_anchors[key][:8]
+                if conflicts:
+                    print("ADVARSEL: Ulike feltkapasiteter mellom opplæringsrunder.")
+                    print("Profilen oppdateres IKKE. Kontroller rapporten:", report_path)
+                else:
+                    profile = StadiumProfile("koteng_arena", 1, "vivenu",
+                                             current_sections, current_anchors, False)
+                    profile.save(profile_file)
+                    print("LAGRET/OPPDATERT PROFILUTKAST:", profile_file)
             print(f"Resultat: {len(measurements)} observerte felt; {len(conflicts)} kapasitetskonflikter.")
             print("Dette er et opplæringsutkast, IKKE en fullstendig eller publiserbar telling.")
             print("Rapport:", report_path)
