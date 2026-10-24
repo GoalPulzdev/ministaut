@@ -221,6 +221,13 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
 .forecast-panel[data-status="unavailable"]{border-color:#4c5c4f}
 @media(max-width:640px){.forecast-panel{grid-template-columns:1fr;gap:15px;padding:18px 19px}.forecast-result{border-left:0;border-top:1px solid #416548;padding:13px 0 0}.forecast-lead h3{font-size:21px}.forecast-number{font-size:26px}}
 
+
+.chart-legend{display:flex;align-items:center;gap:18px;flex-wrap:wrap;color:#bbd3c0;font-size:12px;padding:1px 0 13px}
+.chart-legend[hidden]{display:none}
+.chart-legend span{display:flex;align-items:center;gap:7px}
+.chart-legend i{width:20px;height:0;border-top:3px solid #b6edc3;display:inline-block;flex:none}
+.chart-legend i.legend-projected{border-color:#f3cb82;border-top-style:dashed}
+.chart-legend i.legend-band{width:15px;height:12px;background:#f3cb8236;border:1px solid #f3cb8280;border-radius:3px}
 </style>
 </head>
 <body>
@@ -279,6 +286,7 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
           <p class="graph-desc">Følg ledige plasser over tid. Trykk på grafen for detaljer.</p></div>
         <span id="chartCount" class="graph-count">0 tellinger</span>
       </div>
+      <div class="chart-legend" id="chartLegend" hidden><span><i class="legend-real"></i> Målt</span><span><i class="legend-projected"></i> Prognose</span><span><i class="legend-band"></i> Mulig spenn</span></div>
       <div id="chart" class="chart-wrap empty">Venter på første registrerte måling.</div>
       <div class="chart-inspect" id="chartInspect" aria-live="polite">
         <span id="inspectTime" class="inspect-timestamp">Siste måling</span>
@@ -363,8 +371,11 @@ async function load(path){
 let chartSignature='';
 function graph(points){
   const wrap=$('chart'),count=$('chartCount');
+  const prediction=kickoffForecast(points,selectedKickoff);
+  const hasProjection=prediction.status==='projected' && points.length>1;
+  $('chartLegend').hidden=!hasProjection;
   count.textContent=points.length+' '+(points.length===1?'telling':'tellinger');
-  const signature=String(current)+'|'+points.map(p=>p.observed_at+':'+p.available_seated+':'+(p.locked_fields||[]).join(',')).join('|');
+  const signature=String(current)+'|'+selectedKickoff+'|'+(hasProjection?[prediction.center,prediction.low,prediction.high].join(':'):'none')+'|'+points.map(p=>p.observed_at+':'+p.available_seated+':'+(p.locked_fields||[]).join(',')).join('|');
   if(signature===chartSignature)return;
   chartSignature=signature;
   if(!points.length){
@@ -378,8 +389,11 @@ function graph(points){
   const W=920,H=273,L=56,R=28,T=19,B=39;
   const times=points.map(p=>new Date(p.observed_at).getTime());
   const values=points.map(p=>p.available_seated);
-  const start=Math.min(...times),lastTime=Math.max(...times),end=start===lastTime?start+1:lastTime;
-  const min=Math.min(...values),max=Math.max(...values),padding=Math.max(48,(max-min)*.16);
+  const start=Math.min(...times),lastTime=Math.max(...times);
+  const kickoffMs=hasProjection?new Date(selectedKickoff).getTime():lastTime;
+  const end=Math.max(lastTime+1,kickoffMs);
+  const forecastValues=hasProjection?[prediction.low,prediction.center,prediction.high]:[];
+  const min=Math.min(...values,...forecastValues),max=Math.max(...values,...forecastValues),padding=Math.max(48,(max-min)*.16);
   const lo=Math.max(0,min-padding),hi=Math.min(19015,Math.max(max+padding,lo+96));
   const x=t=>L+(t-start)/(end-start)*(W-L-R);
   const y=v=>T+(hi-v)/(hi-lo)*(H-T-B);
@@ -394,11 +408,23 @@ function graph(points){
   }).join('');
   const dot=px.length===1?'<circle cx="'+px[0].x.toFixed(2)+'" cy="'+px[0].y.toFixed(2)+'" r="4" fill="#bdebc5" />':'';
   const xlabels='<text x="'+L+'" y="'+(H-11)+'" fill="#9db9a4" font-size="12">'+date(points[0].observed_at)+'</text>'
-    +(points.length>1?'<text x="'+(W-R)+'" y="'+(H-11)+'" text-anchor="end" fill="#9db9a4" font-size="12">'+date(points[points.length-1].observed_at)+'</text>':'');
+    +(hasProjection?'<text x="'+(W-R)+'" y="'+(H-11)+'" text-anchor="end" fill="#eac890" font-size="12">Avspark '+date(selectedKickoff)+'</text>'
+      :points.length>1?'<text x="'+(W-R)+'" y="'+(H-11)+'" text-anchor="end" fill="#9db9a4" font-size="12">'+date(points[points.length-1].observed_at)+'</text>':'');
+  const projectedMarkup=hasProjection?(()=>{
+    const leftX=x(lastTime).toFixed(2),rightX=x(kickoffMs).toFixed(2);
+    const lastY=y(values[values.length-1]).toFixed(2),midY=y(prediction.center).toFixed(2);
+    const lowY=y(prediction.low).toFixed(2),highY=y(prediction.high).toFixed(2);
+    const band=leftX+','+lastY+' '+rightX+','+highY+' '+rightX+','+lowY;
+    return '<polygon points="'+band+'" fill="#edb45d" fill-opacity=".17" stroke="none"/>'
+      +'<line x1="'+leftX+'" y1="'+lastY+'" x2="'+rightX+'" y2="'+midY+'" stroke="#f5cd89" stroke-width="2.8" stroke-dasharray="8 7" />'
+      +'<line x1="'+rightX+'" y1="'+highY+'" x2="'+rightX+'" y2="'+lowY+'" stroke="#f1c67e" stroke-width="4" stroke-opacity=".68" />'
+      +'<circle cx="'+rightX+'" cy="'+midY+'" r="5" fill="#f9dba5" />'
+      +'<text x="'+(W-R-6)+'" y="'+Math.max(15,y(prediction.high)-12).toFixed(2)+'" text-anchor="end" fill="#f1d1a0" font-size="12">Mulig spenn</text>';
+  })():'';
   wrap.className='chart-wrap';
   wrap.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" tabindex="0" aria-label="Interaktiv graf over ledige sitteplasser. Bruk piltastene for å bla mellom målingene.">'
     +'<defs><linearGradient id="pulseFill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#99efb2" stop-opacity=".27" /><stop offset="1" stop-color="#99efb2" stop-opacity=".012" /></linearGradient></defs>'
-    +grid+'<path d="'+area+'" fill="url(#pulseFill)"/><path d="'+path+'" fill="none" stroke="#b6edc3" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>'
+    +grid+'<path d="'+area+'" fill="url(#pulseFill)"/><path d="'+path+'" fill="none" stroke="#b6edc3" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>'+projectedMarkup
     +dot+'<line id="chartFocusLine" class="chart-focus-guide" x1="0" x2="0" y1="'+T+'" y2="'+(H-B)+'" stroke="#c8f7d0" stroke-opacity=".65" stroke-width="1.5" stroke-dasharray="4 5"/>'
     +'<circle id="chartFocusHalo" class="endpoint-halo" cx="0" cy="0" r="10" fill="#adf1be" opacity=".16" />'
     +'<circle id="chartFocusPoint" cx="0" cy="0" r="5.6" fill="#e8ffdf" stroke="#427952" stroke-width="2"/>'
@@ -526,8 +552,8 @@ function render(scans){
     :sinceFirst<0?fmt(-sinceFirst)+' færre ledige sitteplasser siden første viste telling.'
     :sinceFirst>0?'Flere sitteplasser tilgjengelige enn ved første telling.'
     :'Følg utviklingen og bli med på kampdag.';
-  graph(scoped);
   renderForecast(records);
+  graph(scoped);
   // The chart count and inspected point already communicate history.
   // Avoid another text block repeating the same information.
 }
