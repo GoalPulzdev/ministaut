@@ -837,7 +837,7 @@ function stadiumColor(row,locked){
 // Source: scanner/anchors_v15.json and scanner/bekreftede_posisjoner_v16.json
 // These are click/hover reference positions, NOT verified seat-boundary polygons.
 const REFERENCE_POINTS={"A":[390,483],"AA":[344,507],"AB":[337,469],"B":[414,483],"BA":[370,505],"BB":[362,469],"C":[436,483],"CA":[405,506],"CB":[406,469],"D":[458,483],"DA":[456,505],"DB":[457,469],"E":[479,483],"EA":[507,506],"EB":[510,469],"F":[500,483],"FA":[551,505],"FB":[532,469],"G":[526,483],"GA":[574,505],"GB":[552,469],"HB":[568,469],"I":[610,405],"IB":[594,425],"J":[610,375],"JB":[594,375],"K":[610,344],"KB":[597,328],"LB":[601,300],"MA":[572,240],"MB":[573,272],"N":[539,258],"NA":[544,242],"NB":[541,271],"O":[492,259],"OA":[504,237],"OB":[502,278],"P":[455,259],"PA":[456,235],"PB":[459,277],"PRESSE":[460,523],"Q":[391,260],"QA":[407,237],"QB":[416,278],"RA":[371,241],"RB":[370,274],"SA":[344,241],"TA":[281,314],"TB":[314,313],"U":[306,343],"UA":[279,345],"UB":[319,328],"V":[305,376],"VA":[280,375],"VB":[322,375],"W":[306,408],"WA":[280,414],"WB":[318,414],"XA":[280,446],"XB":[316,451]};
-const STAND_GROUPS={"northOuter":["SA","RA","QA","PA","OA","NA","MA"],"northVip":["Q","P","O","N"],"northInner":["RB","QB","PB","OB","NB","MB"],"westOuter":["TA","UA","VA","WA","XA"],"westInner":["TB","U","UB","V","VB","W","WB","XB"],"eastOuter":["K","J","I"],"eastInner":["LB","KB","JB","IB"],"southInner":["AB","BB","CB","DB","EB","FB","GB","HB"],"southVip":["A","B","C","D","E","F","G"],"southOuter":["AA","BA","CA","DA","EA","FA","GA"],"southPress":["PRESSE"]};
+const STAND_GROUPS={"northOuter":["SA","RA","QA","PA","OA","NA","MA"],"northVip":["Q","P","O","N"],"northInner":["RB","QB","PB","OB","NB","MB"],"westOuter":["TA","UA","VA","WA","XA"],"westInner":["TB","U","UB","V","VB","W","WB","XB"],"eastOuter":["K","J","I"],"eastInner":["LB","KB","JB","IB","HB"],"southInner":["AB","BB","CB","DB","EB","FB","GB"],"southVip":["A","B","C","D","E","F","G"],"southOuter":["AA","BA","CA","DA","EA","FA","GA"],"southPress":["PRESSE"]};
 const STADIUM_CAPACITIES={};
 function sectionTiles(){
  const reference=REFERENCE_POINTS;
@@ -853,7 +853,7 @@ function sectionTiles(){
    const prior=coords[i-1],next=coords[i+1];
    const left=prior?(item.c+prior.c)/2:item.c-(next?Math.max(8,(next.c-item.c)/2):11);
    const right=next?(item.c+next.c)/2:item.c+(prior?Math.max(8,(item.c-prior.c)/2):11);
-   const railCenters={northOuter:83,northVip:130,northInner:173,westOuter:108,westInner:165,eastOuter:704,eastInner:644,southInner:531,southVip:574,southOuter:633};
+   const railCenters={northOuter:83,northVip:130,northInner:173,westOuter:107,westInner:164,eastOuter:711,eastInner:646,southInner:530,southVip:571,southOuter:618};
    const railName=Object.entries(groups).find(([name,list])=>list===codes)?.[0];
    const centerX=axis==='y'?railCenters[railName]:X(item.p[0]);
    const centerY=axis==='x'?railCenters[railName]:Y(item.p[1]);
@@ -866,14 +866,14 @@ function sectionTiles(){
  rail(groups.northVip,'x',31);
  rail(groups.northInner,'x',48);
  rail(groups.westOuter,'y',72);
- rail(groups.westInner,'y',39);
+ rail(groups.westInner,'y',46);
  rail(groups.eastOuter,'y',48);
- rail(groups.eastInner,'y',40);
+ rail(groups.eastInner,'y',44);
  rail(groups.southInner,'x',43);
- rail(groups.southVip,'x',28);
- rail(groups.southOuter,'x',54);
+ rail(groups.southVip,'x',27);
+ rail(groups.southOuter,'x',43);
  // Presse is behind the south VIP row, unlike the other south-inner seats.
- const p=reference.PRESSE;tiles.push({code:'PRESSE',x:X(p[0])-41,y:670,w:82,h:29});
+ const p=reference.PRESSE;tiles.push({code:'PRESSE',x:X(p[0])-45,y:647,w:90,h:26});
  if(tiles.length!==60||new Set(tiles.map(t=>t.code)).size!==60)throw Error('Invalid stadium geometry');
  return tiles;
 }
@@ -910,8 +910,8 @@ function drawStadiumMap(rows,scan){
   svg.append(svgEl('text',labelAttrs,code));
  });
  // Standing is contextual only, not part of the 60-seat availability model.
- const sb=svgEl('rect',{x:130,y:146,width:34,height:38,rx:2,fill:'#293e38',stroke:'#728578','stroke-dasharray':'3 3'});
- svg.append(sb);svg.append(svgEl('text',{x:147,y:169,'text-anchor':'middle',fill:'#b5cdbb','font-size':11},'SB'));
+ const sb=svgEl('rect',{x:171,y:147,width:25,height:31,rx:3,fill:'#293e38',stroke:'#728578','stroke-dasharray':'3 3'});
+ svg.append(sb);svg.append(svgEl('text',{x:183.5,y:165,'text-anchor':'middle',fill:'#b5cdbb','font-size':10},'SB'));
  const standing=svgEl('rect',{x:754,y:260,width:20,height:215,rx:4,fill:'#293e38',stroke:'#728578','stroke-dasharray':'3 3'});
  svg.append(standing);svg.append(svgEl('text',{x:764,y:367,transform:'rotate(90 764 367)','text-anchor':'middle',fill:'#b5cdbb','font-size':10},'ØVRE ØST'));
  target.append(svg);
