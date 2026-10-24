@@ -84,7 +84,25 @@ class ControlPlane:
         event.validate()
         if event.id in self.events:
             raise ValueError("A match with that ID already exists")
+        if any(e.url.rstrip("/") == event.url.rstrip("/") for e in self.events.values()):
+            raise ValueError("This checkout event is already registered")
         self.events[event.id] = event
+        self.save()
+
+    def update_kickoff(self, key, kickoff_at, now=None):
+        """Explicit correction; never silently resurrect a previously completed event."""
+        now = now or datetime.now(timezone.utc)
+        new_start = utc(kickoff_at)
+        if new_start <= now:
+            raise ValueError("Corrected kickoff must be in the future")
+        event = self.events[key]
+        for job in self.jobs.values():
+            if job.event_id == key and job.state in ("queued", "running"):
+                job.state = "cancelled"
+        event.kickoff_at = new_start.isoformat()
+        event.state = "paused"
+        event.last_scheduled_at = None
+        event.error = None
         self.save()
 
     def set_state(self, key, state, now=None):
