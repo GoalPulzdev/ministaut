@@ -357,7 +357,7 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
     <section class="card sections-panel" aria-labelledby="sections-title">
       <div class="section-heading"><h2 id="sections-title" class="section-title">Tribuneoversikt</h2><span class="section-help" id="sectionStatus">Henter feltdata …</span></div>
       <p class="section-intro">Lerkendals fire tribunesider med feltvis tilgjengelighet. Feltplasseringen følger Lerkendals kjente tribune- og feltinndeling. Formene er skjematiske, ikke nøyaktige sektorpolygoner. Velg et felt for målt ledighet.</p>
-      <div class="stadium-map-shell"><div class="map-switch"><strong>LERKENDAL · SITTEFELT <span class="map-revision">KART V4 · 24.10</span></strong><span class="section-help">Trykk på et felt</span></div><div id="stadiumMap" aria-label="Interaktiv skjematisk stadionoversikt"></div><div class="map-legend"><span class="map-key"><i style="background:#398b58"></i>50 % +</span><span class="map-key"><i style="background:#b7b857"></i>20–49 %</span><span class="map-key"><i style="background:#d78938"></i>8–19 %</span><span class="map-key"><i style="background:#d55a50"></i>1–7 %</span><span class="map-key"><i style="background:#4d5255"></i>0 ledige</span><span class="map-key"><i style="background:#303b46"></i>Låst / ukjent</span></div><p class="map-note">Sittefelt avlest fra valgt kamp. Ståplasser er ikke inkludert. Farge viser andel ledige seter, ikke solgte billetter. Feltinndelingen følger stadionkartet, men rektanglene er skjematiske og ikke oppmålte feltgrenser. Kontroller alltid felt og rad hos RBK.</p></div>
+      <div class="stadium-map-shell"><div class="map-switch"><strong>LERKENDAL · SITTEFELT <span class="map-revision">KART V5 · 24.10</span></strong><span class="section-help">Trykk på et felt</span></div><div id="stadiumMap" aria-label="Interaktiv skjematisk stadionoversikt"></div><div class="map-legend"><span class="map-key"><i style="background:#398b58"></i>50 % +</span><span class="map-key"><i style="background:#b7b857"></i>20–49 %</span><span class="map-key"><i style="background:#d78938"></i>8–19 %</span><span class="map-key"><i style="background:#d55a50"></i>1–7 %</span><span class="map-key"><i style="background:#4d5255"></i>0 ledige</span><span class="map-key"><i style="background:#303b46"></i>Låst / ukjent</span></div><p class="map-note">Sittefelt avlest fra valgt kamp. Ståplasser er ikke inkludert. Farge viser andel ledige seter, ikke solgte billetter. Feltinndelingen følger stadionkartet, men rektanglene er skjematiske og ikke oppmålte feltgrenser. Kontroller alltid felt og rad hos RBK.</p></div>
       <div class="section-grid" id="sectionGrid"><p class="section-loading">Venter på seksjonsdata …</p></div>
       <div id="sectionDetail" class="section-detail" aria-live="polite">Velg et felt for flere detaljer.</div>
     </section>
@@ -837,38 +837,82 @@ function stadiumColor(row,locked){
 // Within each stand coordinates are approximate, not ticket vendor exact hitboxes.
 // Source: scanner/anchors_v15.json and scanner/bekreftede_posisjoner_v16.json
 // These are click/hover reference positions, NOT verified seat-boundary polygons.
-const REFERENCE_POINTS={"A":[390,483],"AA":[344,507],"AB":[337,469],"B":[414,483],"BA":[370,505],"BB":[362,469],"C":[436,483],"CA":[405,506],"CB":[406,469],"D":[458,483],"DA":[456,505],"DB":[457,469],"E":[479,483],"EA":[507,506],"EB":[510,469],"F":[500,483],"FA":[551,505],"FB":[532,469],"G":[526,483],"GA":[574,505],"GB":[552,469],"HB":[568,469],"I":[610,405],"IB":[594,425],"J":[610,375],"JB":[594,375],"K":[610,344],"KB":[597,328],"LB":[601,300],"MA":[572,240],"MB":[573,272],"N":[539,258],"NA":[544,242],"NB":[541,271],"O":[492,259],"OA":[504,237],"OB":[502,278],"P":[455,259],"PA":[456,235],"PB":[459,277],"PRESSE":[460,523],"Q":[391,260],"QA":[407,237],"QB":[416,278],"RA":[371,241],"RB":[370,274],"SA":[344,241],"TA":[281,314],"TB":[314,313],"U":[306,343],"UA":[279,345],"UB":[319,328],"V":[305,376],"VA":[280,375],"VB":[322,375],"W":[306,408],"WA":[280,414],"WB":[318,414],"XA":[280,446],"XB":[316,451]};
-const STAND_GROUPS={"northOuter":["SA","RA","QA","PA","OA","NA","MA"],"northVip":["Q","P","O","N"],"northInner":["RB","QB","PB","OB","NB","MB"],"westOuter":["TA","UA","VA","WA","XA"],"westInner":["TB","U","UB","V","VB","W","WB","XB"],"eastOuter":["K","J","I"],"eastInner":["LB","KB","JB","IB","HB"],"southInner":["AB","BB","CB","DB","EB","FB","GB"],"southVip":["A","B","C","D","E","F","G"],"southOuter":["AA","BA","CA","DA","EA","FA","GA"],"southPress":["PRESSE"]};
-const STADIUM_CAPACITIES={};
+// Hand-audited, deterministic Lerkendal section positions in 780 x 710 viewBox.
+// Visual layer ONLY. No changes to ticket data, field capacities or scan processing.
+const SEAT_LAYOUT=[
+ ["SA",209,58,48,52],
+ ["RA",264,58,52,52],
+ ["QA",323,58,71,52],
+ ["PA",401,58,79,52],
+ ["OA",487,58,78,52],
+ ["NA",572,58,48,52],
+ ["MA",627,58,41,52],
+ ["Q",272,117,75,28],
+ ["P",354,117,75,28],
+ ["O",436,117,75,28],
+ ["N",518,117,75,28],
+ ["RB",193,152,88,45],
+ ["QB",287,152,78,45],
+ ["PB",371,152,79,45],
+ ["OB",456,152,79,45],
+ ["NB",541,152,56,45],
+ ["MB",603,152,47,45],
+ ["TA",74,215,70,60],
+ ["UA",74,282,70,63],
+ ["VA",74,352,70,63],
+ ["WA",74,422,70,65],
+ ["XA",74,494,70,58],
+ ["TB",149,215,40,24],
+ ["UB",149,244,40,26],
+ ["U",149,277,40,58],
+ ["VB",149,342,40,24],
+ ["V",149,373,40,42],
+ ["WB",149,423,40,24],
+ ["W",149,453,40,47],
+ ["XB",149,507,40,45],
+ ["LB",592,205,41,43],
+ ["KB",592,255,41,49],
+ ["JB",592,312,41,62],
+ ["IB",592,381,41,74],
+ ["HB",592,462,41,89],
+ ["K",658,277,46,67],
+ ["J",658,352,46,68],
+ ["I",658,428,46,70],
+ ["AB",196,514,49,42],
+ ["BB",251,514,59,42],
+ ["CB",316,514,64,42],
+ ["DB",386,514,79,42],
+ ["EB",471,514,54,42],
+ ["FB",531,514,26,42],
+ ["GB",563,514,26,42],
+ ["A",279,564,34,25],
+ ["B",320,564,34,25],
+ ["C",361,564,34,25],
+ ["D",402,564,34,25],
+ ["E",443,564,34,25],
+ ["F",484,564,34,25],
+ ["G",525,564,34,25],
+ ["PRESSE",395,595,85,23],
+ ["AA",205,624,49,40],
+ ["BA",260,624,56,40],
+ ["CA",322,624,67,40],
+ ["DA",395,624,85,40],
+ ["EA",486,624,72,40],
+ ["FA",564,624,52,40],
+ ["GA",622,624,43,40]
+];
 function sectionTiles(){
- const tiles=[];
- const add=(code,x,y,w,h)=>tiles.push({code,x,y,w,h});
- const row=(x,y,h,gap,parts)=>{for(const [code,width] of parts){add(code,x,y,width,h);x+=width+gap;}};
- const column=(x,y,w,gap,parts)=>{for(const [code,height] of parts){add(code,x,y,w,height);y+=height+gap;}};
- // Fixed, non-overlapping schematic of the documented Lerkendal field topology.
- // This layer never affects scanner counts or match/section measurements.
- row(191,66,52,4,[['SA',40],['RA',37],['QA',70],['PA',77],['OA',70],['NA',37],['MA',40]]);
- row(275,124,30,4,[['Q',62],['P',67],['O',62],['N',49]]);
- row(214,160,41,4,[['RB',55],['QB',61],['PB',64],['OB',61],['NB',57],['MB',46]]);
- column(86,211,56,5,[['TA',64],['UA',59],['VA',59],['WA',59],['XA',54]]);
- column(168,215,37,5,[['TB',31],['UB',71],['VB',62],['WB',68],['XB',58]]);
- add('U',146,288,18,34);add('V',146,348,18,36);add('W',146,416,18,35);
- column(588,209,42,5,[['LB',46],['KB',56],['JB',56],['IB',69],['HB',51]]);
- column(643,246,44,5,[['K',69],['J',74],['I',69]]);
- row(210,512,40,4,[['AB',47],['BB',48],['CB',57],['DB',58],['EB',50],['FB',46],['GB',44]]);
- row(303,558,24,3,[['A',26],['B',26],['C',26],['D',26],['E',26],['F',26],['G',26]]);
- row(219,588,46,4,[['AA',34],['BA',51],['CA',62],['DA',51],['EA',62],['FA',51],['GA',34]]);
- add('PRESSE',325,639,130,26);
- if(tiles.length!==60||new Set(tiles.map(t=>t.code)).size!==60)
-   throw Error('Invalid stadium layout: expected exactly 60 unique seated fields');
+ const tiles=SEAT_LAYOUT.map(([code,x,y,w,h])=>({code,x,y,w,h}));
+ if(tiles.length!==60||new Set(tiles.map(t=>t.code)).size!==60) throw Error('Expected 60 distinct stadium sections');
  for(let i=0;i<tiles.length;i++){
   const a=tiles[i];
-  if(a.x<0||a.y<0||a.w<=0||a.h<=0||a.x+a.w>780||a.y+a.h>710)
-   throw Error('Invalid stadium layout bounds: '+a.code);
+  if(a.x<0||a.y<0||a.w<=0||a.h<=0||a.x+a.w>780||a.y+a.h>710)throw Error('Out-of-bounds sector '+a.code);
+  if(Math.max(a.x,211)<Math.min(a.x+a.w,575)&&Math.max(a.y,205)<Math.min(a.y+a.h,505))
+    throw Error('Sector inside pitch '+a.code);
   for(let j=i+1;j<tiles.length;j++){
    const b=tiles[j];
    if(Math.max(a.x,b.x)<Math.min(a.x+a.w,b.x+b.w)&&Math.max(a.y,b.y)<Math.min(a.y+a.h,b.y+b.h))
-    throw Error('Overlapping stadium fields: '+a.code+' / '+b.code);
+      throw Error('Overlapping sectors '+a.code+' / '+b.code);
   }
  }
  return tiles;
@@ -906,8 +950,8 @@ function drawStadiumMap(rows,scan){
   svg.append(svgEl('text',labelAttrs,code));
  });
  // SB and Øvre Øst are contextual standing areas, never counted as seated availability.
- const sb=svgEl('rect',{x:191,y:160,width:19,height:41,rx:3,fill:'#293e38',stroke:'#728578','stroke-dasharray':'3 3'});
- svg.append(sb);svg.append(svgEl('text',{x:200.5,y:184,'text-anchor':'middle',fill:'#b5cdbb','font-size':9},'SB'));
+ const sb=svgEl('rect',{x:160,y:152,width:28,height:34,rx:3,fill:'#293e38',stroke:'#728578','stroke-dasharray':'3 3'});
+ svg.append(sb);svg.append(svgEl('text',{x:174,y:172,'text-anchor':'middle',fill:'#b5cdbb','font-size':10},'SB'));
  const standing=svgEl('rect',{x:718,y:252,width:23,height:219,rx:4,fill:'#293e38',stroke:'#728578','stroke-dasharray':'3 3'});
  svg.append(standing);svg.append(svgEl('text',{x:729.5,y:361.5,transform:'rotate(90 729.5 361.5)','text-anchor':'middle',fill:'#b5cdbb','font-size':11},'ØVRE ØST'));
  target.append(svg);
