@@ -754,6 +754,12 @@ def run(args):
                         elif not active:
                             update('Ingen aktive kamper · avventer nye')
                         schedule.scan_finished()
+                        # Drain other due fixtures promptly, without overlapping scans.
+                        if registry.eligible() and any(
+                            monotonic()-last_auto_by_event.get(e['key'],-1e12)>=schedule.seconds
+                            for e in registry.eligible()
+                        ):
+                            schedule.next_due=monotonic()+8
                         continue
                     mouse=mouse_location(page)
                     hits=parse_visible_texts(read_text(page),'v16-manual',mouse['x'],mouse['y'])
