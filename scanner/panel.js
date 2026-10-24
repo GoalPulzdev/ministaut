@@ -130,7 +130,8 @@
       <div class="tiny">Kampen telles til avspark og arkiveres automatisk. Koteng krever eget kontrollert kart.</div>
       <label for="rbk-switch-url" style="margin-top:11px">Legg til en ny kamp</label>
       <div class="inline"><input id="rbk-switch-url" placeholder="https://billett.rbk.no/checkout/…" spellcheck="false" autocomplete="off"/>
-      <button data-action="switch">Bytt</button></div></details>
+      <button data-action="register">Legg til</button></div>
+      <div class="inline" style="margin-top:6px"><label for="rbk-new-venue">Arena</label><select id="rbk-new-venue" style="flex:1;background:#112a20;color:#fff;border:1px solid #507a63;border-radius:6px;padding:8px"><option value="lerkendal">Lerkendal</option><option value="koteng_arena">Koteng Arena</option></select></div></details>
     <div class="tiny" id="rbk-last">Ingen felt registrert ennå</div>
     <div class="tiny">* 21 423 minus dokumentert ledige. Ikke offisielle solgte billetter. Ståplassledighet ukjent.</div>
     <div class="tiny">Målehistorikken beholdes mellom sjekker. Panelet foretar aldri billettkjøp.</div>
@@ -196,7 +197,16 @@
       ask('select_registered:'+key,'Åpne lagret kamp?','Den aktive målingen lagres før du bytter kamp.');
       return;
     }
-        if(action==='switch'){
+        if(action==='register'){
+      const value=root.querySelector('#rbk-switch-url').value.trim();
+      const venue=root.querySelector('#rbk-new-venue').value;
+      let valid=false;
+      try{const u=new URL(value);valid=u.protocol==='https:'&&u.hostname==='billett.rbk.no'&&/^\/checkout\/[A-Za-z0-9_-]{8,100}\/?$/.test(u.pathname);}catch(e){}
+      if(!valid){notice('Bruk en gyldig RBK-billettlenke.',true);return;}
+      ask('register:'+value+'|'+venue,'Legg til kamp?', 'Kampen lagres i listen uten å avbryte aktiv skanning. Angi avspark etterpå.');
+      return;
+    }
+    if(action==='switch'){
       const value=root.querySelector('#rbk-switch-url').value.trim();
       let valid=false;
       try{const u=new URL(value);valid=u.protocol==='https:' && u.hostname==='billett.rbk.no' && /^\/checkout\/[^/]+\/?$/.test(u.pathname);}catch(e){}
