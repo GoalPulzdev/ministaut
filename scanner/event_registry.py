@@ -47,7 +47,7 @@ class EventRegistry:
         now=now or datetime.now(timezone.utc)
         start=item.get('kickoff_at')
         if not start:return 'awaiting_kickoff'
-        if datetime.fromisoformat(start)>=now:return 'scheduled' if item['venue']=='lerkendal' else 'awaiting_map'
+        if datetime.fromisoformat(start)>now:return 'scheduled' if item['venue']=='lerkendal' else 'awaiting_map'
         return 'finished'
     def eligible(self,now=None):
         return [i for i in self.items if self.status(i,now)=='scheduled']
