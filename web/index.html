@@ -289,6 +289,7 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
 .section-detail{font-size:13px;padding:12px 14px;border-radius:10px}
 @media(max-width:640px){.stadium-map-shell{padding:10px 7px}.stadium-map{max-height:580px}.stadium-map .seat-label{font-size:10px}}
 .insight-switch{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}.insight-switch button{border:1px solid #507a56;background:#13291b;color:#d4ebd9;padding:10px;border-radius:9px;cursor:pointer}.insight-switch button[aria-pressed=true]{background:#367245;color:#fff}.insight-records{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}.insight-record{padding:12px;background:#152b1c;border:1px solid #3c6243;border-radius:10px}.insight-record strong{display:block;font-size:19px;margin:5px 0}.insight-record span{font-size:11px;color:#afc9b5}.stadium-map .seat-sector[data-heat=strong]{fill:#d55849}.stadium-map .seat-sector[data-heat=medium]{fill:#d69246}.stadium-map .seat-sector[data-heat=low]{fill:#ddbe64}.stadium-map .seat-sector[data-heat=flat]{fill:#4a8563}.stadium-map .seat-sector[data-heat=increase]{fill:#438fcb}.stadium-map .seat-sector[data-heat=unknown]{fill:#33453c;stroke-dasharray:3 3}@media(max-width:640px){.insight-records{grid-template-columns:1fr}}
+.pace-forecast{padding:13px 16px;margin-top:12px;border:1px solid #3b6545;border-radius:12px;background:#0f2519;display:flex;flex-direction:column;gap:5px}.pace-forecast[hidden]{display:none}.pace-forecast-date{font-size:clamp(19px,3vw,27px);color:#e4ffea}.pace-forecast-rate{font-size:12px;color:#afc9b5}
 </style>
 </head>
 <body>
@@ -339,6 +340,11 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
         <span class="forecast-label" id="projection-label">PROGNOSE VED AVSPARK</span>
         <strong class="forecast-number" id="projection-value">For tidlig å anslå</strong>
         <span class="forecast-range" id="projection-range">Oppdateres når datagrunnlaget er tilstrekkelig</span>
+      </div>
+      <div id="paceForecast" class="pace-forecast" hidden aria-live="polite">
+        <span class="forecast-label">HVIS 12-TIMERSTEMPOET FORTSETTER</span>
+        <strong id="paceForecastDate" class="pace-forecast-date"></strong>
+        <span id="paceForecastRate" class="pace-forecast-rate"></span>
       </div>
     </section>
     <section class="card graph" aria-labelledby="chart-title">
@@ -600,6 +606,33 @@ function kickoffForecast(records,kickoffUtc,now=Date.now()){
   if(materiallyUncertain && !early)return {status:'unavailable',reason:'Utviklingen er for ujevn til et meningsfullt anslag'};
   return {status:'projected',center:Math.round(projected),low,high,count:sample.length,early,materiallyUncertain};
 }
+// Separate, deliberately linear "what if" scenario. NOT a verified sell-out forecast.
+// Compare the last accepted snapshot with the nearest same-scope snapshot 10–14h earlier.
+function paceToZero12h(records,kickoffUtc,now=Date.now()){
+ const kickoff=Date.parse(kickoffUtc||'');
+ if(!Number.isFinite(kickoff)||kickoff<=now)return null;
+ const sorted=records.filter(x=>Number.isFinite(x.available_seated)&&x.available_seated>=0&&Number.isFinite(Date.parse(x.observed_at))).slice().sort((a,b)=>Date.parse(a.observed_at)-Date.parse(b.observed_at));
+ const latest=sorted.at(-1);if(!latest||overdue(latest.observed_at)||latest.available_seated===0)return null;
+ const end=Date.parse(latest.observed_at);
+ const past=sorted.slice(0,-1).filter(x=>comparable(x,latest)).map(x=>({x,hours:(end-Date.parse(x.observed_at))/3600000})).filter(x=>x.hours>=10&&x.hours<=14).sort((a,b)=>Math.abs(a.hours-12)-Math.abs(b.hours-12))[0];
+ if(!past)return null;
+ const decrease=past.x.available_seated-latest.available_seated;
+ if(decrease<=0)return null;
+ const perHour=decrease/past.hours;
+ if(perHour<0.25)return null;
+ const zeroAt=end+latest.available_seated/perHour*3600000;
+ // Don't present a date after kickoff as a pre-match zero-availability event.
+ if(zeroAt>=kickoff)return {status:'after_kickoff',perHour,hours:past.hours};
+ return {status:'before_kickoff',zeroAt,perHour,hours:past.hours};
+}
+function renderPaceForecast(records){
+ const el=$('paceForecast'),result=paceToZero12h(records,selectedKickoff);
+ el.hidden=!result||result.status!=='before_kickoff';
+ if(el.hidden)return;
+ const day=new Intl.DateTimeFormat('nb-NO',{timeZone:'Europe/Oslo',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}).format(new Date(result.zeroAt));
+ $('paceForecastDate').textContent=day;
+ $('paceForecastRate').textContent='Ca. '+fmt(Math.round(result.perHour*24))+' færre ledige per døgn · lineært scenario';
+}
 function renderForecast(records){
   const result=kickoffForecast(records,selectedKickoff);
   const panel=document.querySelector('.forecast-panel');
@@ -704,6 +737,7 @@ function render(scans){
   showTrend('sinceFirst','sinceFirstNote',sinceFirst);
   showTrend('delta','deltaNote',sinceLast);
   renderForecast(records);
+  renderPaceForecast(records);
   graph(scoped);
   // The chart count and inspected point already communicate history.
   // Avoid another text block repeating the same information.
