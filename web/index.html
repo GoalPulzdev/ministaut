@@ -344,8 +344,8 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
     </section>
     <section class="card sections-panel" aria-labelledby="sections-title">
       <div class="section-heading"><h2 id="sections-title" class="section-title">Tribuneoversikt</h2><span class="section-help" id="sectionStatus">Henter feltdata …</span></div>
-      <p class="section-intro">Interaktiv stadionillustrasjon av feltledighet. Feltrekkefølgen er foreløpig skjematisk, og skal ikke brukes som fysisk plasseringskart før den er verifisert mot RBKs offisielle tribunetegning.</p>
-      <div class="stadium-map-shell"><div class="map-switch"><strong>LERKENDAL · SITTEFELT</strong><span class="section-help">Trykk på et felt</span></div><div id="stadiumMap" aria-label="Interaktiv skjematisk stadionoversikt"></div><div class="map-legend"><span class="map-key"><i style="background:#398b58"></i>50 % +</span><span class="map-key"><i style="background:#b7b857"></i>20–49 %</span><span class="map-key"><i style="background:#d78938"></i>8–19 %</span><span class="map-key"><i style="background:#d55a50"></i>1–7 %</span><span class="map-key"><i style="background:#4d5255"></i>0 ledige</span><span class="map-key"><i style="background:#303b46"></i>Låst / ukjent</span></div><p class="map-note">Sittefelt avlest fra valgt kamp. Ståplasser er ikke inkludert. Farge viser andel ledige seter, ikke solgte billetter. Kartplasseringene er illustrerende inntil sektorene er manuelt kontrollert.</p></div>
+      <p class="section-intro">Lerkendals fire tribunesider med feltvis tilgjengelighet. Feltplassering og størrelser er en forenklet gjengivelse av stadionkartet – velg felt for eksakte måletall.</p>
+      <div class="stadium-map-shell"><div class="map-switch"><strong>LERKENDAL · SITTEFELT</strong><span class="section-help">Trykk på et felt</span></div><div id="stadiumMap" aria-label="Interaktiv skjematisk stadionoversikt"></div><div class="map-legend"><span class="map-key"><i style="background:#398b58"></i>50 % +</span><span class="map-key"><i style="background:#b7b857"></i>20–49 %</span><span class="map-key"><i style="background:#d78938"></i>8–19 %</span><span class="map-key"><i style="background:#d55a50"></i>1–7 %</span><span class="map-key"><i style="background:#4d5255"></i>0 ledige</span><span class="map-key"><i style="background:#303b46"></i>Låst / ukjent</span></div><p class="map-note">Sittefelt avlest fra valgt kamp. Ståplasser er ikke inkludert. Farge viser andel ledige seter, ikke solgte billetter. Feltplasseringene følger offentlig tribuneinndeling, men størrelsene er illustrerende; kontroller felt og rad ved billettkjøp.</p></div>
       <div class="section-grid" id="sectionGrid"><p class="section-loading">Venter på seksjonsdata …</p></div>
       <div id="sectionDetail" class="section-detail" aria-live="polite">Velg et felt for flere detaljer.</div>
     </section>
@@ -821,15 +821,68 @@ function stadiumColor(row,locked){
  const pct=row.free/row.capacity;
  return pct>=.5?'ample':pct>=.2?'some':pct>=.08?'few':'critical';
 }
-function stadiumGeometry(index){
- // Illustration only: ordering around the pitch, not an asserted ticketing-plan coordinate.
- const outer=236,inner=145,angle=-Math.PI/2+(index+.5)*Math.PI*2/60;
- const start=-Math.PI/2+index*Math.PI*2/60+.006;
- const stop=-Math.PI/2+(index+1)*Math.PI*2/60-.006;
- const polar=(r,a)=>[330+r*Math.cos(a),265+r*Math.sin(a)];
- const [a,b,c,d]=[polar(outer,start),polar(outer,stop),polar(inner,stop),polar(inner,start)];
- const path='M'+a.join(' ')+' L'+b.join(' ')+' L'+c.join(' ')+' L'+d.join(' ')+' Z';
- return {path,cx:330+192*Math.cos(angle),cy:265+192*Math.sin(angle)};
+// Mapping to the four real sides follows published seating-plan groupings.
+// Within each stand coordinates are approximate, not ticket vendor exact hitboxes.
+const STAND_GROUPS={"northOuter":["SA","RA","QA","PA","OA","NA","MA"],"northInner":["RB","QB","PB","OB","NB","MB"],"westOuter":["TA","UA","VA","WA","XA"],"westInner":["TB","U","UB","V","VB","W","WB","XB"],"southOuter":["AA","BA","CA","DA","EA","FA","GA"],"southInner":["AB","BB","CB","DB","EB","FB","GB"],"southVIP":["A","B","C","D","E","F","G","PRESSE"],"eastOuter":["N","O","P","Q","K"],"eastInner":["HB","I","IB","J","JB","KB","LB"]};
+function sectionTiles(){
+ const out=[];
+ const horizontal=(codes,x,y,total,h)=>codes.forEach((code,i)=>{
+  const width=total/codes.length;
+  out.push({code,x:x+i*width,y,w:width-3,h});
+ });
+ const vertical=(codes,x,y,w,total)=>codes.forEach((code,i)=>{
+  const height=total/codes.length;
+  out.push({code,x,y:y+i*height,w,h:height-3});
+ });
+ horizontal(STAND_GROUPS.northOuter,130,46,510,67);
+ horizontal(STAND_GROUPS.northInner,168,119,428,48);
+ vertical(STAND_GROUPS.westOuter,48,180,72,332);
+ vertical(STAND_GROUPS.westInner,126,185,48,321);
+ horizontal(STAND_GROUPS.southOuter,138,595,494,65);
+ horizontal(STAND_GROUPS.southInner,155,542,458,47);
+ horizontal(STAND_GROUPS.southVIP,190,494,388,42);
+ vertical(STAND_GROUPS.eastOuter,656,184,79,325);
+ vertical(STAND_GROUPS.eastInner,601,187,47,319);
+ return out;
+}
+function drawStadiumMap(rows,scan){
+ const target=$('stadiumMap');
+ target.replaceChildren();stadiumSelected=null;
+ if(!rows||!scan){target.textContent='Kartet vises når målinger er tilgjengelige.';return;}
+ const byCode=new Map(rows.map(r=>[r.section_code,r]));
+ stadiumByCode=byCode;
+ const locks=new Set(scan.locked_fields||[]);
+ const svg=svgEl('svg',{viewBox:'0 0 780 705',class:'stadium-map',role:'group','aria-label':'Tribunekart for Lerkendal, tilgjengelige sitteplasser'});
+ const defs=svgEl('defs');
+ const grad=svgEl('linearGradient',{id:'pitchGrad',x1:'0',x2:'0',y1:'0',y2:'1'});
+ grad.append(svgEl('stop',{offset:'0%', 'stop-color':'#186f46'}),svgEl('stop',{offset:'100%','stop-color':'#0a3c28'}));
+ defs.append(grad);svg.append(defs);
+ svg.append(svgEl('rect',{x:178,y:177,width:413,height:307,rx:7,fill:'#0d2418',stroke:'#4e9367','stroke-width':3}));
+ svg.append(svgEl('rect',{x:193,y:193,width:383,height:276,rx:1,fill:'url(#pitchGrad)',stroke:'#d1e7d6','stroke-width':2}));
+ svg.append(svgEl('line',{x1:384.5,y1:193,x2:384.5,y2:469,stroke:'#b3d0bb','stroke-width':2}));
+ svg.append(svgEl('circle',{cx:384.5,cy:331,r:43,fill:'none',stroke:'#b3d0bb','stroke-width':2}));
+ svg.append(svgEl('rect',{x:193,y:254,width:69,height:154,fill:'none',stroke:'#b3d0bb','stroke-width':2}));
+ svg.append(svgEl('rect',{x:507,y:254,width:69,height:154,fill:'none',stroke:'#b3d0bb','stroke-width':2}));
+ svg.append(svgEl('text',{x:385,y:337,'text-anchor':'middle',fill:'#e4fbea','font-size':24,'font-weight':850,opacity:'.35'},'LERKENDAL'));
+ const labels=[['PEPSI MAX',385,28],['COOP',88,173],['SPAREBANK 1',385,688],['ØVRE / NEDRE ØST',696,174]];
+ labels.forEach(([t,x,y])=>svg.append(svgEl('text',{x,y,'text-anchor':'middle',fill:'#bcd5c3','font-size':14,'font-weight':800,'letter-spacing':1.3},t)));
+ sectionTiles().forEach(tile=>{
+  const {code,x,y,w,h}=tile,row=byCode.get(code),level=stadiumColor(row,locks.has(code));
+  const p=svgEl('rect',{x,y,width:w,height:h,rx:2,class:'seat-sector','data-code':code,'data-level':level,'aria-pressed':'false',tabindex:0,role:'button','aria-label':'Felt '+code+', '+(row?row.free+' ledige av '+row.capacity:locks.has(code)?'låst':'mangler måling')});
+  p.append(svgEl('title',{},'Felt '+code+' · '+(row?row.free+' ledige av '+row.capacity:locks.has(code)?'låst':'ikke målt')));
+  p.addEventListener('click',()=>activateStadiumSection(code));
+  p.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activateStadiumSection(code);}});
+  svg.append(p);
+  const labelAttrs={x:x+w/2,y:y+h/2+3.5,class:'seat-label'};
+  if(w<32||h<32)labelAttrs['font-size']=9;
+  svg.append(svgEl('text',labelAttrs,code));
+ });
+ // Standing is contextual only, not part of the 60-seat availability model.
+ const sb=svgEl('rect',{x:130,y:119,width:34,height:48,rx:2,fill:'#293e38',stroke:'#728578','stroke-dasharray':'3 3'});
+ svg.append(sb);svg.append(svgEl('text',{x:147,y:145,'text-anchor':'middle',fill:'#b5cdbb','font-size':11},'SB'));
+ const standing=svgEl('rect',{x:742,y:235,width:25,height:218,rx:4,fill:'#293e38',stroke:'#728578','stroke-dasharray':'3 3'});
+ svg.append(standing);svg.append(svgEl('text',{x:755,y:342,transform:'rotate(90 755 342)','text-anchor':'middle',fill:'#b5cdbb','font-size':10},'ØVRE ØST'));
+ target.append(svg);
 }
 function activateStadiumSection(code){
  if(stadiumSelected)stadiumSelected.setAttribute('aria-pressed','false');
