@@ -238,19 +238,23 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
 .pulse-insights .daily-pulse{margin:0;padding:3px 0;border:0;flex:1 1 225px}
 @media(max-width:640px){.pulse-insights{gap:2px 0}.pulse-insights .daily-pulse{flex:1 1 100%;font-size:12px}}
 
-.sections-panel{margin-top:16px}.section-intro{color:#b5cbb9;font-size:13px;line-height:1.5;margin:6px 0 17px}
-.section-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:9px}
-.section-cell{min-width:0;min-height:90px;text-align:left;border:1px solid #3f644b;background:#192d20;border-radius:12px;padding:12px;cursor:pointer;color:#f0f9f0;display:flex;flex-direction:column;gap:3px}
+.sections-panel{margin-top:13px;padding:14px 16px}
+.sections-panel .section-title{font-size:17px;line-height:1.25;margin:0}
+.sections-panel .section-heading{display:flex;justify-content:space-between;align-items:center;gap:9px;flex-wrap:wrap}
+.sections-panel .section-help{font-size:11px;color:#acc7b2}
+.section-intro{color:#a9c0ae;font-size:11px;line-height:1.4;margin:4px 0 10px}
+.section-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:5px}
+.section-cell{min-width:0;min-height:61px;text-align:left;border:1px solid #3f644b;background:#192d20;border-radius:8px;padding:7px 8px;cursor:pointer;color:#f0f9f0;display:flex;flex-direction:column;gap:2px}
 .section-cell:hover,.section-cell:focus-visible{border-color:#c0ecc8;background:#24422f}
 .section-cell[aria-pressed="true"]{border-color:#c2f0c9;box-shadow:inset 0 0 0 1px #a2d6ac80}
-.section-code{font-size:12px;font-weight:800;color:#b0d6b8;letter-spacing:.05em}
-.section-free{font-size:24px;line-height:1.1;font-weight:850;font-variant-numeric:tabular-nums}
-.section-meta{font-size:11px;color:#b2c5b3}
+.section-code{font-size:10px;font-weight:800;color:#b0d6b8;letter-spacing:.03em}
+.section-free{font-size:18px;line-height:1.05;font-weight:800;font-variant-numeric:tabular-nums}
+.section-meta{font-size:10px;color:#b2c5b3;line-height:1.2}
 .section-cell[data-level="few"]{border-color:#ba8950;background:#352919}
 .section-cell[data-level="none"]{background:#312322;border-color:#955e5e}
-.section-detail{margin-top:13px;padding:12px 14px;border:1px solid #385943;border-radius:11px;background:#14261b;font-size:13px;color:#c5dfc9}
-.section-loading{font-size:13px;color:#b5cbb9}
-@media(max-width:640px){.section-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.section-cell{padding:10px;min-height:86px}.section-free{font-size:22px}}
+.section-detail{margin-top:8px;padding:8px 10px;border:1px solid #385943;border-radius:8px;background:#14261b;font-size:11px;color:#c5dfc9}
+.section-loading{font-size:12px;color:#b5cbb9}
+@media(max-width:640px){.sections-panel{padding:12px}.section-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.section-cell{padding:6px;min-height:59px}.section-free{font-size:17px}.section-meta{font-size:9px}}
 </style>
 </head>
 <body>
@@ -303,12 +307,6 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
         <span class="forecast-range" id="projection-range">Oppdateres når datagrunnlaget er tilstrekkelig</span>
       </div>
     </section>
-    <section class="card sections-panel" aria-labelledby="sections-title">
-      <div class="section-heading"><h2 id="sections-title" class="section-title">Tribuneoversikt</h2><span class="section-help" id="sectionStatus">Henter feltdata …</span></div>
-      <p class="section-intro">Alle avleste sittefelt for valgt kamp, sortert etter feltkode. Dette er ikke et geografisk stadionkart.</p>
-      <div class="section-grid" id="sectionGrid"><p class="section-loading">Venter på seksjonsdata …</p></div>
-      <div id="sectionDetail" class="section-detail" aria-live="polite">Velg et felt for flere detaljer.</div>
-    </section>
     <section class="card graph" aria-labelledby="chart-title">
       <div class="graph-header">
         <div><div id="chart-title" class="caption">Billettpulsen mot avspark</div>
@@ -322,6 +320,12 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
         <span id="inspectValue" class="inspect-value">—</span>
         <span id="inspectDelta" class="inspect-delta">Velg et punkt i grafen</span>
       </div>
+    </section>
+    <section class="card sections-panel" aria-labelledby="sections-title">
+      <div class="section-heading"><h2 id="sections-title" class="section-title">Tribuneoversikt</h2><span class="section-help" id="sectionStatus">Henter feltdata …</span></div>
+      <p class="section-intro">Alle avleste sittefelt for valgt kamp, sortert etter feltkode. Dette er ikke et geografisk stadionkart.</p>
+      <div class="section-grid" id="sectionGrid"><p class="section-loading">Venter på seksjonsdata …</p></div>
+      <div id="sectionDetail" class="section-detail" aria-live="polite">Velg et felt for flere detaljer.</div>
     </section>
   </section>
   <footer class="fan-footer">Ministaut er en uavhengig supporteroversikt.</footer>
