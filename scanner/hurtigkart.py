@@ -6,6 +6,7 @@ Edge profile is started automatically when needed. Never clicks on a seat.
 from __future__ import annotations
 import argparse,csv,html,json,os,re,subprocess,sys,threading
 from datetime import datetime,timezone
+from zoneinfo import ZoneInfo
 from pathlib import Path
 from time import monotonic,sleep
 from urllib.parse import urlparse
@@ -295,6 +296,12 @@ def run(args):
         registry.add(women_url,'RBK Kvinner · kartlegging kreves','koteng_arena')
     if checkout_url(url) and not registry.get(event_key(url)):
         registry.add(url,event_labels(url)[0])
+    for key,kickoff in [('6a9a7e3f3f93920b289b0675','2026-11-28T18:00'),
+                        ('6a9a7c2b15599587216e21f3','2026-11-07T18:00')]:
+        item=registry.get(key)
+        if item and not item.get('kickoff_at'):
+            registry.update(key,kickoff_at=datetime.fromisoformat(kickoff).replace(tzinfo=ZoneInfo('Europe/Oslo')).isoformat())
+    last_auto_by_event={}
     if args.no_auto and schedule.enabled:schedule.enable(False)
     expected=set(SEATS);scan_expected=expected-set(locked);cap=dict(SEATS);standing={'SB','ØVRE ØST'};source='stadionreferanse';last=''
     map_verified=False;map_issues={};locked_conflicts={}
@@ -410,7 +417,7 @@ def run(args):
                   'chart_points':projection['points'][-30:],
                   'auto_enabled':schedule.enabled,'auto_remaining':schedule.seconds_remaining(),
                   'clock':datetime.now().strftime('%H:%M:%S'),'busy':busy,
-                  'registered_events':registry.items}
+                  'registered_events':[{**e,'status':registry.status(e)} for e in registry.items]}
             panel_show(page,data)
             return data
         def register(hit,manual=None,goal=None,phase=None):
@@ -638,11 +645,21 @@ def run(args):
                             update('Kamp lagret · velg den i kamplisten')
                         except ValueError as ex:update('Ugyldig kampadresse: '+str(ex)[:80])
                         continue
+                    elif command.startswith('kickoff:'):
+                        try:
+                            key,local=command.split(':',1)[1].split('|',1)
+                            dt=datetime.fromisoformat(local).replace(tzinfo=ZoneInfo('Europe/Oslo'))
+                            registry.update(key,kickoff_at=dt.isoformat())
+                            update('Kampstart lagret')
+                        except (ValueError,IndexError) as ex:update('Feil kampstart: '+str(ex)[:70])
+                        continue
                     elif command.startswith('select_registered:'):
                         key=command.split(':',1)[1]
                         entry=registry.get(key)
                         if not entry:
                             update('Kamp finnes ikke i listen');continue
+                        if registry.status(entry)!='scheduled':
+                            update('Kampen er avsluttet eller mangler avspark/kartprofil');continue
                         if entry['venue']!='lerkendal':
                             update('Koteng må kartlegges før skanning kan aktiveres');continue
                         finalize_cycle()
@@ -655,6 +672,8 @@ def run(args):
                         update('Lagrer måling · åpner ny kamp …')
                         if checkout_url(destination):
                             candidate=registry.get(event_key(destination))
+                            if candidate and registry.status(candidate)!='scheduled':
+                                update('Lagre kampstart før skanning');continue
                             if candidate and candidate['venue']!='lerkendal':
                                 update('Koteng-kamp lagret, men krever egen skannerprofil');continue
                             # A new URL becomes a reusable saved fixture, not a one-off switch.
@@ -715,15 +734,26 @@ def run(args):
                                 for hit in sampler.hover(x,y,'v16-clicked-missing'):
                                     register(hit,goal=name,phase='rescue')
                     if schedule.due():
-                        print('Automatisk timesjekk starter:',datetime.now().isoformat(timespec='seconds'),flush=True)
-                        update('Automatisk sjekk · laster inn ferskt billettkart')
-                        finalize_cycle()
-                        if start_next_cycle():
-                            deadline=monotonic()+args.manual_seconds if args.manual_seconds>0 else float('inf')
-                            prior_signature=None;stable=0;last_pointer=mouse_location(page)['t']
-                        else:
-                            schedule.postpone_after_error()
-                            update('Automatisk kontroll mislyktes · prøver igjen om 15 min')
+                        # Each configured match is independent; finished events are archived.
+                        active=registry.eligible()
+                        tick=monotonic()
+                        due=[e for e in active if tick-last_auto_by_event.get(e['key'],-1e12)>=schedule.seconds]
+                        due.sort(key=lambda e:last_auto_by_event.get(e['key'],-1e12))
+                        target=due[0] if due else None
+                        if target:
+                            current_key=event_key(url) if checkout_url(url) else ''
+                            current_entry=registry.get(current_key)
+                            if current_entry and registry.status(current_entry)=='scheduled':
+                                finalize_cycle()
+                                last_auto_by_event[current_key]=monotonic()
+                            if start_next_cycle(next_url=target['url']):
+                                last_auto_by_event[target['key']]=monotonic()
+                                deadline=monotonic()+args.manual_seconds if args.manual_seconds>0 else float('inf')
+                                prior_signature=None;stable=0;last_pointer=mouse_location(page)['t']
+                            else:schedule.postpone_after_error()
+                        elif not active:
+                            update('Ingen aktive kamper · avventer nye')
+                        schedule.scan_finished()
                         continue
                     mouse=mouse_location(page)
                     hits=parse_visible_texts(read_text(page),'v16-manual',mouse['x'],mouse['y'])
