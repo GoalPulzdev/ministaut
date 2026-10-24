@@ -631,8 +631,13 @@ function dailyPulse(records){
   if(!candidates.length)return null;
   const near=candidates.reduce((best,p)=>Math.abs((end-new Date(p.observed_at).getTime())/3600000-24)<
       Math.abs((end-new Date(best.observed_at).getTime())/3600000-24)?p:best);
-  return {hours:Math.round((end-new Date(near.observed_at).getTime())/3600000),
-    difference:latest.available_seated-near.available_seated};
+  const hours=(end-new Date(near.observed_at).getTime())/3600000;
+  // A 26-hour raw delta is not a 24-hour delta. Normalize explicitly.
+  // This is a constant-rate estimate, not a measurement at exactly 24h.
+  const exact=Math.abs(hours-24)<=0.25;
+  const raw=latest.available_seated-near.available_seated;
+  const difference=exact?raw:Math.round(raw*24/hours);
+  return {hours,difference,normalized:!exact,raw};
 }
 function referencePulse(records, targetHours, toleranceHours){
   if(!records.length)return null;
@@ -681,7 +686,9 @@ function render(scans){
   }else{
     const count=fmt(Math.abs(pulse.difference));
     pulseElement.dataset.trend=pulse.difference<0?'down':pulse.difference>0?'up':'flat';
-    pulseElement.textContent='Døgnpuls ('+pulse.hours+' t): '+(pulse.difference<0?count+' færre ledige':pulse.difference>0?count+' flere ledige':'uendret antall ledige');
+    const description=pulse.difference<0?count+' færre ledige':pulse.difference>0?count+' flere ledige':'uendret antall ledige';
+    pulseElement.textContent='Døgnpuls (24 t): '+description+
+      (pulse.normalized?' · beregnet fra '+pulse.hours.toFixed(1).replace('.',',')+' t mellom målingene':'');
   }
   const week=weeklyPulse(scoped),weekElement=$('weekPulse');
   if(!week){
