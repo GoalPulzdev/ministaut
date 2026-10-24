@@ -25,19 +25,19 @@ from v3.profiles import StadiumProfile
 import re
 
 KOTENG_URL = "https://billett.rbk.no/checkout/6aaceecebfe408c38e1712dd"
-SECTION = re.compile(r"\\b(?:SECTION|SEKSJON|FELT|BLOCK|SECTOR|SEKTOR)\\s*[:#-]?\\s*"
-                     r"(?P<name>(?:[A-ZÆØÅ]{1,4}[- ]?\\d{0,3}|\\d{1,3}))\\b", re.I)
+SECTION = re.compile(r"\b(?:SECTION|SEKSJON|FELT|BLOCK|SECTOR|SEKTOR)\s*[:#-]?\s*"
+                     r"(?P<name>(?:[A-ZÆØÅ]{1,4}[- ]?\d{0,3}|\d{1,3}))\b", re.I)
 
 
 def parse_training_tooltip(text, x, y):
     """Same visible-tooltip approach; Koteng may have numbered sections."""
     if not isinstance(text, str) or len(text) > 25000:
         return None
-    clean = re.sub(r"[\\t\\r\\n\\u00a0]+", " ", text)
+    clean = re.sub(r"[\t\r\n\u00a0]+", " ", text)
     clean = re.sub(r" {2,}", " ", clean)
     for count in AVAILABILITY.finditer(clean):
-        free = int(re.sub(r"[ .\\u00a0]", "", count.group("available")))
-        capacity = int(re.sub(r"[ .\\u00a0]", "", count.group("capacity")))
+        free = int(re.sub(r"[ .\u00a0]", "", count.group("available")))
+        capacity = int(re.sub(r"[ .\u00a0]", "", count.group("capacity")))
         if not 1 <= capacity <= 100000 or not 0 <= free <= capacity:
             continue
         names = list(SECTION.finditer(clean[max(0, count.start()-250):count.start()]))
