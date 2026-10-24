@@ -289,7 +289,7 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
 .section-detail{font-size:13px;padding:12px 14px;border-radius:10px}
 @media(max-width:640px){.stadium-map-shell{padding:10px 7px}.stadium-map{max-height:580px}.stadium-map .seat-label{font-size:10px}}
 .insight-switch{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}.insight-switch button{border:1px solid #507a56;background:#13291b;color:#d4ebd9;padding:10px;border-radius:9px;cursor:pointer}.insight-switch button[aria-pressed=true]{background:#367245;color:#fff}.insight-records{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}.insight-record{padding:12px;background:#152b1c;border:1px solid #3c6243;border-radius:10px}.insight-record strong{display:block;font-size:19px;margin:5px 0}.insight-record span{font-size:11px;color:#afc9b5}.stadium-map .seat-sector[data-heat=strong]{fill:#d55849}.stadium-map .seat-sector[data-heat=medium]{fill:#d69246}.stadium-map .seat-sector[data-heat=low]{fill:#ddbe64}.stadium-map .seat-sector[data-heat=flat]{fill:#4a8563}.stadium-map .seat-sector[data-heat=increase]{fill:#438fcb}.stadium-map .seat-sector[data-heat=unknown]{fill:#33453c;stroke-dasharray:3 3}@media(max-width:640px){.insight-records{grid-template-columns:1fr}}
-.pace-forecast{padding:13px 16px;margin-top:12px;border:1px solid #3b6545;border-radius:12px;background:#0f2519;display:flex;flex-direction:column;gap:5px}.pace-forecast[hidden]{display:none}.pace-forecast-date{font-size:clamp(19px,3vw,27px);color:#e4ffea}.pace-forecast-rate{font-size:12px;color:#afc9b5}
+.pace-forecast{padding:13px 16px;margin-top:12px;border:1px solid #3b6545;border-radius:12px;background:#0f2519;display:flex;flex-direction:column;gap:5px}.pace-forecast[hidden]{display:none}.pace-forecast-lead{font-size:13px;line-height:1.45;color:#e2f4e6;max-width:55ch}.pace-forecast-date{font-size:clamp(19px,3vw,27px);color:#e4ffea}.pace-forecast-rate{font-size:12px;color:#afc9b5}
 </style>
 </head>
 <body>
@@ -342,7 +342,8 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
         <span class="forecast-range" id="projection-range">Oppdateres når datagrunnlaget er tilstrekkelig</span>
       </div>
       <div id="paceForecast" class="pace-forecast" hidden aria-live="polite">
-        <span class="forecast-label">HVIS 12-TIMERSTEMPOET FORTSETTER</span>
+        <span class="forecast-label">KAN SITTEPLASSENE BLI UTSOLGT?</span>
+        <span class="pace-forecast-lead">Med samme tempo som de siste 12 timene kan alle målte sitteplasser være borte innen:</span>
         <strong id="paceForecastDate" class="pace-forecast-date"></strong>
         <span id="paceForecastRate" class="pace-forecast-rate"></span>
       </div>
@@ -631,7 +632,7 @@ function renderPaceForecast(records){
  if(el.hidden)return;
  const day=new Intl.DateTimeFormat('nb-NO',{timeZone:'Europe/Oslo',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}).format(new Date(result.zeroAt));
  $('paceForecastDate').textContent=day;
- $('paceForecastRate').textContent='Ca. '+fmt(Math.round(result.perHour*24))+' færre ledige per døgn · lineært scenario';
+ $('paceForecastRate').textContent='Hvis tempoet fortsetter · ca. '+fmt(Math.round(result.perHour*24))+' færre ledige per døgn';
 }
 function renderForecast(records){
   const result=kickoffForecast(records,selectedKickoff);
