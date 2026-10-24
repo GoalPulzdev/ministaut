@@ -518,11 +518,13 @@ function kickoffForecast(records,kickoffUtc,now=Date.now()){
   // beyond the latest observed available seats. Do not extrapolate increases.
   const ceiling=last.available_seated;
   const effectiveRate=Math.min(0,rate);
-  const projected=Math.max(0,Math.min(ceiling,ceiling+effectiveRate*forwardHours));
+  // Gradually reduce long-horizon extrapolation instead of extending an early rush for weeks.
+  const pacedHours=14*24*(1-Math.exp(-forwardHours/(14*24)));
+  const projected=Math.max(0,Math.min(ceiling,ceiling+effectiveRate*pacedHours));
   /* Scenario spread, not a statistical confidence interval. */
   // Pace-based uncertainty: a fraction of expected decrease, not a multi-week MAD extrapolation.
   const predictedReduction=ceiling-projected;
-  const spread=Math.max(15,Math.min(ceiling*.12,predictedReduction*(.12+Math.min(.10,forwardHours/1440))));
+  const spread=Math.max(15,Math.min(ceiling*.12,predictedReduction*(.12+Math.min(.08,forwardHours/1440))));
   const low=Math.max(0,Math.min(ceiling,Math.floor(projected-spread)));
   const high=Math.max(low,Math.min(ceiling,Math.ceil(projected+spread)));
   const materiallyUncertain=(high-low)>Math.max(2500,last.available_seated*.75);
