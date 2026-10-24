@@ -910,6 +910,13 @@ const stadiumFrame=Object.freeze({
  northEdge:pitchBox.y,
  southEdge:pitchBox.y+pitchBox.h
 });
+// Real Coop topology: upper TA/UA/VA/WA/XA, separate VIP U/V/W,
+// and lower TB/UB/VB/WB/XB against the pitch. Three distinct west lanes.
+const coopStand=Object.freeze({
+ upperX:pitchBox.x-158,upperW:69,
+ vipX:pitchBox.x-83,vipW:27,
+ lowerX:pitchBox.x-50,lowerW:32
+});
 function sectionTiles(){
  const tiles=SEAT_LAYOUT.map(([code,x,y,w,h])=>({code,x,y,w,h}));
  const byCode=new Map(tiles.map(t=>[t.code,t]));
@@ -934,6 +941,31 @@ function sectionTiles(){
  alignRail(['A','B','C','D','E','F','G'],'south',59,7);
  alignRail(['PRESSE'],'south',90);
  alignRail(['AA','BA','CA','DA','EA','FA','GA'],'south',119);
+ // Position VIP Coop as a dedicated lower-tier band between the A and B
+ // sections. Previously VIP U/V/W were interleaved in the same x lane as
+ // TB/UB/VB/WB/XB and therefore appeared on the wrong line.
+ const coopRows=[
+  {upper:'TA',lower:'TB',y:215,h:60},
+  {upper:'UA',vip:'U',lower:'UB',y:282,h:63},
+  {upper:'VA',vip:'V',lower:'VB',y:352,h:63},
+  {upper:'WA',vip:'W',lower:'WB',y:422,h:65},
+  {upper:'XA',lower:'XB',y:494,h:58}
+ ];
+ const placeCoop=(code,x,w,y,h)=>{
+  if(!code)return;
+  const tile=byCode.get(code);
+  if(!tile)throw Error('Missing Coop sector '+code);
+  Object.assign(tile,{x,y,w,h});
+ };
+ coopRows.forEach(({upper,vip,lower,y,h})=>{
+  placeCoop(upper,coopStand.upperX,coopStand.upperW,y,h);
+  placeCoop(vip,coopStand.vipX,coopStand.vipW,y,h);
+  placeCoop(lower,coopStand.lowerX,coopStand.lowerW,y,h);
+ });
+ if(!(coopStand.upperX+coopStand.upperW<coopStand.vipX &&
+      coopStand.vipX+coopStand.vipW<coopStand.lowerX &&
+      coopStand.lowerX+coopStand.lowerW<pitchBox.x))
+  throw Error('Invalid Coop lane spacing');
  if(tiles.length!==60||byCode.size!==60)throw Error('Expected 60 distinct stadium sections');
  for(let i=0;i<tiles.length;i++){
   const a=tiles[i];
@@ -974,15 +1006,19 @@ function drawStadiumMap(rows,scan){
  svg.append(svgEl('text',{x:fieldCenterX,y:fieldCenterY+5,'text-anchor':'middle',fill:'#e4fbea','font-size':24,'font-weight':850,opacity:'.35'},'LERKENDAL'));
  const labels=[
   ['PEPSI MAX',stadiumFrame.centerX,stadiumFrame.northEdge-166],
-  ['COOP',pitchBox.x-95,pitchBox.y-11],
+  ['COOP',coopStand.upperX+coopStand.upperW/2,pitchBox.y-11],
   ['SPAREBANK 1',stadiumFrame.centerX,stadiumFrame.southEdge+187],
   ['ØST',pitchBox.x+pitchBox.w+106,pitchBox.y+5]
  ];
  labels.forEach(([t,x,y])=>svg.append(svgEl('text',{x,y,'text-anchor':'middle',fill:'#bcd5c3','font-size':14,'font-weight':800,'letter-spacing':1.3},t)));
+ // Tiny VIP label above the distinct Coop VIP band; seat fills remain data-driven.
+ svg.append(svgEl('text',{x:coopStand.vipX+coopStand.vipW/2,y:pitchBox.y+5,
+   'text-anchor':'middle',fill:'#a9e6bb','font-size':10,'font-weight':900},'VIP'));
  sectionTiles().forEach(tile=>{
   const {code,x,y,w,h}=tile,row=byCode.get(code),level=stadiumColor(row,locks.has(code));
-  const p=svgEl('rect',{x,y,width:w,height:h,rx:4,class:'seat-sector','data-code':code,'data-level':level,'aria-pressed':'false',tabindex:0,role:'button','aria-label':'Felt '+code+', '+(row?row.free+' ledige av '+row.capacity:locks.has(code)?'låst':'mangler måling')});
-  p.append(svgEl('title',{},'Felt '+code+' · '+(row?row.free+' ledige av '+row.capacity:locks.has(code)?'låst':'ikke målt')));
+  const sectorName=['U','V','W'].includes(code)?'VIP Coop, felt '+code:'Felt '+code;
+  const p=svgEl('rect',{x,y,width:w,height:h,rx:4,class:'seat-sector','data-code':code,'data-level':level,'data-vip':(['U','V','W'].includes(code)?'coop':''),'aria-pressed':'false',tabindex:0,role:'button','aria-label':sectorName+', '+(row?row.free+' ledige av '+row.capacity:locks.has(code)?'låst':'mangler måling')});
+  p.append(svgEl('title',{},sectorName+' · '+(row?row.free+' ledige av '+row.capacity:locks.has(code)?'låst':'ikke målt')));
   p.addEventListener('click',()=>activateStadiumSection(code));
   p.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activateStadiumSection(code);}});
   svg.append(p);
