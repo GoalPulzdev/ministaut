@@ -288,6 +288,11 @@ def run(args):
     counter=Counts();nprobe=0;collector=Collector()
     schedule=ScanSchedule(ROOT/'monitorinnstillinger.json',hours=args.auto_hours,enabled=not args.no_auto)
     registry=EventRegistry(ROOT/'monitor_kamper.json')
+    # The user's women-team link is discoverable now, but cannot be scanned
+    # using Lerkendal's unverified 60-section profile.
+    women_url='https://billett.rbk.no/checkout/6aaceecebfe408c38e1712dd'
+    if not registry.get(event_key(women_url)):
+        registry.add(women_url,'RBK Kvinner · kartlegging kreves','koteng_arena')
     if checkout_url(url) and not registry.get(event_key(url)):
         registry.add(url,event_labels(url)[0])
     if args.no_auto and schedule.enabled:schedule.enable(False)
