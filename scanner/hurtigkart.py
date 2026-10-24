@@ -116,6 +116,23 @@ def panel_show(page,data):
     js = r"""data => {const root=document.getElementById('rbk-v16-live-panel');if(!root)return false;
       const put=(id,v)=>{const e=root.querySelector('#'+id);if(e)e.textContent=String(v)};
       const number=v=>Number(v).toLocaleString('nb-NO');
+      const list=root.querySelector('#rbk-saved-events');
+      if(list){
+        const selection=list.value;
+        const items=data.registered_events||[];
+        const signature=JSON.stringify(items);
+        if(list.dataset.signature!==signature){
+          list.dataset.signature=signature;
+          list.replaceChildren();
+          const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='Velg lagret kamp';list.append(placeholder);
+          for(const event of items){
+            const option=document.createElement('option');option.value=event.key;
+            option.textContent=event.title+(event.venue==='koteng_arena'?' · Koteng (avventer)':'');
+            list.append(option);
+          }
+          if(items.some(e=>e.key===selection))list.value=selection;
+        }
+      }
       put('rbk-title',data.title||'Rosenborg · Billettstatus');
       put('rbk-match-id',data.match_date||data.event_key||'');
       put('rbk-mode',data.mode);put('rbk-found',(data.covered??data.found??0)+'/'+data.total);
@@ -632,6 +649,9 @@ def run(args):
                         destination=command.split(':',1)[1]
                         update('Lagrer måling · åpner ny kamp …')
                         if checkout_url(destination):
+                            candidate=registry.get(event_key(destination))
+                            if candidate and candidate['venue']!='lerkendal':
+                                update('Koteng-kamp lagret, men krever egen skannerprofil');continue
                             # A new URL becomes a reusable saved fixture, not a one-off switch.
                             try:registry.add(destination)
                             except ValueError:pass
