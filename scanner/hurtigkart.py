@@ -128,10 +128,13 @@ def panel_show(page,data):
           const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='Velg lagret kamp';list.append(placeholder);
           for(const event of items){
             const option=document.createElement('option');option.value=event.key;
-            option.textContent=event.title+(event.venue==='koteng_arena'?' · Koteng (avventer)':'');
+            const state=event.status==='finished'?' · ferdig':event.status==='awaiting_kickoff'?' · angi avspark':event.status==='awaiting_map'?' · kartlegging':' · aktiv';
+            option.textContent=event.title+state;
             list.append(option);
           }
+          const current=items.find(e=>e.key===data.event_key);
           if(items.some(e=>e.key===selection))list.value=selection;
+          else if(current)list.value=current.key;
         }
       }
       put('rbk-title',data.title||'Rosenborg · Billettstatus');
