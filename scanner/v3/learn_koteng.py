@@ -25,7 +25,7 @@ from v3.profiles import StadiumProfile
 import re
 
 KOTENG_URL = "https://billett.rbk.no/checkout/6aaceecebfe408c38e1712dd"
-SECTION = re.compile(r"\b(?:SECTION|SEKSJON|FELT|BLOCK|SECTOR|SEKTOR)\s*[:#-]?\s*"
+SECTION = re.compile(r"\b(?P<prefix>SECTION|SEKSJON|FELT|BLOCK|SECTOR|SEKTOR)\s*[:#-]?\s*"
                      r"(?P<name>(?:[A-ZÆØÅ]{1,4}[- ]?\d{0,3}|\d{1,3}))\b", re.I)
 STANDING = re.compile(r"\b(?:STÅPLASS|STAAPLASS|STANDING)\s*[:#-]?\s*(?P<name>[A-ZÆØÅ0-9-]{1,8})\b", re.I)
 # Expected labels from the user's Koteng screen and first measured report,
@@ -96,7 +96,10 @@ def parse_training_tooltip(text, x, y):
             label = "STÅPLASS-" + standing[-1].group("name").upper()
             return Observation(label, "", free, capacity, "standing-training", x, y)
         if seats:
-            label = seats[-1].group("name").upper().replace(" ", "")
+            matched = seats[-1]
+            label = matched.group("name").upper().replace(" ", "")
+            if matched.group("prefix").upper() == "FELT" and label.isdigit():
+                label = "FELT-" + label
             return Observation(label, "", free, capacity, "koteng-training", x, y)
     return None
 
