@@ -196,7 +196,7 @@ def train(url=KOTENG_URL, max_points=450, step=38):
                     px = round((x-x1)/(x2-x1), 6)
                     py = round((y-y1)/(y2-y1), 6)
                     if 0 <= px <= 1 and 0 <= py <= 1 and len(anchors[name]) < 5:
-                        anchor = {"ref": [px, py], "coordinate_system": "map_normalized",
+                        anchor = {"ref": [px, py], "coordinate_system": "map_normalized_v2",
                                   "source": "visible_hover_training"}
                         if all(math.dist(a["ref"], anchor["ref"]) > 0.015 for a in anchors[name]):
                             anchors[name].append(anchor)
