@@ -233,6 +233,10 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
 .daily-pulse[data-trend="down"]{color:#f5dba9}
 .daily-pulse[data-trend="up"]{color:#b9eed0}
 @media(max-width:640px){.daily-pulse{font-size:12px}}
+
+.pulse-insights{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 18px;margin-top:13px;padding-top:10px;border-top:1px solid #49785a}
+.pulse-insights .daily-pulse{margin:0;padding:3px 0;border:0;flex:1 1 225px}
+@media(max-width:640px){.pulse-insights{gap:2px 0}.pulse-insights .daily-pulse{flex:1 1 100%;font-size:12px}}
 </style>
 </head>
 <body>
@@ -262,7 +266,7 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
     <div class="summary" id="stats">
       <article class="card primary">
         <div class="caption">Ledige sitteplasser</div><div id="available" class="big">—</div>
-        <p id="pulseMessage" class="pulse-message">Følg billettpulsen fram mot avspark.</p><div id="dailyPulse" class="daily-pulse" aria-live="polite">Døgnpuls: venter på historikk</div>
+        <p id="pulseMessage" class="pulse-message">Følg billettpulsen fram mot avspark.</p><div class="pulse-insights" aria-live="polite"><div id="dailyPulse" class="daily-pulse">Døgnpuls: venter på historikk</div><div id="weekPulse" class="daily-pulse">Ukespuls: trenger historikk</div><div id="pulseMomentum" class="daily-pulse">Tempo: trenger historikk</div></div>
       </article>
       <div class="stack">
         <article class="card small-card"><div class="caption">Siden første viste telling</div><div class="value" id="sinceFirst">—</div><div class="minor" id="sinceFirstNote">Venter på flere målinger</div></article>
@@ -571,6 +575,38 @@ function dailyPulse(records){
   return {hours:Math.round((end-new Date(near.observed_at).getTime())/3600000),
     difference:latest.available_seated-near.available_seated};
 }
+function referencePulse(records, targetHours, toleranceHours){
+  if(!records.length)return null;
+  const sorted=records.slice().sort((a,b)=>new Date(a.observed_at)-new Date(b.observed_at));
+  const latest=sorted.at(-1),end=new Date(latest.observed_at).getTime();
+  const relevant=sorted.slice(0,-1).filter(p=>{
+    const hours=(end-new Date(p.observed_at).getTime())/3600000;
+    return comparable(p,latest)&&Math.abs(hours-targetHours)<=toleranceHours;
+  });
+  if(!relevant.length)return null;
+  const previous=relevant.reduce((best,p)=>Math.abs((end-new Date(p.observed_at).getTime())/3600000-targetHours)<
+    Math.abs((end-new Date(best.observed_at).getTime())/3600000-targetHours)?p:best);
+  return {hours:(end-new Date(previous.observed_at).getTime())/3600000,
+    difference:latest.available_seated-previous.available_seated,
+    previous};
+}
+function weeklyPulse(records){return referencePulse(records,168,24);}
+function momentumPulse(records){
+  // Compare two actual, adjacent ~24h periods, never infer from a one-hour jump.
+  const last24=referencePulse(records,24,6);
+  if(!last24)return null;
+  const previous=last24.previous;
+  const older=records.filter(p=>comparable(p,previous));
+  const old24=referencePulse(older,24,6);
+  if(!old24)return null;
+  const rateNow=Math.max(0,-last24.difference)/last24.hours;
+  const rateOld=Math.max(0,-old24.difference)/old24.hours;
+  // Ignore small changes that could simply be measurement noise.
+  if(rateNow<1&&rateOld<1)return {state:'stable'};
+  if(rateOld<.25)return {state:rateNow>=1?'faster':'stable'};
+  const ratio=rateNow/rateOld;
+  return {state:ratio>=1.3?'faster':ratio<=.7?'slower':'stable'};
+}
 function render(scans){
   const records=scans.slice().sort((a,b)=>new Date(a.observed_at)-new Date(b.observed_at));
   const last=records.at(-1),prev=records.at(-2);
@@ -588,6 +624,21 @@ function render(scans){
     pulseElement.dataset.trend=pulse.difference<0?'down':pulse.difference>0?'up':'flat';
     pulseElement.textContent='Døgnpuls ('+pulse.hours+' t): '+(pulse.difference<0?count+' færre ledige':pulse.difference>0?count+' flere ledige':'uendret antall ledige');
   }
+  const week=weeklyPulse(scoped),weekElement=$('weekPulse');
+  if(!week){
+    weekElement.textContent='Ukespuls: trenger målinger omtrent 7 dager fra hverandre';
+    weekElement.dataset.trend='unknown';
+  }else{
+    const days=Math.round(week.hours/24);
+    weekElement.dataset.trend=week.difference<0?'down':week.difference>0?'up':'flat';
+    weekElement.textContent='Siste '+days+' døgn: '+(week.difference<0?fmt(-week.difference)+' færre ledige':week.difference>0?fmt(week.difference)+' flere ledige':'uendret antall ledige');
+  }
+  const momentum=momentumPulse(scoped),momentumElement=$('pulseMomentum');
+  momentumElement.dataset.trend=momentum?.state||'unknown';
+  momentumElement.textContent=!momentum?'Tempo: trenger tellinger over omtrent 48 timer'
+    :momentum.state==='faster'?'Tempo: raskere reduksjon i ledige plasser'
+    :momentum.state==='slower'?'Tempo: langsommere reduksjon i ledige plasser'
+    :'Tempo: stabil utvikling';
   const sinceFirst=last && scoped.length?last.available_seated-scoped[0].available_seated:null;
   const sinceLast=comparable(last,prev)?last.available_seated-prev.available_seated:null;
   showTrend('sinceFirst','sinceFirstNote',sinceFirst);
