@@ -32,10 +32,17 @@ def profile_location(explicit=None):
             raise ValueError("Cannot find the supplied Koteng profile: " + str(path))
         return path
     folder = ROOT / "v3_profiles"
+    errors = []
     for name in ("koteng_arena.v2.json", "koteng_arena.v1.json"):
         candidate = folder / name
         if candidate.is_file():
-            return candidate
+            try:
+                validate_koteng_profile(StadiumProfile.load(candidate))
+                return candidate
+            except (ValueError, TypeError, KeyError) as exc:
+                errors.append(f"{name}: {exc}")
+    if errors:
+        raise ValueError("Ingen komplett Koteng-profil med 6 felt: " + "; ".join(errors))
     raise FileNotFoundError(
         "Ingen Koteng-profil funnet. Kopier koteng_arena.v1.json fra den "
         "forste fungerende opplaeringsmappen til scanner/v3_profiles/."
