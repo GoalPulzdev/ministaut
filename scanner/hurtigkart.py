@@ -19,6 +19,7 @@ from targets_v16 import confirmed_load,field_candidates,round_robin_recovery,rec
 from publication import publish, TOTAL_PLACES, event_labels, event_key, load_history
 from match_config import SEATS,load_locked,save_locked,normalize_locked,check_map_against_reference
 from schedule_control import ScanSchedule
+from event_registry import EventRegistry
 from analytics import forecast,save_chart,scoped_records
 
 ROOT=Path(__file__).resolve().parent
@@ -269,6 +270,9 @@ def run(args):
                      'auto_recovery_fields':0,'bundled_confirmed_fields':len(CONFIRMED_POINTS)}
     counter=Counts();nprobe=0;collector=Collector()
     schedule=ScanSchedule(ROOT/'monitorinnstillinger.json',hours=args.auto_hours,enabled=not args.no_auto)
+    registry=EventRegistry(ROOT/'monitor_kamper.json')
+    if checkout_url(url) and not registry.get(event_key(url)):
+        registry.add(url,event_labels(url)[0])
     if args.no_auto and schedule.enabled:schedule.enable(False)
     expected=set(SEATS);scan_expected=expected-set(locked);cap=dict(SEATS);standing={'SB','ØVRE ØST'};source='stadionreferanse';last=''
     map_verified=False;map_issues={};locked_conflicts={}
@@ -383,7 +387,8 @@ def run(args):
                   'forecast':{k:projection.get(k) for k in ('state','value','low','high','daily_change','message','hours_until','kickoff_utc')},
                   'chart_points':projection['points'][-30:],
                   'auto_enabled':schedule.enabled,'auto_remaining':schedule.seconds_remaining(),
-                  'clock':datetime.now().strftime('%H:%M:%S'),'busy':busy}
+                  'clock':datetime.now().strftime('%H:%M:%S'),'busy':busy,
+                  'registered_events':registry.items}
             panel_show(page,data)
             return data
         def register(hit,manual=None,goal=None,phase=None):
@@ -604,10 +609,32 @@ def run(args):
                             deadline=monotonic()+args.manual_seconds if args.manual_seconds>0 else float('inf')
                             prior_signature=None;stable=0;last_pointer=mouse_location(page)['t']
                         continue
+                    elif command.startswith('register:'):
+                        destination=command.split(':',1)[1]
+                        try:
+                            saved=registry.add(destination)
+                            update('Kamp lagret · velg den i kamplisten')
+                        except ValueError as ex:update('Ugyldig kampadresse: '+str(ex)[:80])
+                        continue
+                    elif command.startswith('select_registered:'):
+                        key=command.split(':',1)[1]
+                        entry=registry.get(key)
+                        if not entry:
+                            update('Kamp finnes ikke i listen');continue
+                        if entry['venue']!='lerkendal':
+                            update('Koteng må kartlegges før skanning kan aktiveres');continue
+                        finalize_cycle()
+                        if start_next_cycle(next_url=entry['url']):
+                            deadline=monotonic()+args.manual_seconds if args.manual_seconds>0 else float('inf')
+                            prior_signature=None;stable=0;last_pointer=mouse_location(page)['t']
+                        continue
                     elif command.startswith('switch:'):
                         destination=command.split(':',1)[1]
                         update('Lagrer måling · åpner ny kamp …')
                         if checkout_url(destination):
+                            # A new URL becomes a reusable saved fixture, not a one-off switch.
+                            try:registry.add(destination)
+                            except ValueError:pass
                             finalize_cycle()
                             if start_next_cycle(next_url=destination):
                                 deadline=monotonic()+args.manual_seconds if args.manual_seconds>0 else float('inf')
