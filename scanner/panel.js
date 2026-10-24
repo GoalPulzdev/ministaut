@@ -122,7 +122,10 @@
       <div class="inline"><input id="rbk-locked-input" placeholder="Ingen låste felt" spellcheck="false" autocomplete="off"/>
       <button data-action="config_locked">Lagre</button></div>
       <div class="tiny">Bare felt du har bekreftet låst. Endring starter ny sjekk og ny sammenligningsserie.</div>
-      <label for="rbk-switch-url" style="margin-top:11px">Bytt til en annen kamp</label>
+      <label for="rbk-saved-events" style="margin-top:11px">Mine kamper · uten omstart</label>
+      <div class="inline"><select id="rbk-saved-events" style="min-width:0;flex:1;background:#112a20;color:#fff;border:1px solid #507a63;border-radius:6px;padding:8px"><option value="">Velg lagret kamp</option></select>
+      <button data-action="select_registered">Åpne</button></div>
+      <label for="rbk-switch-url" style="margin-top:11px">Legg til en ny kamp</label>
       <div class="inline"><input id="rbk-switch-url" placeholder="https://billett.rbk.no/checkout/…" spellcheck="false" autocomplete="off"/>
       <button data-action="switch">Bytt</button></div></details>
     <div class="tiny" id="rbk-last">Ingen felt registrert ennå</div>
@@ -177,7 +180,13 @@
           'Felt: '+(value||'Ingen')+'.\nBare bekreftet låste felt kan registreres. Det starter deretter en ny skanning.');
       return;
     }
-    if(action==='switch'){
+    if(action==='select_registered'){
+      const key=root.querySelector('#rbk-saved-events').value;
+      if(!key){notice('Velg en kamp fra listen først.',true);return;}
+      ask('select_registered:'+key,'Åpne lagret kamp?','Den aktive målingen lagres før du bytter kamp.');
+      return;
+    }
+        if(action==='switch'){
       const value=root.querySelector('#rbk-switch-url').value.trim();
       let valid=false;
       try{const u=new URL(value);valid=u.protocol==='https:' && u.hostname==='billett.rbk.no' && /^\/checkout\/[^/]+\/?$/.test(u.pathname);}catch(e){}
