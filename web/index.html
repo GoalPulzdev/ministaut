@@ -318,7 +318,7 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
     <div class="summary" id="stats">
       <article class="card primary">
         <div class="caption">Ledige sitteplasser</div><div id="available" class="big">—</div>
-        <p id="pulseMessage" class="pulse-message">Følg billettpulsen fram mot avspark.</p><div class="pulse-insights" aria-live="polite"><div id="dailyPulse" class="daily-pulse">Døgnpuls: venter på historikk</div><div id="weekPulse" class="daily-pulse">Ukespuls: trenger historikk</div><div id="pulseMomentum" class="daily-pulse">Tempo: trenger historikk</div></div>
+        <div class="pulse-insights" aria-live="polite"><div id="dailyPulse" class="daily-pulse" hidden></div><div id="weekPulse" class="daily-pulse" hidden></div><div id="pulseMomentum" class="daily-pulse" hidden></div></div>
       </article>
       <div class="stack">
         <article class="card small-card"><div class="caption">Siden første viste telling</div><div class="value" id="sinceFirst">—</div><div class="minor" id="sinceFirstNote">Venter på flere målinger</div></article>
@@ -680,39 +680,29 @@ function render(scans){
   const scoped=last?records.filter(p=>comparable(p,last)):[];
   const pulse=dailyPulse(scoped);
   const pulseElement=$('dailyPulse');
-  if(!pulse){
-    pulseElement.textContent='Døgnpuls: trenger tellinger med omtrent ett døgn mellomrom';
-    pulseElement.dataset.trend='unknown';
-  }else{
-    const count=fmt(Math.abs(pulse.difference));
+  pulseElement.hidden=!pulse;
+  if(pulse){
+    const n=fmt(Math.abs(pulse.difference));
     pulseElement.dataset.trend=pulse.difference<0?'down':pulse.difference>0?'up':'flat';
-    const description=pulse.difference<0?count+' færre ledige':pulse.difference>0?count+' flere ledige':'uendret antall ledige';
-    pulseElement.textContent='Døgnpuls (24 t): '+description+
-      (pulse.normalized?' · beregnet fra '+pulse.hours.toFixed(1).replace('.',',')+' t mellom målingene':'');
+    pulseElement.textContent='24 t · '+(pulse.difference<0?n+' færre ledige':pulse.difference>0?n+' flere ledige':'uendret');
+    pulseElement.title=pulse.normalized?'24-timers beregnet gjennomsnitt fra '+pulse.hours.toFixed(1).replace('.',',')+' timers måleintervall':'Målt endring over omtrent 24 timer';
   }
   const week=weeklyPulse(scoped),weekElement=$('weekPulse');
-  if(!week){
-    weekElement.textContent='Ukespuls: trenger målinger omtrent 7 dager fra hverandre';
-    weekElement.dataset.trend='unknown';
-  }else{
-    const days=Math.round(week.hours/24);
+  weekElement.hidden=!week;
+  if(week){
     weekElement.dataset.trend=week.difference<0?'down':week.difference>0?'up':'flat';
-    weekElement.textContent='Siste '+days+' døgn: '+(week.difference<0?fmt(-week.difference)+' færre ledige':week.difference>0?fmt(week.difference)+' flere ledige':'uendret antall ledige');
+    weekElement.textContent='7 døgn · '+(week.difference<0?fmt(-week.difference)+' færre ledige':week.difference>0?fmt(week.difference)+' flere ledige':'uendret');
   }
   const momentum=momentumPulse(scoped),momentumElement=$('pulseMomentum');
-  momentumElement.dataset.trend=momentum?.state||'unknown';
-  momentumElement.textContent=!momentum?'Tempo: trenger tellinger over omtrent 48 timer'
-    :momentum.state==='faster'?'Tempo: raskere reduksjon i ledige plasser'
-    :momentum.state==='slower'?'Tempo: langsommere reduksjon i ledige plasser'
-    :'Tempo: stabil utvikling';
+  momentumElement.hidden=!momentum;
+  if(momentum){
+    momentumElement.dataset.trend=momentum.state;
+    momentumElement.textContent='Tempo · '+(momentum.state==='faster'?'øker':momentum.state==='slower'?'avtar':'stabilt');
+  }
   const sinceFirst=last && scoped.length?last.available_seated-scoped[0].available_seated:null;
   const sinceLast=comparable(last,prev)?last.available_seated-prev.available_seated:null;
   showTrend('sinceFirst','sinceFirstNote',sinceFirst);
   showTrend('delta','deltaNote',sinceLast);
-  $('pulseMessage').textContent=!last?'Følg billettpulsen fram mot avspark.'
-    :sinceFirst<0?fmt(-sinceFirst)+' færre ledige sitteplasser siden første viste telling.'
-    :sinceFirst>0?'Flere sitteplasser tilgjengelige enn ved første telling.'
-    :'Følg utviklingen og bli med på kampdag.';
   renderForecast(records);
   graph(scoped);
   // The chart count and inspected point already communicate history.
