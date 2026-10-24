@@ -515,7 +515,9 @@ function kickoffForecast(records,kickoffUtc,now=Date.now()){
   const effectiveRate=Math.min(0,rate);
   const projected=Math.max(0,Math.min(ceiling,ceiling+effectiveRate*forwardHours));
   /* Scenario spread, not a statistical confidence interval. */
-  const spread=Math.max(150,Math.abs(effectiveRate)*forwardHours*.45,1.8*mad*forwardHours);
+  // Pace-based uncertainty: a fraction of expected decrease, not a multi-week MAD extrapolation.
+  const predictedReduction=ceiling-projected;
+  const spread=Math.max(15,Math.min(ceiling*.12,predictedReduction*(.12+Math.min(.10,forwardHours/1440))));
   const low=Math.max(0,Math.min(ceiling,Math.floor(projected-spread)));
   const high=Math.max(low,Math.min(ceiling,Math.ceil(projected+spread)));
   const materiallyUncertain=(high-low)>Math.max(2500,last.available_seated*.75);
