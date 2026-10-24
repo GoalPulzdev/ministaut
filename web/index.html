@@ -288,6 +288,7 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
 .map-legend{border-top:1px solid #365540;margin-top:10px;padding:13px 0 7px}
 .section-detail{font-size:13px;padding:12px 14px;border-radius:10px}
 @media(max-width:640px){.stadium-map-shell{padding:10px 7px}.stadium-map{max-height:580px}.stadium-map .seat-label{font-size:10px}}
+.insight-switch{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}.insight-switch button{border:1px solid #507a56;background:#13291b;color:#d4ebd9;padding:10px;border-radius:9px;cursor:pointer}.insight-switch button[aria-pressed=true]{background:#367245;color:#fff}.insight-records{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}.insight-record{padding:12px;background:#152b1c;border:1px solid #3c6243;border-radius:10px}.insight-record strong{display:block;font-size:19px;margin:5px 0}.insight-record span{font-size:11px;color:#afc9b5}.stadium-map .seat-sector[data-heat=strong]{fill:#d55849}.stadium-map .seat-sector[data-heat=medium]{fill:#d69246}.stadium-map .seat-sector[data-heat=low]{fill:#ddbe64}.stadium-map .seat-sector[data-heat=flat]{fill:#4a8563}.stadium-map .seat-sector[data-heat=increase]{fill:#438fcb}.stadium-map .seat-sector[data-heat=unknown]{fill:#33453c;stroke-dasharray:3 3}@media(max-width:640px){.insight-records{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -357,9 +358,9 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
     <section class="card sections-panel" aria-labelledby="sections-title">
       <div class="section-heading"><h2 id="sections-title" class="section-title">Tribuneoversikt</h2><span class="section-help" id="sectionStatus">Henter feltdata …</span></div>
       <p class="section-intro">Lerkendals fire tribunesider med feltvis tilgjengelighet. Feltplasseringen følger Lerkendals kjente tribune- og feltinndeling. Formene er skjematiske, ikke nøyaktige sektorpolygoner. Velg et felt for målt ledighet.</p>
-      <div class="stadium-map-shell"><div class="map-switch"><strong>LERKENDAL · SITTEFELT <span class="map-revision">KART V5 · 24.10</span></strong><span class="section-help">Trykk på et felt</span></div><div id="stadiumMap" aria-label="Interaktiv skjematisk stadionoversikt"></div><div class="map-legend"><span class="map-key"><i style="background:#398b58"></i>50 % +</span><span class="map-key"><i style="background:#b7b857"></i>20–49 %</span><span class="map-key"><i style="background:#d78938"></i>8–19 %</span><span class="map-key"><i style="background:#d55a50"></i>1–7 %</span><span class="map-key"><i style="background:#4d5255"></i>0 ledige</span><span class="map-key"><i style="background:#303b46"></i>Låst / ukjent</span></div><p class="map-note">Sittefelt avlest fra valgt kamp. Ståplasser er ikke inkludert. Farge viser andel ledige seter, ikke solgte billetter. Feltinndelingen følger stadionkartet, men rektanglene er skjematiske og ikke oppmålte feltgrenser. Kontroller alltid felt og rad hos RBK.</p></div>
+      <div class="stadium-map-shell"><div class="map-switch"><strong>LERKENDAL · SITTEFELT <span class="map-revision">KART V5 · 24.10</span></strong><span class="section-help">Trykk på et felt</span></div><div class="insight-switch"><button id="viewAvailability" type="button" aria-pressed="true">Ledige nå</button><button id="viewHeat" type="button" aria-pressed="false">Endring siste døgn</button><span id="heatStatus"></span></div><div id="stadiumMap" aria-label="Interaktiv skjematisk stadionoversikt"></div><div class="map-legend"><span class="map-key"><i style="background:#398b58"></i>50 % +</span><span class="map-key"><i style="background:#b7b857"></i>20–49 %</span><span class="map-key"><i style="background:#d78938"></i>8–19 %</span><span class="map-key"><i style="background:#d55a50"></i>1–7 %</span><span class="map-key"><i style="background:#4d5255"></i>0 ledige</span><span class="map-key"><i style="background:#303b46"></i>Låst / ukjent</span></div><p class="map-note">Sittefelt avlest fra valgt kamp. Ståplasser er ikke inkludert. Farge viser andel ledige seter, ikke solgte billetter. Feltinndelingen følger stadionkartet, men rektanglene er skjematiske og ikke oppmålte feltgrenser. Kontroller alltid felt og rad hos RBK.</p></div>
       <div class="section-grid" id="sectionGrid"><p class="section-loading">Venter på seksjonsdata …</p></div>
-      <div id="sectionDetail" class="section-detail" aria-live="polite">Velg et felt for flere detaljer.</div>
+      <div id="sectionDetail" class="section-detail" aria-live="polite">Velg et felt for flere detaljer.</div><div id="sectionRecords" class="insight-records" aria-live="polite"></div>
     </section>
   </section>
   <footer class="fan-footer">Ministaut er en uavhengig supporteroversikt.</footer>
@@ -819,7 +820,24 @@ async function refreshCardData(){
 
 const STADIUM_CODES=["A","AA","AB","B","BA","BB","C","CA","CB","D","DA","DB","E","EA","EB","F","FA","FB","G","GA","GB","HB","I","IB","J","JB","K","KB","LB","MA","MB","N","NA","NB","O","OA","OB","P","PA","PB","PRESSE","Q","QA","QB","RA","RB","SA","TA","TB","U","UA","UB","V","VA","VB","W","WA","WB","XA","XB"];
 const SVG_NS='http://www.w3.org/2000/svg';
-let stadiumByCode=new Map(),stadiumSelected=null;
+let stadiumByCode=new Map(),stadiumSelected=null,sectionDeltas=new Map(),sectionView='availability',visibleSectionRows=[],visibleSectionScan=null;
+const historical24=(scans,end)=>{if(!end)return null;const endTime=Date.parse(end.observed_at);return scans.filter(s=>s.id!==end.id&&comparable(s,end)).map(s=>({s,gap:endTime-Date.parse(s.observed_at)})).filter(x=>x.gap>=18*3600000&&x.gap<=30*3600000).sort((a,b)=>Math.abs(a.gap-86400000)-Math.abs(b.gap-86400000))[0]?.s||null;};
+const sectionDeltaLabel=n=>n==null?'mangler sammenlignbar måling':n<0?fmt(-n)+' færre ledige':n>0?fmt(n)+' flere ledige':'uendret';
+const sectionHeat=n=>n==null?'unknown':n>0?'increase':n===0?'flat':n<=-40?'strong':n<=-15?'medium':'low';
+function chooseSectionMode(mode){sectionView=mode;$('viewAvailability').setAttribute('aria-pressed',String(mode==='availability'));$('viewHeat').setAttribute('aria-pressed',String(mode==='heat'));$('heatStatus').textContent=mode==='heat'?'Rød/oransje: størst fall i ledige plasser. Blå: flere ledige. Grå: mangler data.':'Farger viser andel ledige seter';drawStadiumMap(visibleSectionRows,visibleSectionScan);}
+function renderSectionRecords(scans){
+ const box=$('sectionRecords');box.replaceChildren();
+ const ordered=scans.slice().sort((a,b)=>Date.parse(a.observed_at)-Date.parse(b.observed_at));
+ const last=ordered.at(-1),scoped=last?ordered.filter(s=>comparable(s,last)):[];
+ const lowest=scoped.length?Math.min(...scoped.map(s=>s.available_seated)):null;
+ const windows=scoped.map(end=>{const start=historical24(scoped,end);return start?{fall:start.available_seated-end.available_seated,hours:(Date.parse(end.observed_at)-Date.parse(start.observed_at))/3600000}:null}).filter(x=>x&&x.fall>0);
+ const largest=windows.length?Math.max(...windows.map(x=>x.fall)):null;
+ const fastest=windows.length?Math.max(...windows.map(x=>x.fall/x.hours)):null;
+ for(const [name,num,description] of [['Laveste målte ledighet',lowest==null?'—':fmt(lowest),'Samme feltoppsett'],['Største døgnreduksjon',largest==null?'—':fmt(largest),'18–30 timers målte intervaller'],['Raskeste døgnsnitt',fastest==null?'—':fmt(Math.round(fastest))+' / t','Fall i ledige plasser per time']]){
+  const div=document.createElement('div');div.className='insight-record';const label=document.createElement('span');label.textContent=name;const strong=document.createElement('strong');strong.textContent=num;const small=document.createElement('span');small.textContent=description;div.append(label,strong,small);box.append(div);
+ }
+}
+
 function svgEl(name,attrs={},textValue=null){
  const n=document.createElementNS(SVG_NS,name);
  for(const [key,value] of Object.entries(attrs))n.setAttribute(key,String(value));
@@ -990,6 +1008,7 @@ function drawStadiumMap(rows,scan){
  const byCode=new Map(rows.map(r=>[r.section_code,r]));
  stadiumByCode=byCode;
  const locks=new Set(scan.locked_fields||[]);
+ const heat=sectionView==='heat';
  const svg=svgEl('svg',{viewBox:'0 0 780 710',class:'stadium-map',role:'group','aria-label':'Tribunekart for Lerkendal, tilgjengelige sitteplasser'});
  const defs=svgEl('defs');
  const grad=svgEl('linearGradient',{id:'pitchGrad',x1:'0',x2:'0',y1:'0',y2:'1'});
@@ -1017,7 +1036,7 @@ function drawStadiumMap(rows,scan){
  sectionTiles().forEach(tile=>{
   const {code,x,y,w,h}=tile,row=byCode.get(code),level=stadiumColor(row,locks.has(code));
   const sectorName=['U','V','W'].includes(code)?'VIP Coop, felt '+code:'Felt '+code;
-  const p=svgEl('rect',{x,y,width:w,height:h,rx:4,class:'seat-sector','data-code':code,'data-level':level,'data-vip':(['U','V','W'].includes(code)?'coop':''),'aria-pressed':'false',tabindex:0,role:'button','aria-label':sectorName+', '+(row?row.free+' ledige av '+row.capacity:locks.has(code)?'låst':'mangler måling')});
+  const p=svgEl('rect',{x,y,width:w,height:h,rx:4,class:'seat-sector','data-code':code,'data-heat':(heat?sectionHeat(sectionDeltas.get(code)?.day):''),'data-level':level,'data-vip':(['U','V','W'].includes(code)?'coop':''),'aria-pressed':'false',tabindex:0,role:'button','aria-label':sectorName+', '+(row?row.free+' ledige av '+row.capacity:locks.has(code)?'låst':'mangler måling')});
   p.append(svgEl('title',{},sectorName+' · '+(row?row.free+' ledige av '+row.capacity:locks.has(code)?'låst':'ikke målt')));
   p.addEventListener('click',()=>activateStadiumSection(code));
   p.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activateStadiumSection(code);}});
@@ -1047,7 +1066,8 @@ function activateStadiumSection(code){
  const detail=$('sectionDetail');
  if(!row){detail.textContent='Felt '+code+': ikke avlest eller bekreftet låst. Ingen ledighet kan fastslås.';return;}
  const pct=Math.round(100*row.free/row.capacity);
- detail.textContent='Felt '+code+' · '+fmt(row.free)+' ledige av '+fmt(row.capacity)+' seter ('+pct+' %). Målt '+date(lastObservedAt)+'.';
+ const change=sectionDeltas.get(code)||{};
+ detail.textContent='Felt '+code+' · '+fmt(row.free)+' ledige av '+fmt(row.capacity)+' seter ('+pct+' %). Målt '+date(lastObservedAt)+'. Forrige telling: '+sectionDeltaLabel(change.previous)+'. Omtrent 24 timer: '+sectionDeltaLabel(change.day)+'.';
  const cell=[...$('sectionGrid').children].find(el=>el.dataset?.code===code);
  if(sectionSelection)sectionSelection.setAttribute('aria-pressed','false');
  sectionSelection=cell||null;
@@ -1058,7 +1078,7 @@ function renderSections(rows,scan){
   grid.replaceChildren();
   if(!scan || !Array.isArray(rows)){
     drawStadiumMap(null,null);
-    status.textContent='Feltdata ikke tilgjengelige';
+    visibleSectionRows=[];visibleSectionScan=null;sectionDeltas=new Map();status.textContent='Feltdata ikke tilgjengelige';
     detail.textContent='Velg en kamp for å se sittefeltene.';
     return;
   }
@@ -1076,7 +1096,7 @@ function renderSections(rows,scan){
     return;
   }
   status.textContent=valid.length+' avleste felt · '+date(scan.observed_at);
-  drawStadiumMap(valid,scan);
+  visibleSectionRows=valid.slice();visibleSectionScan=scan;drawStadiumMap(valid,scan);
   valid.sort((a,b)=>a.section_code.localeCompare(b.section_code,'nb',{numeric:true}));
   sectionSelection=null;
   detail.textContent='Velg et felt for å se ledige plasser og størrelse.';
@@ -1092,15 +1112,31 @@ function renderSections(rows,scan){
     grid.append(btn);
   }
 }
-async function loadSections(scan,version,id){
+async function loadSections(scan,version,id,scans){
   const grid=$('sectionGrid');
   grid.textContent='Henter seksjonstall …';
   $('sectionStatus').textContent='Henter feltdata …';
   if(!scan){renderSections(null,null);return;}
   try{
-    const rows=await load('ministaut_section_measurements?select=section_code,free,capacity&scan_id=eq.'+
-      encodeURIComponent(scan.id)+'&order=section_code.asc&limit=80');
+    const prior=scans.filter(s=>s.id!==scan.id&&Date.parse(s.observed_at)<Date.parse(scan.observed_at)&&comparable(s,scan)).sort((a,b)=>Date.parse(b.observed_at)-Date.parse(a.observed_at))[0];
+    const day=historical24(scans,scan);
+    const unique=[scan,prior,day].filter((x,i,arr)=>x&&arr.findIndex(y=>y?.id===x.id)===i);
+    const snapshots=await Promise.all(unique.map(async item=>{
+      const rows=await load('ministaut_section_measurements?select=section_code,free,capacity&scan_id=eq.'+encodeURIComponent(item.id)+'&order=section_code.asc&limit=80');
+      const valid=rows.length+(item.locked_fields||[]).length===60&&new Set(rows.map(r=>r.section_code)).size===rows.length&&rows.reduce((a,b)=>a+b.free,0)===item.available_seated;
+      return {id:item.id,rows:valid?rows:null};
+    }));
     if(version!==selectionVersion||current!==id)return;
+    const byId=new Map(snapshots.map(x=>[x.id,x.rows]));
+    const rows=byId.get(scan.id);if(!rows){renderSections(null,null);return;}
+    // Do not use a comparison snapshot if it covers different field capacities.
+    // Full-snapshot checks above already reject missing rows and bad totals.
+    const prev=new Map(((prior&&byId.get(prior.id))||[]).map(r=>[r.section_code,r]));
+    const daily=new Map(((day&&byId.get(day.id))||[]).map(r=>[r.section_code,r]));
+    sectionDeltas=new Map(rows.map(r=>{
+     const a=prev.get(r.section_code),b=daily.get(r.section_code);
+     return [r.section_code,{previous:a&&a.capacity===r.capacity?r.free-a.free:null,day:b&&b.capacity===r.capacity?r.free-b.free:null}];
+    }));
     renderSections(rows,scan);
   }catch(error){
     if(version!==selectionVersion||current!==id)return;
@@ -1108,6 +1144,8 @@ async function loadSections(scan,version,id){
     $('sectionDetail').textContent='Kunne ikke hente seksjonsdata nå.';
   }
 }
+$('viewAvailability').addEventListener('click',()=>chooseSectionMode('availability'));
+$('viewHeat').addEventListener('click',()=>chooseSectionMode('heat'));
 async function selectMatch(id){
   const match=matches.find(m=>m.id===id);
   if(!match)return;
@@ -1118,13 +1156,14 @@ async function selectMatch(id){
   $('kickoff').textContent=match.kickoff_at?'Avspark '+date(match.kickoff_at):'Avspark ikke registrert';
   const key=String(match.event_key||'');
   $('tickets').href=/^[A-Za-z0-9_-]{8,100}$/.test(key)?'https://billett.rbk.no/checkout/'+key:'https://billett.rbk.no/';
-  if(changed){$('error').textContent='';render([]);renderSections(null,null);}
+  if(changed){$('error').textContent='';render([]);renderSectionRecords([]);renderSections(null,null);}
   $('stats').setAttribute('aria-busy','true');
   try{
     const data=await load('ministaut_scans?select=id,observed_at,available_seated,locked_fields&reading_status=eq.accepted&match_id=eq.'+encodeURIComponent(id)+'&order=observed_at.desc&limit=500');
     if(version!==selectionVersion || id!==current)return;
     render(data);
-    await loadSections(data[0]||null,version,id);
+    renderSectionRecords(data);
+    await loadSections(data[0]||null,version,id,data);
   }catch(error){if(version===selectionVersion)$('error').textContent='Kunne ikke hente tall for valgt kamp. Prøv Oppdater.';}
   finally{if(version===selectionVersion)$('stats').removeAttribute('aria-busy');}
 }
