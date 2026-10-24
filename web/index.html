@@ -506,16 +506,25 @@ function kickoffForecast(records,kickoffUtc,now=Date.now()){
     }
   }
   if(slopes.length<3)return {status:'unavailable',reason:'Trenger flere målinger med tidsavstand'};
-  const rate=median(slopes),mad=median(slopes.map(x=>Math.abs(x-rate)));
+  const longPace=Math.max(0,(sample[0].available_seated-last.available_seated)/((lastTime-new Date(sample[0].observed_at).getTime())/3600000));
+  const recent=sample.slice(-3);
+  const recentHours=(new Date(recent.at(-1).observed_at)-new Date(recent[0].observed_at))/3600000;
+  const recentPace=recentHours>=4?Math.max(0,(recent[0].available_seated-last.available_seated)/recentHours):longPace;
+  const rate=-(recentHours>=6?recentPace:.65*recentPace+.35*longPace);
+  const mad=median(slopes.map(x=>Math.abs(x-rate)));
   const forwardHours=(kickoff-lastTime)/3600000;
   if(forwardHours<=0)return {status:'unavailable',reason:'Kampstart er passert'};
   // Conservative business rule: inventory in our forecast must never grow
   // beyond the latest observed available seats. Do not extrapolate increases.
   const ceiling=last.available_seated;
   const effectiveRate=Math.min(0,rate);
-  const projected=Math.max(0,Math.min(ceiling,ceiling+effectiveRate*forwardHours));
+  // Gradually reduce long-horizon extrapolation instead of extending an early rush for weeks.
+  const pacedHours=14*24*(1-Math.exp(-forwardHours/(14*24)));
+  const projected=Math.max(0,Math.min(ceiling,ceiling+effectiveRate*pacedHours));
   /* Scenario spread, not a statistical confidence interval. */
-  const spread=Math.max(150,Math.abs(effectiveRate)*forwardHours*.45,1.8*mad*forwardHours);
+  // Pace-based uncertainty: a fraction of expected decrease, not a multi-week MAD extrapolation.
+  const predictedReduction=ceiling-projected;
+  const spread=Math.max(15,Math.min(ceiling*.12,predictedReduction*(.12+Math.min(.08,forwardHours/1440))));
   const low=Math.max(0,Math.min(ceiling,Math.floor(projected-spread)));
   const high=Math.max(low,Math.min(ceiling,Math.ceil(projected+spread)));
   const materiallyUncertain=(high-low)>Math.max(2500,last.available_seated*.75);
