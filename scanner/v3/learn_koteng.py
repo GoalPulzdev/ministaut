@@ -27,6 +27,55 @@ import re
 KOTENG_URL = "https://billett.rbk.no/checkout/6aaceecebfe408c38e1712dd"
 SECTION = re.compile(r"\b(?:SECTION|SEKSJON|FELT|BLOCK|SECTOR|SEKTOR)\s*[:#-]?\s*"
                      r"(?P<name>(?:[A-ZÆØÅ]{1,4}[- ]?\d{0,3}|\d{1,3}))\b", re.I)
+STANDING = re.compile(r"\b(?:STÅPLASS|STAAPLASS|STANDING)\s*[:#-]?\s*(?P<name>[A-ZÆØÅ0-9-]{1,8})\b", re.I)
+# Expected labels from the user's Koteng screen and first measured report,
+# NOT a verified complete stadium inventory.
+REFERENCE_SEAT_FIELDS = {"FELT-1", "FELT-2", "FELT-3", "FELT-4", "FELT-5", "VIP"}
+
+
+def cookie_overlay(page):
+    try:
+        return bool(page.evaluate("""() => {
+            const t = document.body?.innerText || '';
+            return t.includes('Sikkerheten til dataene dine') &&
+                   t.includes('Bare nødvendig');
+        }"""))
+    except Exception:
+        return False
+
+
+def focused_koteng_region(page):
+    """Crop away checkout basket and include the top seating row.
+
+    The existing generic SVG detector covered x=5..1590 and started at y=424
+    in the uploaded 1600x960 screenshot. Koteng's seating map is in the left
+    checkout column with the top row near y=316. This is a Koteng-only
+    supervised training crop, not a change to the Lerkendal scanner.
+    """
+    original, source = choose_map_region(page)
+    vp = page.viewport_size or {"width": 1600, "height": 960}
+    width, height = vp["width"], vp["height"]
+    region = (
+        max(0, min(original[0], width * .04)),
+        max(0, min(original[1], height * .28)),
+        min(original[2], width * .665),
+        min(original[3], height - 10),
+    )
+    if region[2] - region[0] < 200 or region[3] - region[1] < 200:
+        raise RuntimeError("Fant ingen pålitelig stadionkart-region")
+    return region, source + "+koteng-left-column"
+
+
+def even_sample(points, limit):
+    """Sample whole spatial range, not just first rows of a grid."""
+    if limit <= 0 or not points:
+        return []
+    if len(points) <= limit:
+        return list(points)
+    if limit == 1:
+        return [points[len(points) // 2]]
+    return [points[round(i * (len(points) - 1) / (limit - 1))]
+            for i in range(limit)]
 
 
 def parse_training_tooltip(text, x, y):
@@ -40,9 +89,14 @@ def parse_training_tooltip(text, x, y):
         capacity = int(re.sub(r"[ .\u00a0]", "", count.group("capacity")))
         if not 1 <= capacity <= 100000 or not 0 <= free <= capacity:
             continue
-        names = list(SECTION.finditer(clean[max(0, count.start()-250):count.start()]))
-        if names:
-            label = names[-1].group("name").upper().replace(" ", "")
+        context = clean[max(0, count.start()-250):count.start()]
+        seats = list(SECTION.finditer(context))
+        standing = list(STANDING.finditer(context))
+        if standing and (not seats or standing[-1].start() > seats[-1].start()):
+            label = "STÅPLASS-" + standing[-1].group("name").upper()
+            return Observation(label, "", free, capacity, "standing-training", x, y)
+        if seats:
+            label = seats[-1].group("name").upper().replace(" ", "")
             return Observation(label, "", free, capacity, "koteng-training", x, y)
     return None
 
@@ -62,7 +116,9 @@ def train(url=KOTENG_URL, max_points=450, step=38):
         raise ValueError("Koteng-opplæring støtter kun offentlig RBK Vivenu-checkout")
     output = ROOT / "v3_learning" / "koteng_arena"
     output.mkdir(parents=True, exist_ok=True)
-    profile_file = ROOT / "v3_profiles" / "koteng_arena.v1.json"
+    # V2 anchor space differs from the original overbroad detector; do not merge
+    # historical V1 coordinates with this new focused region.
+    profile_file = ROOT / "v3_profiles" / "koteng_arena.v2.json"
     print("\nKOTENG ARENA - LÆR OPP STADION (TESTMODUS)")
     print("Ingen billetter klikkes eller reserveres. Ingenting publiseres.")
     print("Lerkendals data forblir urørt. Edge åpnes med egen V3-profil.\n")
@@ -75,26 +131,35 @@ def train(url=KOTENG_URL, max_points=450, step=38):
             page = context.pages[0] if context.pages else context.new_page()
             page.goto(url, wait_until="domcontentloaded", timeout=45000)
             print("Billettsiden er åpnet i Edge.")
-            input("Gå til STADIONKARTET i Edge og vent til feltene synes. Trykk ENTER her for å lære inn: ")
-            region, method = choose_map_region(page)
+            print("VIKTIG: Lukk samtykkevinduet selv, for eksempel med 'Bare nødvendig'.")
+            input("Vis HELE STADIONKARTET i Edge (inkl. Felt 1–5, VIP og Ståplass A), så trykk ENTER: ")
+            if cookie_overlay(page):
+                raise RuntimeError("Personvernbanneret ligger fortsatt over stadionkartet. Lukk det manuelt og prøv igjen.")
+            region, method = focused_koteng_region(page)
             print("Stadionkart:", method, tuple(round(x) for x in region))
             x1, y1, x2, y2 = region
             if x2-x1 < 150 or y2-y1 < 150:
                 raise RuntimeError("Fant ikke en stor nok stadionkart-region; læring stoppet")
-            points = collect_dom_points(page, region)
-            # Follow proven Lerkendal rescue principle: bounded grid if SVG points miss fields.
-            points += grid_points(region, step)
+            dom = collect_dom_points(page, region)
+            grid = grid_points(region, step)
+            # The old algorithm consumed up to 450 DOM positions before it
+            # reached the lower areas. Spread both discovery and rescue probes.
+            candidates = even_sample(dom, max_points // 2) + even_sample(
+                grid, max_points - max_points // 2)
             selected = []
             used = set()
-            for x, y in points:
+            for x, y in candidates:
                 key = (round(x/8), round(y/8))
                 if key not in used and len(selected) < max_points:
                     used.add(key)
                     selected.append((x, y))
+            print(f"Fordelte hoverpunkter: {len(dom)} SVG-kandidater, {len(grid)} rutepunkter; "
+                  f"{len(selected)} valgt på tvers av hele kartet.")
             if not selected:
                 raise RuntimeError("Ingen tilgjengelige skannepunkter")
             print(f"Kontrollerer opptil {len(selected)} hoverpunkter uten å klikke seter.")
             measurements = {}
+            standing_measurements = {}
             anchors = defaultdict(list)
             conflicts = {}
             prior_popup = None
@@ -114,6 +179,14 @@ def train(url=KOTENG_URL, max_points=450, step=38):
                 prior_popup = set(two)
                 for hit in stable:
                     name = hit.section
+                    if name.startswith("STÅPLASS-"):
+                        standing_measurements[name] = {
+                            "available_sample": hit.free,
+                            "capacity": hit.capacity,
+                            "status": "provisional_separate_inventory"}
+                        print(f"  ? Ståplasskandidat {name}: {hit.free}/{hit.capacity} "
+                              "(holdes utenfor sitteplasstellingen)", flush=True)
+                        continue
                     if name in measurements and measurements[name]["capacity"] != hit.capacity:
                         conflicts[name] = [measurements[name]["capacity"], hit.capacity]
                         continue
@@ -128,12 +201,18 @@ def train(url=KOTENG_URL, max_points=450, step=38):
                         if all(math.dist(a["ref"], anchor["ref"]) > 0.015 for a in anchors[name]):
                             anchors[name].append(anchor)
                 if i % 50 == 0:
-                    print(f"  Sjekket {i}/{len(selected)} · {len(measurements)} felt funnet", flush=True)
+                    print(f"  Sjekket {i}/{len(selected)} · {len(measurements)} sittefelt funnet", flush=True)
             stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
             report = {"timestamp": stamp, "url": url, "arena": "koteng_arena",
                       "region_method": method, "map_region": region,
                       "checked_points": len(selected), "found_sections": measurements,
-                      "capacity_conflicts": conflicts, "coordinate_system": "map_normalized",
+                      "expected_seat_fields_from_reference": sorted(REFERENCE_SEAT_FIELDS),
+                      "missing_reference_seat_fields": sorted(REFERENCE_SEAT_FIELDS-set(measurements)),
+                      "standing_areas_from_visible_tooltips": standing_measurements,
+                      "standing_area_from_user_image": "Ståplass A – beholdning ikke bekreftet",
+                      "available_seated_sample": sum(x["available_sample"] for x in measurements.values()),
+                      "seated_capacity_in_observed_fields": sum(x["capacity"] for x in measurements.values()),
+                      "capacity_conflicts": conflicts, "coordinate_system": "map_normalized_v2",
                       "map_full_coverage_verified": False,
                       "approval": "NOT_APPROVED_NO_PUBLICATION"}
             report_path = output / (stamp + "_training.json")
@@ -163,11 +242,15 @@ def train(url=KOTENG_URL, max_points=450, step=38):
                     print("ADVARSEL: Ulike feltkapasiteter mellom opplæringsrunder.")
                     print("Profilen oppdateres IKKE. Kontroller rapporten:", report_path)
                 else:
-                    profile = StadiumProfile("koteng_arena", 1, "vivenu",
+                    profile = StadiumProfile("koteng_arena", 2, "vivenu",
                                              current_sections, current_anchors, False)
                     profile.save(profile_file)
                     print("LAGRET/OPPDATERT PROFILUTKAST:", profile_file)
-            print(f"Resultat: {len(measurements)} observerte felt; {len(conflicts)} kapasitetskonflikter.")
+            print(f"Resultat: {len(measurements)} observerte sittefelt; "
+                  f"{len(conflicts)} kapasitetskonflikter.")
+            print("Mangler fra skjermreferansen:", ", ".join(sorted(
+                  REFERENCE_SEAT_FIELDS-set(measurements))) or "Ingen")
+            print("Ståplass A er IKKE dokumentert komplett i sitteplasstallet.")
             print("Dette er et opplæringsutkast, IKKE en fullstendig eller publiserbar telling.")
             print("Rapport:", report_path)
         finally:
