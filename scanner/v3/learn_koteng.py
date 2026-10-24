@@ -28,8 +28,8 @@ KOTENG_URL = "https://billett.rbk.no/checkout/6aaceecebfe408c38e1712dd"
 SECTION = re.compile(r"\b(?P<prefix>SECTION|SEKSJON|FELT|BLOCK|SECTOR|SEKTOR)\s*[:#-]?\s*"
                      r"(?P<name>(?:[A-ZÆØÅ]{1,4}[- ]?\d{0,3}|\d{1,3}))\b", re.I)
 STANDING = re.compile(r"\b(?:STÅPLASS|STAAPLASS|STANDING)\s*[:#-]?\s*(?P<name>[A-ZÆØÅ0-9-]{1,8})\b", re.I)
-# Expected labels from the user's Koteng screen and first measured report,
-# NOT a verified complete stadium inventory.
+# The operator confirmed on 24 October that these are ALL Koteng seating
+# areas. Ståplass A is separate and intentionally excluded from this count.
 REFERENCE_SEAT_FIELDS = {"FELT-1", "FELT-2", "FELT-3", "FELT-4", "FELT-5", "VIP"}
 
 
