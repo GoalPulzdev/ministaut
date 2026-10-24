@@ -654,11 +654,11 @@ def run(args):
                             prior_signature=None;stable=0;last_pointer=mouse_location(page)['t']
                         continue
                     elif command.startswith('register:'):
-                        destination=command.split(':',1)[1]
                         try:
-                            saved=registry.add(destination)
-                            update('Kamp lagret · velg den i kamplisten')
-                        except ValueError as ex:update('Ugyldig kampadresse: '+str(ex)[:80])
+                            destination,venue=command.split(':',1)[1].rsplit('|',1)
+                            registry.add(destination,venue=venue)
+                            update('Kamp lagret · registrer avspark for automatisk telling')
+                        except ValueError as ex:update('Kunne ikke lagre kamp: '+str(ex)[:80])
                         continue
                     elif command.startswith('kickoff:'):
                         try:
