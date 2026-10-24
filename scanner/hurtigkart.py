@@ -302,6 +302,14 @@ def run(args):
         if item and not item.get('kickoff_at'):
             registry.update(key,kickoff_at=datetime.fromisoformat(kickoff).replace(tzinfo=ZoneInfo('Europe/Oslo')).isoformat())
     last_auto_by_event={}
+    if checkout_url(url):
+        event=registry.get(event_key(url))
+        if event and event['venue']!='lerkendal':
+            print('Denne kampen krever en egen verifisert arenaprofil. Ingen Lerkendal-skanning utføres.')
+            return 2
+        if event and registry.status(event)=='finished':
+            print('Kampstart passert. Denne kampen er arkivert og skal ikke skannes.')
+            return 2
     if args.no_auto and schedule.enabled:schedule.enable(False)
     expected=set(SEATS);scan_expected=expected-set(locked);cap=dict(SEATS);standing={'SB','ØVRE ØST'};source='stadionreferanse';last=''
     map_verified=False;map_issues={};locked_conflicts={}
@@ -518,6 +526,13 @@ def run(args):
                                  ensure_ascii=False,indent=2),encoding='utf-8')
             final=save_reports(out,counter,expected,cap,standing,url,source,nprobe,'final',pitch,metrics(),locked,map_verified,map_issues,locked_conflicts)
             finalized_revision=revision
+            # A scan may have started just before kickoff. Archive its local
+            # diagnostics, but never upload a post-kickoff seat count.
+            event=registry.get(event_key(url)) if checkout_url(url) else None
+            if event and registry.status(event)=='finished':
+                print('Kamp startet: ingen ny publisering etter avspark')
+                update('Kampstart passert · historikken er avsluttet')
+                return False
             print('Måling:',final['captured_fields'],'avlest +',len(locked),'låst av 60. Ledige:',final['free_confirmed_fields'])
             try:
                 post=publish(final,out,ROOT/'historikk',browser=browser,header_text=match_header)
