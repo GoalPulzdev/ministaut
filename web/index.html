@@ -206,6 +206,21 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
   .match-tile:hover, .ticket-link:hover { transform: none; }
 }
 
+
+
+/* Kickoff scenario: separate visual treatment from observed, verified seats */
+.forecast-panel{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr);gap:18px;align-items:center;margin-top:16px;padding:22px 25px;background:linear-gradient(110deg,#183321,#102219);border:1px solid #476f4e;border-radius:16px}
+.forecast-eyebrow{font-size:11px;font-weight:850;letter-spacing:.14em;color:#a9d4b0}
+.forecast-lead h3{font-size:clamp(19px,2.4vw,24px);font-weight:790;line-height:1.2;letter-spacing:-.035em;margin:5px 0 7px}
+.forecast-lead p{font-size:13px;line-height:1.5;color:#aec3b0;margin:0;max-width:390px}
+.forecast-result{min-width:0;border-left:1px solid #416548;padding-left:22px;display:flex;flex-direction:column;gap:6px;justify-content:center}
+.forecast-label{color:#b8d3bd;font-size:11px;font-weight:800;letter-spacing:.1em}
+.forecast-number{font-size:clamp(20px,2.6vw,29px);line-height:1.2;letter-spacing:-.04em;color:#e6f4e5;overflow-wrap:anywhere}
+.forecast-range{font-size:12px;color:#bbcfbe;line-height:1.5}
+.forecast-panel[data-status="projected"]{border-color:#629573}
+.forecast-panel[data-status="unavailable"]{border-color:#4c5c4f}
+@media(max-width:640px){.forecast-panel{grid-template-columns:1fr;gap:15px;padding:18px 19px}.forecast-result{border-left:0;border-top:1px solid #416548;padding:13px 0 0}.forecast-lead h3{font-size:21px}.forecast-number{font-size:26px}}
+
 </style>
 </head>
 <body>
@@ -246,6 +261,18 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
       <a id="tickets" class="ticket-link" href="https://billett.rbk.no/" target="_blank" rel="noopener noreferrer" aria-label="Gå til billettsalget for valgt Rosenborg-kamp">Finn din plass på Lerkendal <span aria-hidden="true">↗</span></a>
       <div class="campaign-copy"><strong>Ses på Lerkendal!</strong><span>Ta med noen på kamp. Sammen skaper vi trøkket.</span></div>
     </div>
+    <section class="forecast-panel" aria-labelledby="projection-title">
+      <div class="forecast-lead">
+        <span class="forecast-eyebrow">MOT AVSPARK</span>
+        <h3 id="projection-title">Hvor mange plasser er igjen på kampdag?</h3>
+        <p id="projection-subtitle">Vi følger utviklingen før vi kan gi et forsiktig anslag.</p>
+      </div>
+      <div class="forecast-result">
+        <span class="forecast-label" id="projection-label">PROGNOSE VED AVSPARK</span>
+        <strong class="forecast-number" id="projection-value">For tidlig å anslå</strong>
+        <span class="forecast-range" id="projection-range">Oppdateres når datagrunnlaget er tilstrekkelig</span>
+      </div>
+    </section>
     <section class="card graph" aria-labelledby="chart-title">
       <div class="graph-header">
         <div><div id="chart-title" class="caption">Billettpulsen mot avspark</div>
@@ -320,7 +347,7 @@ function crestFor(title){
   const lower=String(title||'').toLowerCase();
   return Object.keys(knownOpponentCrests).find(name=>lower.includes(name)) || null;
 }
-let matches=[], current=null, cards=new Map(), cardSignature='', selectionVersion=0, refreshPromise=null, lastObservedAt=null;
+let matches=[], current=null, cards=new Map(), cardSignature='', selectionVersion=0, refreshPromise=null, lastObservedAt=null, selectedKickoff=null;
 function updateAgeIndicator(){
   const badge=$('age');
   badge.textContent=ageLabel(lastObservedAt);
@@ -417,6 +444,71 @@ function graph(points){
   inspect(points.length-1);
 }
 
+
+/* A scenario for remaining available seats, never an official sell-out probability.
+ * Require sustained comparable observations, a fresh scan, and a short horizon.
+ * Heuristic spread is not a statistical confidence interval. */
+const PROJECTION_HORIZON_DAYS=10, PROJECTION_MAX_SEATED=19015;
+function median(numbers){
+  const sorted=[...numbers].sort((a,b)=>a-b),m=Math.floor(sorted.length/2);
+  return sorted.length%2?sorted[m]:(sorted[m-1]+sorted[m])/2;
+}
+function kickoffForecast(records,kickoffUtc,now=Date.now()){
+  const kickoff=new Date(kickoffUtc||'').getTime();
+  if(!Number.isFinite(kickoff))return {status:'unavailable',reason:'Kampstart er ikke bekreftet'};
+  const horizon=kickoff-now;
+  if(horizon<=0)return {status:'unavailable',reason:'Kampen har startet'};
+  if(horizon>PROJECTION_HORIZON_DAYS*86400000)return {status:'unavailable',reason:'Prognosen åpner når det er 10 dager til avspark'};
+  const sorted=records.filter(p=>Number.isFinite(p.available_seated)&&
+      Number.isFinite(new Date(p.observed_at).getTime())&&
+      p.available_seated>=0&&p.available_seated<=PROJECTION_MAX_SEATED)
+    .sort((a,b)=>new Date(a.observed_at)-new Date(b.observed_at));
+  if(!sorted.length)return {status:'unavailable',reason:'Venter på første telling'};
+  const last=sorted.at(-1);
+  if(overdue(last.observed_at))return {status:'unavailable',reason:'Avventer en fersk måling'};
+  const lastTime=new Date(last.observed_at).getTime();
+  const sample=sorted.filter(p=>comparable(p,last)&&
+      new Date(p.observed_at).getTime()>=lastTime-10*86400000).slice(-60);
+  if(sample.length<5)return {status:'unavailable',reason:'Trenger minst fem sammenlignbare tellinger'};
+  const span=(new Date(sample.at(-1).observed_at)-new Date(sample[0].observed_at));
+  if(span<12*3600000)return {status:'unavailable',reason:'Trenger målinger over minst 12 timer'};
+  const slopes=[];
+  for(let i=0;i<sample.length;i++){
+    for(let j=i+1;j<sample.length;j++){
+      const hours=(new Date(sample[j].observed_at)-new Date(sample[i].observed_at))/3600000;
+      if(hours>=2)slopes.push((sample[j].available_seated-sample[i].available_seated)/hours);
+    }
+  }
+  if(slopes.length<3)return {status:'unavailable',reason:'Trenger flere målinger med tidsavstand'};
+  const rate=median(slopes),mad=median(slopes.map(x=>Math.abs(x-rate)));
+  const forwardHours=(kickoff-lastTime)/3600000;
+  if(forwardHours<=0)return {status:'unavailable',reason:'Kampstart er passert'};
+  const projected=Math.min(PROJECTION_MAX_SEATED,Math.max(0,last.available_seated+rate*forwardHours));
+  /* Wider than day-to-day noise; intentionally not called a confidence interval. */
+  const spread=Math.max(150,Math.abs(rate)*forwardHours*.45,1.8*mad*forwardHours);
+  const low=Math.max(0,Math.floor(projected-spread));
+  const high=Math.min(PROJECTION_MAX_SEATED,Math.ceil(projected+spread));
+  const materiallyUncertain=(high-low)>Math.max(2500,last.available_seated*.75);
+  if(materiallyUncertain)return {status:'unavailable',reason:'Utviklingen er for ujevn til et meningsfullt anslag'};
+  return {status:'projected',center:Math.round(projected),low,high,count:sample.length};
+}
+function renderForecast(records){
+  const result=kickoffForecast(records,selectedKickoff);
+  const panel=document.querySelector('.forecast-panel');
+  panel.dataset.status=result.status;
+  if(result.status!=='projected'){
+    $('projection-value').textContent='For tidlig å anslå';
+    $('projection-range').textContent=result.reason;
+    $('projection-subtitle').textContent='Først når vi har nok ferske og sammenlignbare målinger, viser vi et scenario.';
+    return;
+  }
+  $('projection-subtitle').textContent=result.low===0
+    ?'Det kan bli få sitteplasser tilgjengelige før avspark. Følg utviklingen!'
+    :'Basert på tempoet i tidligere tellinger, ikke et garantert resultat.';
+  $('projection-value').textContent=fmt(result.center)+' ledige';
+  $('projection-range').textContent='Mulig spenn: '+fmt(result.low)+'–'+fmt(result.high)+' ledige sitteplasser · grovt scenario';
+}
+
 function render(scans){
   const records=scans.slice().sort((a,b)=>new Date(a.observed_at)-new Date(b.observed_at));
   const last=records.at(-1),prev=records.at(-2);
@@ -433,6 +525,7 @@ function render(scans){
     :sinceFirst>0?'Flere sitteplasser tilgjengelige enn ved første telling.'
     :'Følg utviklingen og bli med på kampdag.';
   graph(scoped);
+  renderForecast(records);
   // The chart count and inspected point already communicate history.
   // Avoid another text block repeating the same information.
 }
@@ -548,6 +641,7 @@ async function selectMatch(id){
   const changed=current!==id,version=++selectionVersion;
   current=id;updateSelectedCards();
   $('selectedMatchTitle').textContent=match.title;
+  selectedKickoff=match.kickoff_at||null;
   $('kickoff').textContent=match.kickoff_at?'Avspark '+date(match.kickoff_at):'Avspark ikke registrert';
   const key=String(match.event_key||'');
   $('tickets').href=/^[A-Za-z0-9_-]{8,100}$/.test(key)?'https://billett.rbk.no/checkout/'+key:'https://billett.rbk.no/';
