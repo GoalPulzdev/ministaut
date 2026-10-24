@@ -294,6 +294,13 @@ def run(args):
     women_url='https://billett.rbk.no/checkout/6aaceecebfe408c38e1712dd'
     if not registry.get(event_key(women_url)):
         registry.add(women_url,'RBK Kvinner · kartlegging kreves','koteng_arena')
+    # Retain both confirmed 2026 Lerkendal fixtures on first installation.
+    known_fixtures=[
+        ('6a9a7e3f3f93920b289b0675','Rosenborg – Molde'),
+        ('6a9a7c2b15599587216e21f3','Rosenborg – Start')]
+    for key,title in known_fixtures:
+        if not registry.get(key):
+            registry.add('https://billett.rbk.no/checkout/'+key,title)
     if checkout_url(url) and not registry.get(event_key(url)):
         registry.add(url,event_labels(url)[0])
     for key,kickoff in [('6a9a7e3f3f93920b289b0675','2026-11-28T18:00'),
