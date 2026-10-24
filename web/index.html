@@ -228,6 +228,11 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
 .chart-legend i{width:20px;height:0;border-top:3px solid #b6edc3;display:inline-block;flex:none}
 .chart-legend i.legend-projected{border-color:#f3cb82;border-top-style:dashed}
 .chart-legend i.legend-band{width:15px;height:12px;background:#f3cb8236;border:1px solid #f3cb8280;border-radius:3px}
+
+.daily-pulse{margin-top:13px;padding-top:11px;border-top:1px solid #49785a;color:#d7e8d6;font-size:13px;font-weight:650;line-height:1.5}
+.daily-pulse[data-trend="down"]{color:#f5dba9}
+.daily-pulse[data-trend="up"]{color:#b9eed0}
+@media(max-width:640px){.daily-pulse{font-size:12px}}
 </style>
 </head>
 <body>
@@ -257,7 +262,7 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
     <div class="summary" id="stats">
       <article class="card primary">
         <div class="caption">Ledige sitteplasser</div><div id="available" class="big">—</div>
-        <p id="pulseMessage" class="pulse-message">Følg billettpulsen fram mot avspark.</p>
+        <p id="pulseMessage" class="pulse-message">Følg billettpulsen fram mot avspark.</p><div id="dailyPulse" class="daily-pulse" aria-live="polite">Døgnpuls: venter på historikk</div>
       </article>
       <div class="stack">
         <article class="card small-card"><div class="caption">Siden første viste telling</div><div class="value" id="sinceFirst">—</div><div class="minor" id="sinceFirstNote">Venter på flere målinger</div></article>
@@ -550,6 +555,22 @@ function renderForecast(records){
   $('projection-range').textContent=(result.early?'Foreløpig spenn: ':'Mulig spenn: ')+fmt(result.low)+'–'+fmt(result.high)+' ledige sitteplasser · '+(result.early?'stor usikkerhet':'grovt scenario');
 }
 
+// Use an actual prior observed scan near 24 hours ago, never treat a
+// shorter scan interval as a full day's change.
+function dailyPulse(records){
+  if(!records.length)return null;
+  const sorted=records.slice().sort((a,b)=>new Date(a.observed_at)-new Date(b.observed_at));
+  const latest=sorted.at(-1),end=new Date(latest.observed_at).getTime();
+  const candidates=sorted.slice(0,-1).filter(p=>{
+    const hours=(end-new Date(p.observed_at).getTime())/3600000;
+    return comparable(p,latest)&&hours>=18&&hours<=30;
+  });
+  if(!candidates.length)return null;
+  const near=candidates.reduce((best,p)=>Math.abs((end-new Date(p.observed_at).getTime())/3600000-24)<
+      Math.abs((end-new Date(best.observed_at).getTime())/3600000-24)?p:best);
+  return {hours:Math.round((end-new Date(near.observed_at).getTime())/3600000),
+    difference:latest.available_seated-near.available_seated};
+}
 function render(scans){
   const records=scans.slice().sort((a,b)=>new Date(a.observed_at)-new Date(b.observed_at));
   const last=records.at(-1),prev=records.at(-2);
@@ -557,6 +578,16 @@ function render(scans){
   lastObservedAt=last?.observed_at||null;
   updateAgeIndicator();
   const scoped=last?records.filter(p=>comparable(p,last)):[];
+  const pulse=dailyPulse(scoped);
+  const pulseElement=$('dailyPulse');
+  if(!pulse){
+    pulseElement.textContent='Døgnpuls: trenger tellinger med omtrent ett døgn mellomrom';
+    pulseElement.dataset.trend='unknown';
+  }else{
+    const count=fmt(Math.abs(pulse.difference));
+    pulseElement.dataset.trend=pulse.difference<0?'down':pulse.difference>0?'up':'flat';
+    pulseElement.textContent='Døgnpuls ('+pulse.hours+' t): '+(pulse.difference<0?count+' færre ledige':pulse.difference>0?count+' flere ledige':'uendret antall ledige');
+  }
   const sinceFirst=last && scoped.length?last.available_seated-scoped[0].available_seated:null;
   const sinceLast=comparable(last,prev)?last.available_seated-prev.available_seated:null;
   showTrend('sinceFirst','sinceFirstNote',sinceFirst);
