@@ -448,7 +448,7 @@ function graph(points){
 /* A scenario for remaining available seats, never an official sell-out probability.
  * Require sustained comparable observations, a fresh scan, and a short horizon.
  * Heuristic spread is not a statistical confidence interval. */
-const PROJECTION_HORIZON_DAYS=10, PROJECTION_MAX_SEATED=19015;
+const PROJECTION_HORIZON_DAYS=60, PROJECTION_MAX_SEATED=19015;
 function median(numbers){
   const sorted=[...numbers].sort((a,b)=>a-b),m=Math.floor(sorted.length/2);
   return sorted.length%2?sorted[m]:(sorted[m-1]+sorted[m])/2;
@@ -458,7 +458,7 @@ function kickoffForecast(records,kickoffUtc,now=Date.now()){
   if(!Number.isFinite(kickoff))return {status:'unavailable',reason:'Kampstart er ikke bekreftet'};
   const horizon=kickoff-now;
   if(horizon<=0)return {status:'unavailable',reason:'Kampen har startet'};
-  if(horizon>PROJECTION_HORIZON_DAYS*86400000)return {status:'unavailable',reason:'Prognosen åpner når det er 10 dager til avspark'};
+  if(horizon>PROJECTION_HORIZON_DAYS*86400000)return {status:'unavailable',reason:'Mer enn 60 dager til kampstart'};
   const sorted=records.filter(p=>Number.isFinite(p.available_seated)&&
       Number.isFinite(new Date(p.observed_at).getTime())&&
       p.available_seated>=0&&p.available_seated<=PROJECTION_MAX_SEATED)
@@ -489,8 +489,9 @@ function kickoffForecast(records,kickoffUtc,now=Date.now()){
   const low=Math.max(0,Math.floor(projected-spread));
   const high=Math.min(PROJECTION_MAX_SEATED,Math.ceil(projected+spread));
   const materiallyUncertain=(high-low)>Math.max(2500,last.available_seated*.75);
-  if(materiallyUncertain)return {status:'unavailable',reason:'Utviklingen er for ujevn til et meningsfullt anslag'};
-  return {status:'projected',center:Math.round(projected),low,high,count:sample.length};
+  const early=forwardHours>14*24;
+  if(materiallyUncertain && !early)return {status:'unavailable',reason:'Utviklingen er for ujevn til et meningsfullt anslag'};
+  return {status:'projected',center:Math.round(projected),low,high,count:sample.length,early,materiallyUncertain};
 }
 function renderForecast(records){
   const result=kickoffForecast(records,selectedKickoff);
@@ -502,11 +503,12 @@ function renderForecast(records){
     $('projection-subtitle').textContent='Først når vi har nok ferske og sammenlignbare målinger, viser vi et scenario.';
     return;
   }
-  $('projection-subtitle').textContent=result.low===0
-    ?'Det kan bli få sitteplasser tilgjengelige før avspark. Følg utviklingen!'
+  $('projection-subtitle').textContent=result.early
+    ?'Tidlig utviklingsscenario. Mye kan endre seg før kampstart.'
+    :result.low===0?'Det kan bli få sitteplasser tilgjengelige før avspark. Følg utviklingen!'
     :'Basert på tempoet i tidligere tellinger, ikke et garantert resultat.';
-  $('projection-value').textContent=fmt(result.center)+' ledige';
-  $('projection-range').textContent='Mulig spenn: '+fmt(result.low)+'–'+fmt(result.high)+' ledige sitteplasser · grovt scenario';
+  $('projection-value').textContent=result.early&&result.materiallyUncertain?'Tidlig anslag':fmt(result.center)+' ledige';
+  $('projection-range').textContent=(result.early?'Foreløpig spenn: ':'Mulig spenn: ')+fmt(result.low)+'–'+fmt(result.high)+' ledige sitteplasser · '+(result.early?'stor usikkerhet':'grovt scenario');
 }
 
 function render(scans){
