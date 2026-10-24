@@ -596,7 +596,7 @@ function momentumPulse(records){
   const last24=referencePulse(records,24,6);
   if(!last24)return null;
   const previous=last24.previous;
-  const older=records.filter(p=>comparable(p,previous));
+  const older=records.filter(p=>comparable(p,previous)&&new Date(p.observed_at)<=new Date(previous.observed_at));
   const old24=referencePulse(older,24,6);
   if(!old24)return null;
   const rateNow=Math.max(0,-last24.difference)/last24.hours;
