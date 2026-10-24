@@ -34,11 +34,35 @@ assert.ok(ordered(['LB','KB','JB','IB','HB'],'y'));
 assert.ok(ordered(['K','J','I'],'y'));
 assert.ok(ordered(['AB','BB','CB','DB','EB','FB','GB'],'x'));
 assert.ok(ordered(['AA','BA','CA','DA','EA','FA','GA'],'x'));
-assert.ok(byCode.get('LB').x>=byCode.get('MB').x+byCode.get('MB').w,'north/east must not overlap');
+assert.ok(byCode.get('LB').y>=byCode.get('MB').y+byCode.get('MB').h,'north/east corner must have safe vertical clearance');
 assert.ok(byCode.get('HB').x>=byCode.get('GB').x+byCode.get('GB').w,'south/east must not overlap');
-assert.ok(byCode.get('TA').x<byCode.get('U').x&&byCode.get('U').x<byCode.get('UB').x,'Coop VIP ordering');
-assert.ok(byCode.get('PRESSE').y>byCode.get('DA').y+byCode.get('DA').h,'press must sit below lower south row');
-assert.ok(byCode.get('PRESSE').y-byCode.get('DA').y-byCode.get('DA').h<=10,'press must stay attached');
+// Upper Coop -> VIP Coop -> lower Coop, in physically separate parallel lanes.
+const coopRows=[
+ ['TA',null,'TB'],
+ ['UA','U','UB'],
+ ['VA','V','VB'],
+ ['WA','W','WB'],
+ ['XA',null,'XB']
+];
+for(const [upperCode,vipCode,lowerCode] of coopRows){
+ const upper=byCode.get(upperCode),lower=byCode.get(lowerCode);
+ assert.ok(upper.x+upper.w<lower.x,upperCode+' must be outside the lower Coop tier');
+ assert.equal(upper.y,lower.y,upperCode+' and '+lowerCode+' must align');
+ assert.equal(upper.h,lower.h,upperCode+' and '+lowerCode+' must share row height');
+ if(vipCode){
+  const vip=byCode.get(vipCode);
+  assert.ok(upper.x+upper.w<vip.x&&vip.x+vip.w<lower.x,
+   vipCode+' must occupy its own lane between upper and lower Coop, never B row');
+  assert.equal(vip.y,lower.y,vipCode+' must be on the lower Coop tier');
+  assert.equal(vip.h,lower.h,vipCode+' must be aligned with the B-field');
+ }
+}
+assert.ok(byCode.get('XB').x+byCode.get('XB').w<byCode.get('AB').x,
+ 'south-west corner: XB must not overlap AB');
+assert.ok(byCode.get('PRESSE').y+byCode.get('PRESSE').h<byCode.get('DA').y,
+ 'press must sit above the outer south rail');
+assert.ok(byCode.get('DA').y-byCode.get('PRESSE').y-byCode.get('PRESSE').h<=10,
+ 'press must stay attached to the south rail');
 const railGroups=[
  ['SA','RA','QA','PA','OA','NA','MA'],
  ['Q','P','O','N'],
@@ -72,4 +96,4 @@ for(const tile of tiles){
 assert.ok(Math.abs((byCode.get('PRESSE').x+byCode.get('PRESSE').w/2)-stadiumFrame.centerX)<.001,
  'press box centered on stadium centerline');
 assert.ok(!byCode.has('SB')&&!byCode.has('ØVRE ØST'),'standing inventory is separate');
-console.log('PASS: 60 sectors, correct topology, no collisions, standing areas excluded.');
+console.log('PASS: 60 sectors, 3 Coop lanes with VIP U/V/W, correct corners and south/north rails, zero collisions.');
