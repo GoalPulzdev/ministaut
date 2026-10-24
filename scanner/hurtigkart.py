@@ -680,12 +680,18 @@ def run(args):
                         entry=registry.get(key)
                         if not entry:
                             update('Kamp finnes ikke i listen');continue
-                        if registry.status(entry)!='scheduled':
-                            update('Kampen er avsluttet eller mangler avspark/kartprofil');continue
+                        state=registry.status(entry)
+                        if state=='awaiting_kickoff':
+                            update('Mangler kampstart · velg kampen og lagre avspark i panelet');continue
+                        if state=='finished':
+                            update('Kampstart er passert · sjekk eller korriger dato og klokkeslett');continue
+                        if state=='awaiting_map':
+                            update('Koteng Arena avventer kontrollert skannerprofil');continue
                         if entry['venue']!='lerkendal':
                             update('Koteng må kartlegges før skanning kan aktiveres');continue
                         finalize_cycle()
                         if start_next_cycle(next_url=entry['url']):
+                            update('Kampbytte utført · '+entry['title'])
                             deadline=monotonic()+args.manual_seconds if args.manual_seconds>0 else float('inf')
                             prior_signature=None;stable=0;last_pointer=mouse_location(page)['t']
                         continue
