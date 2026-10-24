@@ -901,18 +901,52 @@ const SEAT_LAYOUT=[
  ["FA",564,624,52,40],
  ["GA",622,624,43,40]
 ];
+// Pitch geometry is the single anchor for both longside stands and the rendered turf.
+// SEAT_LAYOUT retains field widths + the already checked west/east arrangement;
+// sectionTiles() overrides the north/south rail coordinates from this frame.
+const pitchBox=Object.freeze({x:211,y:205,w:364,h:300});
+const stadiumFrame=Object.freeze({
+ centerX:pitchBox.x+pitchBox.w/2,
+ northEdge:pitchBox.y,
+ southEdge:pitchBox.y+pitchBox.h
+});
 function sectionTiles(){
  const tiles=SEAT_LAYOUT.map(([code,x,y,w,h])=>({code,x,y,w,h}));
- if(tiles.length!==60||new Set(tiles.map(t=>t.code)).size!==60) throw Error('Expected 60 distinct stadium sections');
+ const byCode=new Map(tiles.map(t=>[t.code,t]));
+ // Center each continuous north/south rail on the exact pitch midline.
+ // Gaps are distances from the outer pitch frame, not absolute SVG Y values.
+ const alignRail=(codes,side,pitchGap,spacing=6)=>{
+  const rail=codes.map(code=>byCode.get(code));
+  if(rail.some(t=>!t||t.h!==rail[0].h))throw Error('Invalid stadium rail');
+  const span=rail.reduce((sum,t)=>sum+t.w,0)+(rail.length-1)*spacing;
+  const y=side==='north'
+   ? stadiumFrame.northEdge-pitchGap-rail[0].h
+   : stadiumFrame.southEdge+pitchGap;
+  let x=stadiumFrame.centerX-span/2;
+  rail.forEach(t=>{t.x=x;t.y=y;x+=t.w+spacing;});
+ };
+ // North: Pepsi Max outer, VIP middle and the front rail nearest the field.
+ alignRail(['SA','RA','QA','PA','OA','NA','MA'],'north',95);
+ alignRail(['Q','P','O','N'],'north',60,7);
+ alignRail(['RB','QB','PB','OB','NB','MB'],'north',8);
+ // South: front rail, VIP boxes, the central press box, then upper rail.
+ alignRail(['AB','BB','CB','DB','EB','FB','GB'],'south',9);
+ alignRail(['A','B','C','D','E','F','G'],'south',59,7);
+ alignRail(['PRESSE'],'south',90);
+ alignRail(['AA','BA','CA','DA','EA','FA','GA'],'south',119);
+ if(tiles.length!==60||byCode.size!==60)throw Error('Expected 60 distinct stadium sections');
  for(let i=0;i<tiles.length;i++){
   const a=tiles[i];
-  if(a.x<0||a.y<0||a.w<=0||a.h<=0||a.x+a.w>780||a.y+a.h>710)throw Error('Out-of-bounds sector '+a.code);
-  if(Math.max(a.x,211)<Math.min(a.x+a.w,575)&&Math.max(a.y,205)<Math.min(a.y+a.h,505))
-    throw Error('Sector inside pitch '+a.code);
+  if(a.x<0||a.y<0||a.w<=0||a.h<=0||a.x+a.w>780||a.y+a.h>710)
+   throw Error('Out-of-bounds sector '+a.code);
+  if(Math.max(a.x,pitchBox.x)<Math.min(a.x+a.w,pitchBox.x+pitchBox.w)&&
+     Math.max(a.y,pitchBox.y)<Math.min(a.y+a.h,pitchBox.y+pitchBox.h))
+   throw Error('Sector inside pitch '+a.code);
   for(let j=i+1;j<tiles.length;j++){
    const b=tiles[j];
-   if(Math.max(a.x,b.x)<Math.min(a.x+a.w,b.x+b.w)&&Math.max(a.y,b.y)<Math.min(a.y+a.h,b.y+b.h))
-      throw Error('Overlapping sectors '+a.code+' / '+b.code);
+   if(Math.max(a.x,b.x)<Math.min(a.x+a.w,b.x+b.w)&&
+      Math.max(a.y,b.y)<Math.min(a.y+a.h,b.y+b.h))
+    throw Error('Overlapping sectors '+a.code+' / '+b.code);
   }
  }
  return tiles;
@@ -929,14 +963,21 @@ function drawStadiumMap(rows,scan){
  const grad=svgEl('linearGradient',{id:'pitchGrad',x1:'0',x2:'0',y1:'0',y2:'1'});
  grad.append(svgEl('stop',{offset:'0%','stop-color':'#186f46'}),svgEl('stop',{offset:'100%','stop-color':'#0a3c28'}));
  defs.append(grad);svg.append(defs);
- svg.append(svgEl('rect',{x:211,y:205,width:364,height:300,rx:8,fill:'#0d2418',stroke:'#4e9367','stroke-width':3}));
- svg.append(svgEl('rect',{x:222,y:216,width:341,height:278,rx:1,fill:'url(#pitchGrad)',stroke:'#d1e7d6','stroke-width':2}));
- svg.append(svgEl('line',{x1:392.5,y1:216,x2:392.5,y2:494,stroke:'#b3d0bb','stroke-width':2}));
- svg.append(svgEl('circle',{cx:392.5,cy:355,r:43,fill:'none',stroke:'#b3d0bb','stroke-width':2}));
- svg.append(svgEl('rect',{x:222,y:282,width:62,height:143,fill:'none',stroke:'#b3d0bb','stroke-width':2}));
- svg.append(svgEl('rect',{x:501,y:282,width:62,height:143,fill:'none',stroke:'#b3d0bb','stroke-width':2}));
- svg.append(svgEl('text',{x:392.5,y:360,'text-anchor':'middle',fill:'#e4fbea','font-size':24,'font-weight':850,opacity:'.35'},'LERKENDAL'));
- const labels=[['PEPSI MAX',390,39],['COOP',116,194],['SPAREBANK 1',392,692],['ØST',666,210]];
+ const field={x:pitchBox.x+11,y:pitchBox.y+11,w:pitchBox.w-23,h:pitchBox.h-22};
+ const fieldCenterX=field.x+field.w/2,fieldCenterY=field.y+field.h/2;
+ svg.append(svgEl('rect',{x:pitchBox.x,y:pitchBox.y,width:pitchBox.w,height:pitchBox.h,rx:8,fill:'#0d2418',stroke:'#4e9367','stroke-width':3}));
+ svg.append(svgEl('rect',{x:field.x,y:field.y,width:field.w,height:field.h,rx:1,fill:'url(#pitchGrad)',stroke:'#d1e7d6','stroke-width':2}));
+ svg.append(svgEl('line',{x1:fieldCenterX,y1:field.y,x2:fieldCenterX,y2:field.y+field.h,stroke:'#b3d0bb','stroke-width':2}));
+ svg.append(svgEl('circle',{cx:fieldCenterX,cy:fieldCenterY,r:43,fill:'none',stroke:'#b3d0bb','stroke-width':2}));
+ svg.append(svgEl('rect',{x:field.x,y:field.y+66,width:62,height:143,fill:'none',stroke:'#b3d0bb','stroke-width':2}));
+ svg.append(svgEl('rect',{x:field.x+field.w-62,y:field.y+66,width:62,height:143,fill:'none',stroke:'#b3d0bb','stroke-width':2}));
+ svg.append(svgEl('text',{x:fieldCenterX,y:fieldCenterY+5,'text-anchor':'middle',fill:'#e4fbea','font-size':24,'font-weight':850,opacity:'.35'},'LERKENDAL'));
+ const labels=[
+  ['PEPSI MAX',stadiumFrame.centerX,stadiumFrame.northEdge-166],
+  ['COOP',pitchBox.x-95,pitchBox.y-11],
+  ['SPAREBANK 1',stadiumFrame.centerX,stadiumFrame.southEdge+187],
+  ['ØST',pitchBox.x+pitchBox.w+106,pitchBox.y+5]
+ ];
  labels.forEach(([t,x,y])=>svg.append(svgEl('text',{x,y,'text-anchor':'middle',fill:'#bcd5c3','font-size':14,'font-weight':800,'letter-spacing':1.3},t)));
  sectionTiles().forEach(tile=>{
   const {code,x,y,w,h}=tile,row=byCode.get(code),level=stadiumColor(row,locks.has(code));
@@ -950,10 +991,15 @@ function drawStadiumMap(rows,scan){
   svg.append(svgEl('text',labelAttrs,code));
  });
  // SB and Øvre Øst are contextual standing areas, never counted as seated availability.
- const sb=svgEl('rect',{x:160,y:152,width:28,height:34,rx:3,fill:'#293e38',stroke:'#728578','stroke-dasharray':'3 3'});
- svg.append(sb);svg.append(svgEl('text',{x:174,y:172,'text-anchor':'middle',fill:'#b5cdbb','font-size':10},'SB'));
- const standing=svgEl('rect',{x:718,y:252,width:23,height:219,rx:4,fill:'#293e38',stroke:'#728578','stroke-dasharray':'3 3'});
- svg.append(standing);svg.append(svgEl('text',{x:729.5,y:361.5,transform:'rotate(90 729.5 361.5)','text-anchor':'middle',fill:'#b5cdbb','font-size':11},'ØVRE ØST'));
+ // Position contextual standing areas outside the same pitch-relative rails.
+ // They are not part of the 60 seated-sector availability measurements.
+ const sbX=pitchBox.x-81,sbY=pitchBox.y-53;
+ const sb=svgEl('rect',{x:sbX,y:sbY,width:28,height:34,rx:3,fill:'#293e38',stroke:'#728578','stroke-dasharray':'3 3'});
+ svg.append(sb);svg.append(svgEl('text',{x:sbX+14,y:sbY+20,'text-anchor':'middle',fill:'#b5cdbb','font-size':10},'SB'));
+ const standingX=pitchBox.x+pitchBox.w+143,standingY=pitchBox.y+47;
+ const standing=svgEl('rect',{x:standingX,y:standingY,width:23,height:219,rx:4,fill:'#293e38',stroke:'#728578','stroke-dasharray':'3 3'});
+ const standingCX=standingX+11.5,standingCY=standingY+109.5;
+ svg.append(standing);svg.append(svgEl('text',{x:standingCX,y:standingCY,transform:'rotate(90 '+standingCX+' '+standingCY+')','text-anchor':'middle',fill:'#b5cdbb','font-size':11},'ØVRE ØST'));
  target.append(svg);
 }
 function activateStadiumSection(code){
