@@ -899,35 +899,6 @@ function activateStadiumSection(code){
  sectionSelection=cell||null;
  if(cell)cell.setAttribute('aria-pressed','true');
 }
-function drawStadiumMap(rows,scan){
- const target=$('stadiumMap');
- target.replaceChildren();stadiumSelected=null;
- if(!rows||!scan){target.textContent='Kartet vises når målinger er tilgjengelige.';return;}
- const byCode=new Map(rows.map(r=>[r.section_code,r]));
- stadiumByCode=byCode;
- const locks=new Set(scan.locked_fields||[]);
- const svg=svgEl('svg',{viewBox:'0 0 660 530',class:'stadium-map',role:'group','aria-label':'Skjematisk oversikt over 60 sittefelt'});
- const defs=svgEl('defs');
- const grad=svgEl('linearGradient',{id:'pitchGrad',x1:'0',x2:'0',y1:'0',y2:'1'});
- grad.append(svgEl('stop',{offset:'0%', 'stop-color':'#185e3b'}),svgEl('stop',{offset:'100%','stop-color':'#0b3c2a'}));defs.append(grad);svg.append(defs);
- svg.append(svgEl('rect',{x:170,y:103,width:320,height:324,rx:23,fill:'#193727',stroke:'#669e72','stroke-width':3}));
- svg.append(svgEl('rect',{x:187,y:120,width:286,height:290,rx:4,fill:'url(#pitchGrad)',stroke:'#95bca0','stroke-width':2}));
- svg.append(svgEl('line',{x1:187,y1:265,x2:473,y2:265,stroke:'#8dbba0','stroke-width':2}));
- svg.append(svgEl('circle',{cx:330,cy:265,r:42,fill:'none',stroke:'#8dbba0','stroke-width':2}));
- svg.append(svgEl('rect',{x:257,y:120,width:146,height:52,fill:'none',stroke:'#8dbba0','stroke-width':2}));
- svg.append(svgEl('rect',{x:257,y:358,width:146,height:52,fill:'none',stroke:'#8dbba0','stroke-width':2}));
- svg.append(svgEl('text',{x:330,y:277,'text-anchor':'middle',fill:'#cdeed6','font-size':24,'font-weight':850,opacity:'.35'},'LERKENDAL'));
- STADIUM_CODES.forEach((code,i)=>{
-  const g=stadiumGeometry(i),row=byCode.get(code),level=stadiumColor(row,locks.has(code));
-  const p=svgEl('path',{d:g.path,class:'seat-sector','data-code':code,'data-level':level,'aria-pressed':'false',tabindex:0,role:'button','aria-label':'Felt '+code+', '+(row?row.free+' ledige av '+row.capacity:locks.has(code)?'låst':'mangler måling')});
-  p.addEventListener('click',()=>activateStadiumSection(code));
-  p.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activateStadiumSection(code);}});
-  const title=svgEl('title',{},'Felt '+code+' · '+(row?row.free+' ledige av '+row.capacity:locks.has(code)?'låst':'ikke målt'));p.append(title);svg.append(p);
-  svg.append(svgEl('text',{x:g.cx.toFixed(1),y:(g.cy+3.5).toFixed(1),class:'seat-label'},code));
- });
- target.append(svg);
-}
-
 function renderSections(rows,scan){
   const grid=$('sectionGrid'),status=$('sectionStatus'),detail=$('sectionDetail');
   grid.replaceChildren();
