@@ -30,10 +30,10 @@ Deno.serve(async req=>{
   if(total!==p.available_seated||p.reference_capacity_seated!==601)return deny('Total mismatch');
   const {data:match,error:matchErr}=await admin.from('ministaut_koteng_matches').select('id,is_published').eq('event_key',EVENT).single();
   if(matchErr||!match||match.is_published!==true)return json(503,{error:'Event not published'});
-  const {data:existing}=await admin.from('ministaut_koteng_scans').select('id,available_seated,observed_at').eq('match_id',match.id).eq('source_run_id',p.source_run_id).maybeSingle();
+  const {data:existing}=await admin.from('ministaut_koteng_scans').select('id,available_seated,observed_at,reading_status').eq('match_id',match.id).eq('source_run_id',p.source_run_id).maybeSingle();
   if(existing){
     if(existing.available_seated!==total||Date.parse(existing.observed_at)!==observed)return deny('Run ID collision');
-    return json(200,{ok:true,scan_id:existing.id,duplicate:true,status:'observed'});
+    return json(200,{ok:true,scan_id:existing.id,duplicate:true,status:existing.reading_status});
   }
   const {data:scan,error:scanErr}=await admin.from('ministaut_koteng_scans').insert({
     match_id:match.id,source_run_id:p.source_run_id,observed_at:new Date(observed).toISOString(),
