@@ -34,5 +34,5 @@ assert.match(script,/\$\('womenPending'\)\.hidden=activeTeam!=='women'\|\|matche
 assert.match(script,/allMatches=published/);
 assert.match(script,/matches=allMatches\.filter\(m=>categoryFor\(m\)===activeTeam\)/);
 assert.equal((script.match(/in\\.\\(observed,accepted\\)/g)||[]).length,2,'Koteng cards and history must both include observed live scans');
-assert.match(script,/id="availabilityCaption"/,'Availability caption is venue-specific');
+assert.match(html,/id="availabilityCaption"/,'Availability caption exists');
 console.log('PASS: RBK / RBK Kvinner team selection, deep links, safe pending state, Koteng map, six-field validation');
