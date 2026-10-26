@@ -346,7 +346,7 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
     </div>
     <div class="summary" id="stats">
       <article class="card primary">
-        <div class="caption">Ledige sitteplasser</div><div id="available" class="big">—</div>
+        <div id="availabilityCaption" class="caption">Ledige sitteplasser</div><div id="available" class="big">—</div>
         <div class="pulse-insights" aria-live="polite"><div id="dailyPulse" class="daily-pulse" hidden></div><div id="weekPulse" class="daily-pulse" hidden></div><div id="pulseMomentum" class="daily-pulse" hidden></div></div>
       </article>
       <div class="stack">
@@ -864,7 +864,8 @@ async function refreshCardData(){
     if(!card)return;
     try{
       const table=categoryFor(match)==='women'?'ministaut_koteng_scans':'ministaut_scans';
-      const data=await load(table+'?select=observed_at,available_seated,locked_fields&reading_status=eq.accepted&match_id=eq.'+encodeURIComponent(match.id)+'&order=observed_at.desc&limit=24');
+    const statusFilter=categoryFor(match)==='women'?'in.(observed,accepted)':'eq.accepted';
+      const data=await load(table+'?select=observed_at,available_seated,locked_fields&reading_status='+statusFilter+'&match_id=eq.'+encodeURIComponent(match.id)+'&order=observed_at.desc&limit=24');
       if(cards.get(match.id)!==card)return;
       if(!data.length){
         card.value.textContent='—';
@@ -1260,8 +1261,9 @@ async function selectMatch(id){
   if(!match)return;
   const changed=current!==id,version=++selectionVersion;
   selectedVenue=venueFor(match);
+  $('availabilityCaption').textContent=selectedVenue==='koteng_arena'?'Observerte ledige sitteplasser':'Ledige sitteplasser';
   $('stadiumHeading').textContent=selectedVenue==='koteng_arena'?'KOTENG ARENA · SITTEFELT · V1.8':'LERKENDAL · SITTEFELT · KART V5';
-  $('stadiumIntro').textContent=selectedVenue==='koteng_arena'?'Koteng Arena har VIP og fem nummererte sittefelt. Ståplass A og B telles ikke med. Kartet er skjematisk.':'Lerkendals fire tribunesider med feltvis tilgjengelighet. Plasseringen er skjematisk.';
+  $('stadiumIntro').textContent=selectedVenue==='koteng_arena'?'Koteng Arena har VIP og fem nummererte sittefelt. Ståplass A og B telles ikke med. Dette er dobbeltkontrollerte observasjoner av billettkartet, ikke bekreftet salg eller komplett kategoriinventar. Kartet er skjematisk.':'Lerkendals fire tribunesider med feltvis tilgjengelighet. Plasseringen er skjematisk.';
   $('ticketLabel').textContent='Finn din plass på '+(selectedVenue==='koteng_arena'?'Koteng Arena':'Lerkendal');
   $('campaignHeading').textContent='Ses på '+(selectedVenue==='koteng_arena'?'Koteng Arena!':'Lerkendal!');
   current=id;updateSelectedCards();
@@ -1274,7 +1276,8 @@ async function selectMatch(id){
   $('stats').setAttribute('aria-busy','true');
   try{
     const table=categoryFor(match)==='women'?'ministaut_koteng_scans':'ministaut_scans';
-    const data=await load(table+'?select=id,observed_at,available_seated,locked_fields&reading_status=eq.accepted&match_id=eq.'+encodeURIComponent(id)+'&order=observed_at.desc&limit=500');
+    const statusFilter=categoryFor(match)==='women'?'in.(observed,accepted)':'eq.accepted';
+    const data=await load(table+'?select=id,observed_at,available_seated,locked_fields&reading_status='+statusFilter+'&match_id=eq.'+encodeURIComponent(id)+'&order=observed_at.desc&limit=500');
     if(version!==selectionVersion || id!==current)return;
     render(data);
     renderSectionRecords(data);
