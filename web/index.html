@@ -1070,7 +1070,40 @@ function sectionTiles(){
  }
  return tiles;
 }
+const KOTENG_CODES=['VIP','FELT-1','FELT-2','FELT-3','FELT-4','FELT-5'];
+function drawKotengMap(rows,scan){
+  const target=$('stadiumMap');target.replaceChildren();stadiumSelected=null;
+  if(!rows||!scan){target.textContent='Koteng-kartet vises når godkjente målinger er tilgjengelige.';return;}
+  const byCode=new Map(rows.map(r=>[r.section_code,r]));
+  stadiumByCode=byCode;
+  const locked=new Set(scan.locked_fields||[]);
+  const heat=sectionView==='heat';
+  const svg=svgEl('svg',{viewBox:'0 0 800 520',class:'stadium-map',role:'group','aria-label':'Skjematisk sitteplasskart Koteng Arena'});
+  svg.append(svgEl('rect',{x:20,y:153,width:760,height:304,rx:6,fill:'#087039',stroke:'#72bb80','stroke-width':3}));
+  for(let x=20;x<780;x+=95)svg.append(svgEl('rect',{x,y:153,width:47.5,height:304,fill:'#198448',opacity:'.6'}));
+  svg.append(svgEl('rect',{x:44,y:176,width:712,height:258,fill:'none',stroke:'#efffec','stroke-width':3}));
+  svg.append(svgEl('line',{x1:400,y1:176,x2:400,y2:434,stroke:'#efffec','stroke-width':3}));
+  svg.append(svgEl('circle',{cx:400,cy:305,r:48,fill:'none',stroke:'#efffec','stroke-width':3}));
+  svg.append(svgEl('rect',{x:44,y:245,width:100,height:120,fill:'none',stroke:'#efffec','stroke-width':3}));
+  svg.append(svgEl('rect',{x:656,y:245,width:100,height:120,fill:'none',stroke:'#efffec','stroke-width':3}));
+  const tiles=[['FELT-1',20,81,71,57],['FELT-2',97,81,190,57],['FELT-3',293,81,190,57],['FELT-4',489,81,190,57],['FELT-5',685,81,95,57],['VIP',293,19,190,54]];
+  for(const [code,x,y,w,height] of tiles){
+    const row=byCode.get(code),name=code==='VIP'?'VIP':'Felt '+code.slice(5);
+    const sector=svgEl('rect',{x,y,width:w,height,rx:4,class:'seat-sector','data-code':code,'data-level':stadiumColor(row,locked.has(code)),'data-heat':heat?sectionHeat(sectionDeltas.get(code)?.day):'','aria-pressed':'false',tabindex:0,role:'button','aria-label':name+', '+(row?row.free+' ledige av '+row.capacity:locked.has(code)?'låst':'ikke målt')});
+    sector.append(svgEl('title',{},name+' · '+(row?row.free+' ledige av '+row.capacity:locked.has(code)?'låst':'ikke målt')));
+    sector.addEventListener('click',()=>activateStadiumSection(code));
+    sector.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activateStadiumSection(code);}});
+    svg.append(sector);
+    svg.append(svgEl('text',{x:x+w/2,y:y+height/2+5,class:'seat-label'},name));
+  }
+  for(const [name,x] of [['STÅPLASS A',38],['STÅPLASS B',442]]){
+    svg.append(svgEl('rect',{x,y:469,width:320,height:37,rx:4,fill:'#26392e',stroke:'#75947b','stroke-dasharray':'5 5'}));
+    svg.append(svgEl('text',{x:x+160,y:492,'text-anchor':'middle',fill:'#b8d4bd','font-size':14},name));
+  }
+  target.append(svg);
+}
 function drawStadiumMap(rows,scan){
+  if(selectedVenue==='koteng_arena')return drawKotengMap(rows,scan);
  const target=$('stadiumMap');
  target.replaceChildren();stadiumSelected=null;
  if(!rows||!scan){target.textContent='Kartet vises når målinger er tilgjengelige.';return;}
@@ -1136,7 +1169,7 @@ function activateStadiumSection(code){
  if(!row){detail.textContent='Felt '+code+': ikke avlest eller bekreftet låst. Ingen ledighet kan fastslås.';return;}
  const pct=Math.round(100*row.free/row.capacity);
  const change=sectionDeltas.get(code)||{};
- detail.textContent='Felt '+code+' · '+fmt(row.free)+' ledige av '+fmt(row.capacity)+' seter ('+pct+' %). Målt '+date(lastObservedAt)+'. Forrige telling: '+sectionDeltaLabel(change.previous)+'. Omtrent 24 timer: '+sectionDeltaLabel(change.day)+'.';
+ detail.textContent=(code==='VIP'?'VIP':code.startsWith('FELT-')?'Felt '+code.slice(5):'Felt '+code)+' · '+fmt(row.free)+' ledige av '+fmt(row.capacity)+' seter ('+pct+' %). Målt '+date(lastObservedAt)+'. Forrige telling: '+sectionDeltaLabel(change.previous)+'. Omtrent 24 timer: '+sectionDeltaLabel(change.day)+'.';
  const cell=[...$('sectionGrid').children].find(el=>el.dataset?.code===code);
  if(sectionSelection)sectionSelection.setAttribute('aria-pressed','false');
  sectionSelection=cell||null;
@@ -1155,8 +1188,10 @@ function renderSections(rows,scan){
       Number.isInteger(r.capacity)&&r.capacity>0&&r.free>=0&&r.free<=r.capacity);
   const codes=new Set(valid.map(r=>r.section_code));
   const total=valid.reduce((sum,r)=>sum+r.free,0);
-  const complete=codes.size===valid.length &&
-    valid.length+((scan.locked_fields||[]).length)===60 &&
+  const expected=new Set(selectedVenue==='koteng_arena'?KOTENG_CODES:STADIUM_CODES);
+  const locks=scan.locked_fields||[];
+  const complete=codes.size===valid.length&&valid.every(r=>expected.has(r.section_code))&&
+    locks.every(code=>expected.has(code)&&!codes.has(code))&&valid.length+locks.length===expected.size&&
     total===scan.available_seated;
   if(!complete){
     status.textContent='Feltkontroll mangler';
@@ -1173,7 +1208,7 @@ function renderSections(rows,scan){
     const btn=document.createElement('button');
     btn.type='button';btn.className='section-cell';btn.dataset.code=r.section_code;btn.setAttribute('aria-pressed','false');
     btn.dataset.level=r.free===0?'none':r.free<=10?'few':'normal';
-    const name=document.createElement('span');name.className='section-code';name.textContent='Felt '+r.section_code;
+    const name=document.createElement('span');name.className='section-code';name.textContent=r.section_code==='VIP'?'VIP':r.section_code.startsWith('FELT-')?'Felt '+r.section_code.slice(5):'Felt '+r.section_code;
     const value=document.createElement('span');value.className='section-free';value.textContent=fmt(r.free);
     const meta=document.createElement('span');meta.className='section-meta';meta.textContent='ledige av '+fmt(r.capacity);
     btn.append(name,value,meta);
@@ -1192,7 +1227,10 @@ async function loadSections(scan,version,id,scans){
     const unique=[scan,prior,day].filter((x,i,arr)=>x&&arr.findIndex(y=>y?.id===x.id)===i);
     const snapshots=await Promise.all(unique.map(async item=>{
       const rows=await load('ministaut_section_measurements?select=section_code,free,capacity&scan_id=eq.'+encodeURIComponent(item.id)+'&order=section_code.asc&limit=80');
-      const valid=rows.length+(item.locked_fields||[]).length===60&&new Set(rows.map(r=>r.section_code)).size===rows.length&&rows.reduce((a,b)=>a+b.free,0)===item.available_seated;
+      const expected=new Set(selectedVenue==='koteng_arena'?KOTENG_CODES:STADIUM_CODES),locks=item.locked_fields||[];
+      const valid=rows.length+locks.length===expected.size&&rows.every(r=>expected.has(r.section_code))&&
+        locks.every(code=>expected.has(code)&&!rows.some(r=>r.section_code===code))&&new Set(rows.map(r=>r.section_code)).size===rows.length&&
+        rows.reduce((a,b)=>a+b.free,0)===item.available_seated;
       return {id:item.id,rows:valid?rows:null};
     }));
     if(version!==selectionVersion||current!==id)return;
