@@ -1,0 +1,36 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const path=require('node:path');
+const html=fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
+const script=html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
+assert.ok(script);
+new vm.Script(script,{filename:'ministaut.js'});
+for(const id of ['teamMen','teamWomen','teamMenCount','teamWomenCount','womenPending','stadiumHeading','stadiumIntro','stadiumMap']){
+ assert.ok(html.includes('id="'+id+'"'),id+' DOM target missing');
+}
+const start=script.indexOf("const WOMEN_KEYS=");
+const end=script.indexOf("let current=null",start);
+assert.ok(start>=0&&end>start);
+const ctx={window:{location:{search:'?lag=kvinner'}}};
+const f=vm.runInNewContext(script.slice(start,end)+";({categoryFor,venueFor,teamFromURL})",ctx,{timeout:1000});
+const roea={event_key:'6aaceecebfe408c38e1712dd',title:'Rosenborg – Røa'};
+const molde={event_key:'6a9a7e3f3f93920b289b0675',title:'Rosenborg – Molde'};
+assert.equal(f.categoryFor(roea),'women');
+assert.equal(f.categoryFor(molde),'men');
+assert.equal(f.venueFor(roea),'koteng_arena');
+assert.equal(f.venueFor(molde),'lerkendal');
+assert.equal(f.teamFromURL([roea,molde]),'women');
+ctx.window.location.search='?lag=rbk&kamp=6aaceecebfe408c38e1712dd';
+assert.equal(f.teamFromURL([roea,molde]),'women','deep link overrides mismatching team query');
+ctx.window.location.search='?lag=kvinner&kamp=6a9a7e3f3f93920b289b0675';
+assert.equal(f.teamFromURL([roea,molde]),'men','old RBK deep links work');
+assert.match(script,/function drawKotengMap\(/);
+assert.match(script,/selectedVenue==='koteng_arena'\)return drawKotengMap\(rows,scan\)/);
+assert.match(script,/KOTENG_CODES=\['VIP','FELT-1','FELT-2','FELT-3','FELT-4','FELT-5'\]/);
+assert.match(script,/valid\.every\(r=>expected\.has\(r\.section_code\)\)/);
+assert.match(script,/\$\('womenPending'\)\.hidden=activeTeam!=='women'\|\|matches\.length>0/);
+assert.match(script,/allMatches=published/);
+assert.match(script,/matches=allMatches\.filter\(m=>categoryFor\(m\)===activeTeam\)/);
+console.log('PASS: RBK / RBK Kvinner team selection, deep links, safe pending state, Koteng map, six-field validation');
