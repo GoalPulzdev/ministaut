@@ -15,6 +15,13 @@ VERSION='koteng-v1.8-geometry-locked-20261026'
 CAP={'VIP':71,'FELT-1':49,'FELT-2':160,'FELT-3':120,'FELT-4':152,'FELT-5':49}
 
 def build_payload(path:Path)->dict:
+    from profile_lock import load_verified_lock
+    profile_path=ROOT/'koteng_profile.json'
+    anchors_path=ROOT/'ankerpunkter_koteng.json'
+    profile=json.loads(profile_path.read_text(encoding='utf-8'))
+    if profile.get('profile_version')!=VERSION or profile.get('local_profile_lock',{}).get('state')!='LOCKED':
+        raise ValueError('Koteng V1.8 profil er ikke låst')
+    load_verified_lock(profile,anchors_path,EVENT)
     d=json.loads(Path(path).read_text(encoding='utf-8'))
     v=d.get('validation') or {}
     if d.get('event_key')!=EVENT or d.get('venue_id')!='koteng_arena' or d.get('profile_version')!=VERSION:
