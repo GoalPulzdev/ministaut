@@ -863,7 +863,8 @@ async function refreshCardData(){
     const card=cards.get(match.id);
     if(!card)return;
     try{
-      const data=await load('ministaut_scans?select=observed_at,available_seated,locked_fields&reading_status=eq.accepted&match_id=eq.'+encodeURIComponent(match.id)+'&order=observed_at.desc&limit=24');
+      const table=categoryFor(match)==='women'?'ministaut_koteng_scans':'ministaut_scans';
+      const data=await load(table+'?select=observed_at,available_seated,locked_fields&reading_status=eq.accepted&match_id=eq.'+encodeURIComponent(match.id)+'&order=observed_at.desc&limit=24');
       if(cards.get(match.id)!==card)return;
       if(!data.length){
         card.value.textContent='—';
@@ -1226,7 +1227,8 @@ async function loadSections(scan,version,id,scans){
     const day=historical24(scans,scan);
     const unique=[scan,prior,day].filter((x,i,arr)=>x&&arr.findIndex(y=>y?.id===x.id)===i);
     const snapshots=await Promise.all(unique.map(async item=>{
-      const rows=await load('ministaut_section_measurements?select=section_code,free,capacity&scan_id=eq.'+encodeURIComponent(item.id)+'&order=section_code.asc&limit=80');
+      const table=selectedVenue==='koteng_arena'?'ministaut_koteng_section_measurements':'ministaut_section_measurements';
+      const rows=await load(table+'?select=section_code,free,capacity&scan_id=eq.'+encodeURIComponent(item.id)+'&order=section_code.asc&limit=80');
       const expected=new Set(selectedVenue==='koteng_arena'?KOTENG_CODES:STADIUM_CODES),locks=item.locked_fields||[];
       const valid=rows.length+locks.length===expected.size&&rows.every(r=>expected.has(r.section_code))&&
         locks.every(code=>expected.has(code)&&!rows.some(r=>r.section_code===code))&&new Set(rows.map(r=>r.section_code)).size===rows.length&&
@@ -1271,7 +1273,8 @@ async function selectMatch(id){
   if(changed){$('error').textContent='';render([]);renderSectionRecords([]);renderSections(null,null);}
   $('stats').setAttribute('aria-busy','true');
   try{
-    const data=await load('ministaut_scans?select=id,observed_at,available_seated,locked_fields&reading_status=eq.accepted&match_id=eq.'+encodeURIComponent(id)+'&order=observed_at.desc&limit=500');
+    const table=categoryFor(match)==='women'?'ministaut_koteng_scans':'ministaut_scans';
+    const data=await load(table+'?select=id,observed_at,available_seated,locked_fields&reading_status=eq.accepted&match_id=eq.'+encodeURIComponent(id)+'&order=observed_at.desc&limit=500');
     if(version!==selectionVersion || id!==current)return;
     render(data);
     renderSectionRecords(data);
@@ -1311,8 +1314,11 @@ async function refresh(){
   if(refreshPromise)return refreshPromise;
   refreshPromise=(async()=>{
     $('error').textContent='';
-    const published=await load('ministaut_matches?select=id,event_key,title,kickoff_at&is_published=eq.true&order=kickoff_at.asc');
-    allMatches=published;
+    const [men,women]=await Promise.all([
+      load('ministaut_matches?select=id,event_key,title,kickoff_at&is_published=eq.true&order=kickoff_at.asc'),
+      load('ministaut_koteng_matches?select=id,event_key,title,kickoff_at,venue_id,team_category&is_published=eq.true&order=kickoff_at.asc')
+    ]);
+    allMatches=men.map(m=>({...m,team_category:'men',venue_id:'lerkendal'})).concat(women);
     if(!teamInitialized){activeTeam=teamFromURL(allMatches);teamInitialized=true;}
     await showTeam(activeTeam,{share:false});
   })().catch(error=>{$('error').textContent='Kunne ikke hente billettdata. Prøv Oppdater.';})
