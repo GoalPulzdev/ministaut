@@ -21,8 +21,13 @@ def build_payload(path:Path)->dict:
     profile=json.loads(profile_path.read_text(encoding='utf-8'))
     if profile.get('profile_version')!=VERSION or profile.get('local_profile_lock',{}).get('state')!='LOCKED':
         raise ValueError('Koteng V1.8 profil er ikke låst')
-    load_verified_lock(profile,anchors_path,EVENT)
+    _, lock_digest=load_verified_lock(profile,anchors_path,EVENT)
+    if profile.get('reference_sections')!=CAP:raise ValueError('Kapasitet stemmer ikke med låst profil')
     d=json.loads(Path(path).read_text(encoding='utf-8'))
+    if (d.get('profile_lock') or {}).get('digest_sha256')!=lock_digest:
+        raise ValueError('Skanningsfilens profil-SHA256 stemmer ikke med gjeldende lås')
+    if d.get('network_publication') is not False:
+        raise ValueError('Uventet aktiv skannerpublisering')
     v=d.get('validation') or {}
     if d.get('event_key')!=EVENT or d.get('venue_id')!='koteng_arena' or d.get('profile_version')!=VERSION:
         raise ValueError('Feil kamp, arena eller Koteng-profil')
