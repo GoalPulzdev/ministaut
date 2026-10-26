@@ -29,23 +29,23 @@ Deno.serve(async req=>{
   }
   if(total!==p.available_seated||p.reference_capacity_seated!==601)return deny('Total mismatch');
   const {data:match,error:matchErr}=await admin.from('ministaut_koteng_matches').select('id,is_published').eq('event_key',EVENT).single();
-  if(matchErr||!match)return json(503,{error:'Event not configured'});
-  const {data:existing}=await admin.from('ministaut_koteng_scans').select('id,available_seated,observed_at').eq('match_id',match.id).eq('source_run_id',p.source_run_id).maybeSingle();
+  if(matchErr||!match||match.is_published!==true)return json(503,{error:'Event not published'});
+  const {data:existing}=await admin.from('ministaut_koteng_scans').select('id,available_seated,observed_at,reading_status').eq('match_id',match.id).eq('source_run_id',p.source_run_id).maybeSingle();
   if(existing){
     if(existing.available_seated!==total||Date.parse(existing.observed_at)!==observed)return deny('Run ID collision');
-    return json(200,{ok:true,scan_id:existing.id,duplicate:true,status:'pending'});
+    return json(200,{ok:true,scan_id:existing.id,duplicate:true,status:existing.reading_status});
   }
   const {data:scan,error:scanErr}=await admin.from('ministaut_koteng_scans').insert({
     match_id:match.id,source_run_id:p.source_run_id,observed_at:new Date(observed).toISOString(),
-    available_seated:total,counted_sections:6,locked_fields:[],reading_status:'pending',
+    available_seated:total,counted_sections:6,locked_fields:[],reading_status:'observed',
     standing_status:'unknown',ticket_category:String(p.ticket_category||'ukjent').slice(0,60),
     ticket_category_verified:false,inventory_verified:false
   }).select('id').single();
   if(scanErr||!scan)return json(500,{error:'Could not save scan'});
   const {error:detailErr}=await admin.from('ministaut_koteng_section_measurements').insert(p.sections.map((s:{section:string,free:number,capacity:number})=>({scan_id:scan.id,section_code:s.section,free:s.free,capacity:s.capacity})));
   if(detailErr){
-    await admin.from('ministaut_koteng_scans').delete().eq('id',scan.id).eq('reading_status','pending');
+    await admin.from('ministaut_koteng_scans').delete().eq('id',scan.id).eq('reading_status','observed');
     return json(500,{error:'Failed section write; scan rolled back'});
   }
-  return json(200,{ok:true,scan_id:scan.id,status:'pending',available_seated:total});
+  return json(200,{ok:true,scan_id:scan.id,status:'observed',available_seated:total});
 });

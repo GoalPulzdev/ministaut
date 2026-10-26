@@ -77,8 +77,8 @@ def submit(payload:dict)->dict:
         with urlopen(request,timeout=25) as reply: result=json.load(reply)
     except HTTPError as error:
         raise RuntimeError('Supabase avviste innlesingen (HTTP '+str(error.code)+')') from error
-    if result.get('ok') is not True or result.get('status')!='pending':
-        raise RuntimeError('Mangler bekreftet privat innlesing')
+    if result.get('ok') is not True or result.get('status')!='observed':
+        raise RuntimeError('Mangler bekreftet offentlig observasjon')
     return result
 
 def main(argv=None):
@@ -88,10 +88,10 @@ def main(argv=None):
     ap.add_argument('--send',action='store_true',help='Last opp privat når MINISTAUT_TOKEN er konfigurert')
     args=ap.parse_args(argv)
     payload=build_payload(args.diagnostic)
-    print('Kontrollert:',payload['available_seated'],'ledige,',len(payload['sections']),'felt. Offentlig: NEI')
+    print('Kontrollert:',payload['available_seated'],'observerte ledige,',len(payload['sections']),'felt')
     if args.send:
         response=submit(payload)
-        print('Lagret privat som',response.get('status'),'scan_id:',response.get('scan_id'))
+        print('Registrert offentlig observasjon som',response.get('status'),'scan_id:',response.get('scan_id'))
     else:print('Ingen overføring. Bruk --send først når autorisert token er konfigurert.')
     return 0
 
