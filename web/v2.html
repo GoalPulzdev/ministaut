@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#070707">
-  <meta name="description" content="Følg billettpulsen før Rosenborgs hjemmekamper. Velg kamp, se utviklingen og finn din plass på Lerkendal.">
-  <title>Ministaut V2 · Eksklusiv billettoversikt</title>
+  <meta name="description" content="Følg billettsalget før Rosenborgs hjemmekamper. Se ledige sitteplasser, utviklingen og finn din plass på tribunen.">
+  <title>Ministaut · Følg billettsalget</title>
   <style>
 
 :root {
@@ -683,16 +683,16 @@ body{background:#070707}
 <body>
 <main class="wrap">
   <header class="top">
-    <div class="brand"><span class="v2-logo"><svg class="v2-crown" viewBox="0 0 48 40" aria-hidden="true"><path d="M4 12 14 22 23 7 32 22 44 12 39 31H9Z" fill="currentColor"/><rect x="10" y="33" width="28" height="4" rx="1" fill="currentColor"/><circle cx="4" cy="10" r="3" fill="currentColor"/><circle cx="23" cy="5" r="3" fill="currentColor"/><circle cx="44" cy="10" r="3" fill="currentColor"/></svg></span><span><span class="brand-name">MINISTAUT</span><small>RBK BILLETTMONITOR V2</small></span></div>
-    <nav class="top-links" aria-label="Hovedmeny"><a class="active" href="#page-title">Oversikt</a><a href="#matchCards">Kamper</a><a href="#chart-title">Billettpuls</a><a href="#sections-title">Tribuner</a></nav>
-    <span class="preview-chip">V2 FORHÅNDSVISNING</span>
+    <div class="brand"><span class="v2-logo"><svg class="v2-crown" viewBox="0 0 48 40" aria-hidden="true"><path d="M4 12 14 22 23 7 32 22 44 12 39 31H9Z" fill="currentColor"/><rect x="10" y="33" width="28" height="4" rx="1" fill="currentColor"/><circle cx="4" cy="10" r="3" fill="currentColor"/><circle cx="23" cy="5" r="3" fill="currentColor"/><circle cx="44" cy="10" r="3" fill="currentColor"/></svg></span><span><span class="brand-name">MINISTAUT</span></span></div>
+    <nav class="top-links" aria-label="Hovedmeny"><a class="active" href="#page-title">Oversikt</a><a href="#matchCards">Kamper</a><a href="#chart-title">Utvikling</a><a href="#sections-title">Tribuner</a></nav>
+    
     <div class="team-mark"><img src="https://cdn.sportmonks.com/images/soccer/teams/23/1335.png" alt="Rosenborg BK" width="45" height="45"></div>
   </header>
   <section class="hero" aria-labelledby="page-title">
     <div class="overline"><span class="pulse-dot" aria-hidden="true"></span><span id="teamOverline">BILLETT PÅ LERKENDAL</span></div>
-    <h1 id="page-title">Følg billettpulsen<br>til <em>Rosenborg.</em></h1>
-    <p id="teamDescription">Se hvordan de ledige plassene utvikler seg fram mot avspark. Velg kampen du vil følge – og bli med på å skape stemningen på tribunen.</p>
-    <div class="hero-controls"><a class="premium-cta" href="#matchCards">Se kommende kamper &nbsp; →</a><a class="premium-ghost" href="#match-details">Utforsk billettpulsen</a></div>
+    <h1 id="page-title">Følg billettsalget<br>til <em>Rosenborg.</em></h1>
+    <p id="teamDescription">Se hvor mange sitteplasser som er ledige, og hvordan det endrer seg fram mot avspark. Finn din plass på tribunen.</p>
+    <div class="hero-controls"><a class="premium-cta" href="#matchCards">Se kommende kamper &nbsp; →</a><a class="premium-ghost" href="#match-details">Se billettutviklingen</a></div>
     <span class="hero-caption">LERKENDAL · TRONDHEIM<br>EN BY. ETT LAG.</span>
     <div class="hero-watermark" aria-hidden="true"><img src="https://cdn.sportmonks.com/images/soccer/teams/23/1335.png" alt=""></div>
   </section>
@@ -706,14 +706,14 @@ body{background:#070707}
     <div id="womenPending" class="women-pending" hidden>
       <div class="overline">RBK KVINNER · KOTENG ARENA</div>
       <h3>Rosenborg – Røa · 1. november kl. 14.30</h3>
-      <p>Vi gjør klar billettpulsen for Rosenborg Kvinner. Ingen måling er offentliggjort ennå. Vi viser ikke tall før Koteng-tellingene er godkjent for publisering.</p>
+      <p>Vi følger med på billettene til RBK Kvinner. Her finner du oversikten så snart den er tilgjengelig.</p>
       <a href="https://billett.rbk.no/checkout/6aaceecebfe408c38e1712dd" target="_blank" rel="noopener noreferrer">Se billetter til Rosenborg – Røa ↗</a>
     </div>
   </section>
   <section class="results" id="match-details" aria-labelledby="selectedMatchTitle">
     <div class="details-head">
       <div>
-        <div class="overline" id="matchEyebrow">KAMPDETALJER · LERKENDAL</div>
+        <div class="overline" id="matchEyebrow">LERKENDAL · BILLETTOVERSIKT</div>
         <h2 id="selectedMatchTitle">Velg en kamp over</h2>
         <p id="kickoff">Kampstart</p>
       </div>
@@ -725,11 +725,11 @@ body{background:#070707}
     </div>
     <div class="summary" id="stats">
       <article class="card primary">
-        <div id="availabilityCaption" class="caption">Ledige sitteplasser</div><div id="available" class="big">—</div><p class="availability-footnote">Faktisk avleste, tilgjengelige sitteplasser</p>
+        <div id="availabilityCaption" class="caption">Ledige sitteplasser</div><div id="available" class="big">—</div><p class="availability-footnote">Tilgjengelige sitteplasser ved siste oppdatering</p>
         <div class="pulse-insights" aria-live="polite"><div id="dailyPulse" class="daily-pulse" hidden></div><div id="weekPulse" class="daily-pulse" hidden></div><div id="pulseMomentum" class="daily-pulse" hidden></div></div>
       </article>
       <div class="stack">
-        <article class="card small-card"><div class="caption">Siden første viste telling</div><div class="value" id="sinceFirst">—</div><div class="minor" id="sinceFirstNote">Venter på flere målinger</div></article>
+        <article class="card small-card"><div class="caption">Siden vi startet å følge kampen</div><div class="value" id="sinceFirst">—</div><div class="minor" id="sinceFirstNote">Venter på flere målinger</div></article>
         <article class="card small-card"><div class="caption">Siden forrige måling</div><div class="value" id="delta">—</div><div class="minor" id="deltaNote">Venter på flere målinger</div></article>
       </div>
     </div>
@@ -754,7 +754,7 @@ body{background:#070707}
     </section>
     <section class="card graph" aria-labelledby="chart-title">
       <div class="graph-header">
-        <div><div id="chart-title" class="caption">Billettpulsen mot avspark</div>
+        <div><div id="chart-title" class="caption">Ledige plasser over tid</div>
           <p class="graph-desc">Følg ledige plasser over tid. Trykk på grafen for detaljer.</p></div>
         <span id="chartCount" class="graph-count">0 tellinger</span>
       </div>
@@ -768,14 +768,14 @@ body{background:#070707}
       </div>
     </section>
     <section class="card sections-panel" aria-labelledby="sections-title">
-      <div class="section-heading"><h2 id="sections-title" class="section-title">Tribuneoversikt</h2><span class="section-help" id="sectionStatus">Henter feltdata …</span></div>
-      <p class="section-intro" id="stadiumIntro">Lerkendals fire tribunesider med feltvis tilgjengelighet. Feltplasseringen følger Lerkendals kjente tribune- og feltinndeling. Formene er skjematiske, ikke nøyaktige sektorpolygoner. Velg et felt for målt ledighet.</p>
-      <div class="stadium-map-shell"><div class="map-switch"><strong id="stadiumHeading">LERKENDAL · SITTEFELT <span class="map-revision">KART V5 · 24.10</span></strong><span class="section-help">Trykk på et felt</span></div><div class="insight-switch"><button id="viewAvailability" type="button" aria-pressed="true">Ledige nå</button><button id="viewHeat" type="button" aria-pressed="false">Endring siste døgn</button><span id="heatStatus"></span></div><div id="stadiumMap" aria-label="Interaktiv skjematisk stadionoversikt"></div><div class="map-legend"><span class="map-key"><i style="background:#a58a55"></i>50 % +</span><span class="map-key"><i style="background:#dec48d"></i>20–49 %</span><span class="map-key"><i style="background:#c8a664"></i>8–19 %</span><span class="map-key"><i style="background:#a58a55"></i>1–7 %</span><span class="map-key"><i style="background:#4d5255"></i>0 ledige</span><span class="map-key"><i style="background:#3c3427"></i>Låst / ukjent</span></div><p class="map-note">Sittefelt avlest fra valgt kamp. Ståplasser er ikke inkludert. Farge viser andel ledige seter, ikke solgte billetter. Feltinndelingen følger stadionkartet, men rektanglene er skjematiske og ikke oppmålte feltgrenser. Kontroller alltid felt og rad hos RBK.</p></div>
-      <div class="section-grid" id="sectionGrid"><p class="section-loading">Venter på seksjonsdata …</p></div>
+      <div class="section-heading"><h2 id="sections-title" class="section-title">Tribuneoversikt</h2><span class="section-help" id="sectionStatus">Henter tribunekart …</span></div>
+      <p class="section-intro" id="stadiumIntro">Velg et felt for å se hvor mange sitteplasser som er ledige.</p>
+      <div class="stadium-map-shell"><div class="map-switch"><strong id="stadiumHeading">LERKENDAL · SITTEFELT <span class="map-revision"></span></strong><span class="section-help">Trykk på et felt</span></div><div class="insight-switch"><button id="viewAvailability" type="button" aria-pressed="true">Ledige nå</button><button id="viewHeat" type="button" aria-pressed="false">Endring siste døgn</button><span id="heatStatus"></span></div><div id="stadiumMap" aria-label="Interaktiv skjematisk stadionoversikt"></div><div class="map-legend"><span class="map-key"><i style="background:#a58a55"></i>50 % +</span><span class="map-key"><i style="background:#dec48d"></i>20–49 %</span><span class="map-key"><i style="background:#c8a664"></i>8–19 %</span><span class="map-key"><i style="background:#a58a55"></i>1–7 %</span><span class="map-key"><i style="background:#4d5255"></i>0 ledige</span><span class="map-key"><i style="background:#3c3427"></i>Låst / ukjent</span></div><p class="map-note">Fargene viser andelen ledige sitteplasser i hvert felt. Ståplasser er ikke med. Kartet er veiledende – sjekk eksakt plass hos RBK før du kjøper.</p></div>
+      <div class="section-grid" id="sectionGrid"><p class="section-loading">Henter ledige plasser …</p></div>
       <div id="sectionDetail" class="section-detail" aria-live="polite">Velg et felt for flere detaljer.</div><div id="sectionRecords" class="insight-records" aria-live="polite"></div>
     </section>
   </section>
-  <footer class="fan-footer">MINISTAUT · En uavhengig supporteroversikt. <span class="premium-bottom">V2 designforhåndsvisning · Målinger fra eksisterende godkjent datakilde.</span> <span class="premium-bottom">Stadionfoto: Einar Fredriksen, <a href="https://commons.wikimedia.org/wiki/File:Lerkendal_stadion_at_night.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>, <a href="https://creativecommons.org/licenses/by-sa/2.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 2.0</a>. Bearbeidet til sort-hvitt.</span></footer>
+  <footer class="fan-footer">MINISTAUT · En uavhengig supporteroversikt. <span class="premium-bottom">Stadionfoto: Einar Fredriksen, <a href="https://commons.wikimedia.org/wiki/File:Lerkendal_stadion_at_night.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>, <a href="https://creativecommons.org/licenses/by-sa/2.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 2.0</a>. Bearbeidet til sort-hvitt.</span></footer>
   <p id="error" role="alert"></p>
 </main>
 <script>
@@ -1202,7 +1202,7 @@ function createCard(match){
   const unit=document.createElement('span');unit.className='tile-unit';unit.textContent='ledige sitteplasser';
   summary.append(value,unit);
   const spark=document.createElement('span');spark.className='tile-spark';spark.setAttribute('aria-hidden','true');
-  const foot=document.createElement('span');foot.className='tile-foot';foot.textContent='Henter siste telling …';
+  const foot=document.createElement('span');foot.className='tile-foot';foot.textContent='Henter siste oppdatering …';
   bottom.append(summary,spark,foot);
   button.append(top,matchup,bottom);
   button.addEventListener('click',()=>{
@@ -1471,7 +1471,7 @@ function sectionTiles(){
 const KOTENG_CODES=['VIP','FELT-1','FELT-2','FELT-3','FELT-4','FELT-5'];
 function drawKotengMap(rows,scan){
   const target=$('stadiumMap');target.replaceChildren();stadiumSelected=null;
-  if(!rows||!scan){target.textContent='Koteng-kartet vises når godkjente målinger er tilgjengelige.';return;}
+  if(!rows||!scan){target.textContent='Tribunekartet kommer snart.';return;}
   const byCode=new Map(rows.map(r=>[r.section_code,r]));
   stadiumByCode=byCode;
   const locked=new Set(scan.locked_fields||[]);
@@ -1504,7 +1504,7 @@ function drawStadiumMap(rows,scan){
   if(selectedVenue==='koteng_arena')return drawKotengMap(rows,scan);
  const target=$('stadiumMap');
  target.replaceChildren();stadiumSelected=null;
- if(!rows||!scan){target.textContent='Kartet vises når målinger er tilgjengelige.';return;}
+ if(!rows||!scan){target.textContent='Tribunekartet kommer snart.';return;}
  const byCode=new Map(rows.map(r=>[r.section_code,r]));
  stadiumByCode=byCode;
  const locks=new Set(scan.locked_fields||[]);
@@ -1578,8 +1578,8 @@ function renderSections(rows,scan){
   grid.replaceChildren();
   if(!scan || !Array.isArray(rows)){
     drawStadiumMap(null,null);
-    visibleSectionRows=[];visibleSectionScan=null;sectionDeltas=new Map();status.textContent='Feltdata ikke tilgjengelige';
-    detail.textContent='Velg en kamp for å se sittefeltene.';
+    visibleSectionRows=[];visibleSectionScan=null;sectionDeltas=new Map();status.textContent='Tribunekartet er ikke tilgjengelig ennå';
+    detail.textContent='Velg en kamp for å se ledige plasser.';
     return;
   }
   const valid=rows.filter(r=>typeof r.section_code==='string'&&Number.isInteger(r.free)&&
@@ -1592,12 +1592,12 @@ function renderSections(rows,scan){
     locks.every(code=>expected.has(code)&&!codes.has(code))&&valid.length+locks.length===expected.size&&
     total===scan.available_seated;
   if(!complete){
-    status.textContent='Feltkontroll mangler';
-    detail.textContent='Seksjonstallene vises ikke før summen stemmer med godkjent telling.';
+    status.textContent='Tribunekartet er midlertidig utilgjengelig';
+    detail.textContent='Prøv igjen litt senere.';
     drawStadiumMap(null,null);
     return;
   }
-  status.textContent=valid.length+' avleste felt · '+date(scan.observed_at);
+  status.textContent='Oppdatert '+date(scan.observed_at);
   visibleSectionRows=valid.slice();visibleSectionScan=scan;drawStadiumMap(valid,scan);
   valid.sort((a,b)=>a.section_code.localeCompare(b.section_code,'nb',{numeric:true}));
   sectionSelection=null;
@@ -1616,8 +1616,8 @@ function renderSections(rows,scan){
 }
 async function loadSections(scan,version,id,scans){
   const grid=$('sectionGrid');
-  grid.textContent='Henter seksjonstall …';
-  $('sectionStatus').textContent='Henter feltdata …';
+  grid.textContent='Henter ledige plasser …';
+  $('sectionStatus').textContent='Henter tribunekart …';
   if(!scan){renderSections(null,null);return;}
   try{
     const prior=scans.filter(s=>s.id!==scan.id&&Date.parse(s.observed_at)<Date.parse(scan.observed_at)&&comparable(s,scan)).sort((a,b)=>Date.parse(b.observed_at)-Date.parse(a.observed_at))[0];
@@ -1647,7 +1647,7 @@ async function loadSections(scan,version,id,scans){
   }catch(error){
     if(version!==selectionVersion||current!==id)return;
     renderSections(null,null);
-    $('sectionDetail').textContent='Kunne ikke hente seksjonsdata nå.';
+    $('sectionDetail').textContent='Kunne ikke hente tribunekartet nå.';
   }
 }
 $('viewAvailability').addEventListener('click',()=>chooseSectionMode('availability'));
@@ -1658,13 +1658,13 @@ async function selectMatch(id){
   const changed=current!==id,version=++selectionVersion;
   selectedVenue=venueFor(match);
   $('availabilityCaption').textContent=selectedVenue==='koteng_arena'?'Observerte ledige sitteplasser':'Ledige sitteplasser';
-  $('stadiumHeading').textContent=selectedVenue==='koteng_arena'?'KOTENG ARENA · SITTEFELT · V1.8':'LERKENDAL · SITTEFELT · KART V5';
-  $('stadiumIntro').textContent=selectedVenue==='koteng_arena'?'Koteng Arena har VIP og fem nummererte sittefelt. Ståplass A og B telles ikke med. Dette er dobbeltkontrollerte observasjoner av billettkartet, ikke bekreftet salg eller komplett kategoriinventar. Kartet er skjematisk.':'Lerkendals fire tribunesider med feltvis tilgjengelighet. Plasseringen er skjematisk.';
+  $('stadiumHeading').textContent=selectedVenue==='koteng_arena'?'KOTENG ARENA · TRIBUNEKART':'LERKENDAL · TRIBUNEKART';
+  $('stadiumIntro').textContent=selectedVenue==='koteng_arena'?'Velg et felt for å se ledige sitteplasser på Koteng Arena. Ståplassene er ikke med i oversikten.':'Velg et felt for å se ledige sitteplasser på Lerkendal.';
   $('ticketLabel').textContent='Finn din plass på '+(selectedVenue==='koteng_arena'?'Koteng Arena':'Lerkendal');
   $('campaignHeading').textContent='Ses på '+(selectedVenue==='koteng_arena'?'Koteng Arena!':'Lerkendal!');
   current=id;updateSelectedCards();
   $('selectedMatchTitle').textContent=match.title;
-  $('matchEyebrow').textContent=selectedVenue==='koteng_arena'?'KAMPDETALJER · KOTENG ARENA':'KAMPDETALJER · LERKENDAL';
+  $('matchEyebrow').textContent=selectedVenue==='koteng_arena'?'KOTENG ARENA · BILLETTOVERSIKT':'LERKENDAL · BILLETTOVERSIKT';
   selectedKickoff=match.kickoff_at||null;
   $('kickoff').textContent=match.kickoff_at?'Avspark '+date(match.kickoff_at):'Avspark ikke registrert';
   const key=String(match.event_key||'');
@@ -1694,10 +1694,10 @@ async function showTeam(next,{share=true}={}){
   $('teamMenCount').textContent=allMatches.filter(m=>categoryFor(m)==='men').length+' kamper';
   $('teamWomenCount').textContent=allMatches.filter(m=>categoryFor(m)==='women').length+' kamper';
   $('teamOverline').textContent=activeTeam==='women'?'BILLETTSTATUS · RBK KVINNER':'BILLETTSTATUS · RBK';
-  $('page-title').innerHTML=activeTeam==='women'?'Følg billettpulsen<br>til <em>RBK Kvinner.</em>':'Følg billettpulsen<br>til <em>Rosenborg.</em>';
+  $('page-title').innerHTML=activeTeam==='women'?'Følg billettsalget<br>til <em>RBK Kvinner.</em>':'Følg billettsalget<br>til <em>Rosenborg.</em>';
   $('teamDescription').textContent=activeTeam==='women'
-    ?'Følg RBK Kvinners kamper og ledige sitteplasser. Historikk og tribuneoversikt kommer når målingene er godkjent for publisering.'
-    :'Se hvordan de ledige plassene utvikler seg fram mot avspark. Velg kampen du vil følge – og bli med på å skape stemningen på tribunen.';
+    ?'Se ledige sitteplasser til RBK Kvinners kamper og finn din plass på tribunen.'
+    :'Se hvor mange sitteplasser som er ledige, og hvordan det endrer seg fram mot avspark. Finn din plass på tribunen.';
   $('picker-title').textContent=activeTeam==='women'?'RBK Kvinner · kommende kamper':'Kommende hjemmekamper';
   $('womenPending').hidden=activeTeam!=='women'||matches.length>0;
   $('match-details').hidden=matches.length===0;
