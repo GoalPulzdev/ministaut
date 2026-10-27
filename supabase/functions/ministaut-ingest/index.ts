@@ -37,8 +37,11 @@ Deno.serve(async(req)=>{
   if(sum!==payload.available_seated||payload.total_capacity!==21423)return reply(422,{error:'Summary mismatch'});
   if(payload.quality_approved!==true||payload.locked_fields_confirmed!==true)return reply(422,{error:'Unapproved scan'});
   const kickoff=payload.kickoff_at?new Date(payload.kickoff_at).toISOString():null;
-  const {data:match,error:matchError}=await admin.from('ministaut_matches').upsert({event_key:eventKey,title,kickoff_at:kickoff,total_capacity:21423},{onConflict:'event_key'}).select('id').single();
-  if(matchError)return reply(500,{error:'Could not update match'});
+  // Scanner submissions create new match records but must never overwrite operator-curated metadata.
+  const {error:seedError}=await admin.from('ministaut_matches').upsert({event_key:eventKey,title,kickoff_at:kickoff,total_capacity:21423},{onConflict:'event_key',ignoreDuplicates:true});
+  if(seedError)return reply(500,{error:'Could not create match'});
+  const {data:match,error:matchError}=await admin.from('ministaut_matches').select('id').eq('event_key',eventKey).single();
+  if(matchError||!match)return reply(500,{error:'Could not find match'});
   const {data:scan,error:scanError}=await admin.from('ministaut_scans').upsert({match_id:match.id,source_run_id:runId,observed_at:new Date(when).toISOString(),available_seated:sum,counted_sections:seen.size,locked_fields:locks,standing_status:'unknown'},{onConflict:'match_id,source_run_id'}).select('id').single();
   if(scanError)return reply(500,{error:'Could not save scan'});
   const {error:sectionError}=await admin.from('ministaut_section_measurements').upsert(sections.map((s:any)=>({scan_id:scan.id,section_code:s.section,free:s.free,capacity:s.capacity})),{onConflict:'scan_id,section_code'});
