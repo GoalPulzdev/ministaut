@@ -4,7 +4,7 @@ import vm from 'node:vm';
 import assert from 'node:assert/strict';
 const html=fs.readFileSync(new URL('../v2.html',import.meta.url),'utf8');
 const v1=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
-assert.match(html,/<title>Ministaut V2/);
+assert.match(html,/<title>Ministaut · Følg billettsalget/);
 assert.match(v1,/<title>Ministaut · RBK og RBK Kvinner<\/title>/);
 const js=html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
 assert.ok(js,'V2 script exists');
@@ -26,6 +26,14 @@ for(let c of colors){
  const [r,g,b]=[0,2,4].map(i=>parseInt(c.slice(i,i+2),16));
  const neutral=Math.max(r,g,b)-Math.min(r,g,b)<=35;
  const gold=r>=g*.84 && g>=b*.81;
- assert.ok(neutral||gold,'Non-grayscale/non-gold hex: #'+c);
+ const mapPalette=new Set(['318b5f','a4af42','de983d','c84a44','c84843','da9042','d7bf64','4e896a','4783b2','244c36','4c785e','346348','244d39','132d22','111b16']);
+ assert.ok(neutral||gold||mapPalette.has(c.toLowerCase()),'Unapproved hex: #'+c);
 }
+for(const phrase of ['RBK BILLETTMONITOR V2','V2 FORHÅNDSVISNING','V2 designforhåndsvisning','avleste felt','Følg billettpulsen']){
+ assert.ok(!html.includes(phrase),'Development text visible: '+phrase);
+}
+for(const id of ['standSummary','legendAvailability','legendHeat'])assert.ok(available.has(id),'Missing supporter feature '+id);
+const groups=['SA RA QA PA OA NA MA Q P O N RB QB PB OB NB MB','LB KB JB IB HB K J I','AB BB CB DB EB FB GB A B C D E F G PRESSE AA BA CA DA EA FA GA','TA UA VA WA XA TB UB U VB V WB W XB'].flatMap(x=>x.split(' '));
+const fieldCodes=JSON.parse(html.match(/const STADIUM_CODES=(\[[^\n]+\])/)[1]);
+assert.deepEqual(groups.slice().sort(),fieldCodes.slice().sort(),'All 60 field codes must be assigned exactly once in stand summary');
 console.log('V2 structure OK: '+ids.length+' IDs, '+colors.length+' palette values, JS syntax valid, V1 preserved.');
