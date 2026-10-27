@@ -12,10 +12,16 @@ from .model import ENGINES, Job, checkout_key, parse_utc
 from .observations import token_configured
 from .runner import Controller, REVIEW, FAILED, PLANNED, REJECTED, TIMEOUT
 from .storage import Store
+from .cards import CardGrid
 
 BG = '#09160f'; PANEL = '#14271b'; PANEL2 = '#1d3526'; FG = '#eaf8ec'; DIM = '#9dbba4'; ACC = '#79e8a2'
 WARN = '#ffcf7a'; BAD = '#ff8f8f'
 TICK_MS = 2000
+# Compact badge text for the cards; full status stays in the detail line.
+SHORT = {'publisert observasjon': 'PUBLISERT', 'bekreftet lokalt': 'BEKREFTET', 'køet for sending': 'SENDES',
+         'avvist av kvalitetskontroll': 'AVVIST', 'trenger gjennomgang': 'SJEKK LÅS', 'stoppet ved avspark': 'AVSPARK',
+         'tidsavbrudd': 'TIDSAVBRUDD', 'planlagt': 'PLANLAGT', 'ferdig': 'FERDIG', 'feil': 'FEIL', 'klar': 'KLAR',
+         'av': 'PAUSE', 'stoppet': 'STOPPET'}
 
 
 def when_text(value: str | None) -> str:
@@ -142,7 +148,7 @@ class App:
     def _build(self):
         r = self.root
         r.title(f'MINISTAUT · Scanner Control {__version__}')
-        r.geometry('1240x820'); r.minsize(980, 660); r.configure(bg=BG)
+        r.geometry('1280x940'); r.minsize(980, 700); r.configure(bg=BG)
         icon = Path(getattr(sys, '_MEIPASS', self.base)) / 'ministaut.ico'
         if icon.is_file():
             try:
@@ -150,43 +156,34 @@ class App:
             except tk.TclError:
                 pass
         self._style()
-        tk.Label(r, text=f'MINISTAUT  /  SCANNER CONTROL {__version__}', anchor='w', bg=BG, fg=ACC,
-                 font=('Segoe UI', 11, 'bold')).pack(fill='x', padx=24, pady=(18, 2), anchor='w')
-        tk.Label(r, text='Alle kamper. Én kontroll. Ingen falske tall.', anchor='w', bg=BG, fg=FG,
-                 font=('Segoe UI', 20, 'bold')).pack(fill='x', padx=24, pady=(0, 12), anchor='w')
-        strip = tk.Frame(r, bg=BG); strip.pack(fill='x', padx=23, pady=(0, 8))
-        self.summary = tk.Label(strip, text='', bg=BG, fg=DIM, font=('Segoe UI', 10)); self.summary.pack(side='left')
-        for label, fun in [('Systemsjekk', self.health), ('Slett', self.delete), ('Rediger', self.edit),
-                           ('+ Legg til kamp', self.add)]:
-            ttk.Button(strip, text=label, command=fun).pack(side='right', padx=4)
+        head = tk.Frame(r, bg=BG); head.pack(fill='x', padx=24, pady=(18, 4))
+        brand = tk.Frame(head, bg=BG); brand.pack(side='left')
+        tk.Label(brand, text='M', bg=ACC, fg=BG, font=('Segoe UI', 15, 'bold'), width=2).pack(side='left', padx=(0, 12))
+        names = tk.Frame(brand, bg=BG); names.pack(side='left')
+        tk.Label(names, text='Ministaut Scanner Control', anchor='w', bg=BG, fg=FG,
+                 font=('Segoe UI', 17, 'bold')).pack(anchor='w')
+        self.summary = tk.Label(names, text='', anchor='w', bg=BG, fg=DIM, font=('Segoe UI', 9))
+        self.summary.pack(anchor='w')
+        self.live_pill = tk.Label(head, font=('Segoe UI', 10, 'bold'), padx=14, pady=6)
+        self.live_pill.pack(side='right')
 
-        cols = [('team', 'LAG', 110), ('event', 'KAMP', 210), ('venue', 'ARENA', 105), ('free', 'LEDIGE', 70),
-                ('delta', 'ENDRING', 72), ('age', 'MÅLT', 70), ('mode', 'DRIFT', 120), ('kickoff', 'AVSPARK', 125),
-                ('status', 'STATUS', 165), ('next', 'NESTE', 120)]
-        table = tk.Frame(r, bg=BG); table.pack(fill='both', expand=True, padx=24)
-        self.tree = ttk.Treeview(table, columns=[c[0] for c in cols], show='headings', height=7, selectmode='browse')
-        for c, label, w in cols:
-            self.tree.heading(c, text=label); self.tree.column(c, width=w, anchor='w', stretch=(c == 'event'))
-        self.tree.tag_configure('live', foreground=ACC)
-        self.tree.tag_configure('off', foreground=DIM)
-        self.tree.tag_configure('error', foreground=BAD)
-        self.tree.tag_configure('review', foreground=WARN)
-        self.tree.pack(side='left', fill='both', expand=True)
-        sb = ttk.Scrollbar(table, orient='vertical', command=self.tree.yview); sb.pack(side='right', fill='y')
-        self.tree.configure(yscrollcommand=sb.set)
-        self.tree.bind('<<TreeviewSelect>>', self.on_select)
-        self.tree.bind('<Double-1>', lambda _e: self.edit())
+        bar = tk.Frame(r, bg=BG); bar.pack(fill='x', padx=24, pady=(12, 12))
+        for label, fun, style in [('Test én gang', self.test, 'Primary.TButton'), ('Start nå', self.start_now, 'TButton'),
+                                  ('Aktiver / Pause', self.toggle, 'TButton'), ('Live av/på', self.live, 'TButton'),
+                                  ('Stopp', self.stop, 'Danger.TButton')]:
+            ttk.Button(bar, text=label, command=fun, style=style).pack(side='left', padx=(0, 6))
+        for label, fun in [('Systemsjekk', self.health), ('Frigi lås', self.release), ('Åpne mappe', self.folder),
+                           ('Slett', self.delete), ('Rediger', self.edit), ('+ Legg til kamp', self.add)]:
+            ttk.Button(bar, text=label, command=fun, style='Ghost.TButton' if label[0] != '+' else 'Primary.TButton'
+                       ).pack(side='right', padx=(6, 0))
 
-        buttons = tk.Frame(r, bg=BG); buttons.pack(fill='x', padx=24, pady=8)
-        for label, fun in [('Test én gang', self.test), ('Aktiver / Deaktiver', self.toggle), ('Live AV/PÅ', self.live),
-                           ('Start nå', self.start_now), ('Stopp', self.stop), ('Frigi lås', self.release),
-                           ('Åpne mappe', self.folder)]:
-            ttk.Button(buttons, text=label, command=fun).pack(side='left', padx=(0, 7))
+        self.cards = CardGrid(r, self.pick, lambda key: (self.pick(key), self.edit()))
+        self.cards.pack(fill='both', expand=True, padx=24)
 
         self.note = tk.Label(r, text='Velg en kamp for detaljer.', bg=BG, fg=DIM, font=('Segoe UI', 10),
                              anchor='w', justify='left', wraplength=1150)
         self.note.pack(fill='x', padx=24, pady=(4, 6))
-        book = ttk.Notebook(r); book.pack(fill='both', expand=True, padx=24, pady=(0, 8))
+        book = ttk.Notebook(r); book.pack(fill='x', padx=24, pady=(0, 8))
         self.hist = self._table(book, 'Målinger', [('time', 'MÅLT (NORSK TID)', 150), ('free', 'LEDIGE', 80),
                                                    ('delta', 'ENDRING', 80), ('fields', 'FELT', 60),
                                                    ('pub', 'PUBLISERING', 160), ('run', 'MÅLE-ID', 200)])
@@ -200,7 +197,7 @@ class App:
 
     def _table(self, book, title, cols):
         frame = tk.Frame(book, bg=PANEL); book.add(frame, text=title)
-        t = ttk.Treeview(frame, columns=[c[0] for c in cols], show='headings', height=6)
+        t = ttk.Treeview(frame, columns=[c[0] for c in cols], show='headings', height=4, style='Detail.Treeview')
         for c, label, w in cols:
             t.heading(c, text=label); t.column(c, width=w, anchor='w', stretch=(c == cols[-1][0]))
         t.pack(fill='both', expand=True)
@@ -208,7 +205,7 @@ class App:
 
     def _text(self, book, title):
         frame = tk.Frame(book, bg=PANEL); book.add(frame, text=title)
-        t = tk.Text(frame, bg=PANEL, fg=FG, insertbackground=ACC, height=8, font=('Consolas', 9),
+        t = tk.Text(frame, bg=PANEL, fg=FG, insertbackground=ACC, height=6, font=('Consolas', 9),
                     borderwidth=0, wrap='word', state='disabled')
         t.pack(fill='both', expand=True)
         return t
@@ -217,10 +214,19 @@ class App:
         st = ttk.Style(self.root); st.theme_use('clam')
         st.configure('Treeview', background=PANEL, fieldbackground=PANEL, foreground=FG, rowheight=34,
                      font=('Segoe UI', 10), borderwidth=0)
+        st.configure('Detail.Treeview', background=PANEL, fieldbackground=PANEL, foreground=FG, rowheight=26,
+                     font=('Segoe UI', 9), borderwidth=0)
+        st.map('Detail.Treeview', background=[('selected', '#276a45')])
         st.configure('Treeview.Heading', background=PANEL2, foreground=ACC, font=('Segoe UI', 9, 'bold'), relief='flat')
         st.map('Treeview', background=[('selected', '#276a45')], foreground=[('selected', '#ffffff')])
         st.configure('TButton', background='#28523a', foreground=FG, font=('Segoe UI', 9, 'bold'), padding=(10, 8), borderwidth=0)
         st.map('TButton', background=[('active', '#33734d')])
+        st.configure('Primary.TButton', background=ACC, foreground=BG)
+        st.map('Primary.TButton', background=[('active', '#a3f0c0')])
+        st.configure('Danger.TButton', background='#4a1f1f', foreground='#ffb4b4')
+        st.map('Danger.TButton', background=[('active', '#6a2a2a')])
+        st.configure('Ghost.TButton', background=BG, foreground=DIM, padding=(8, 8))
+        st.map('Ghost.TButton', background=[('active', PANEL2)], foreground=[('active', FG)])
         st.configure('TNotebook', background=BG, borderwidth=0)
         st.configure('TNotebook.Tab', background=PANEL2, foreground=DIM, padding=(14, 6), font=('Segoe UI', 9, 'bold'))
         st.map('TNotebook.Tab', background=[('selected', PANEL)], foreground=[('selected', ACC)])
@@ -390,12 +396,11 @@ class App:
             self.event('Systemsjekk: ' + ('avvik funnet' if blocking else 'ingen blokkerende feil'))
         self.handle(work)
 
-    def on_select(self, _evt):
-        ids = self.tree.selection()
-        self.selected = ids[0] if ids else None
+    def pick(self, key: str):
+        self.selected = key
         self._log_shown = ('', 0.0)
         self._detail_shown = None
-        self.render_detail()
+        self.render()
 
     # --- rendering -----------------------------------------------------------
     def _tick(self):
@@ -415,39 +420,61 @@ class App:
         now = datetime.now(timezone.utc)
         jobs = self.store.jobs()
         busy = {a.job.profile for a in self.controller.active.values()}
-        keys = set()
+        cards = []
         for j in jobs:
-            keys.add(j.key)
             st = self.store.state(j.key)
-            hist = self.store.history(j.key, 1)
+            hist = self.store.history(j.key, 24)
             latest = hist[0] if hist else None
-            status = st['last_status']
+            status, tone = SHORT.get(st['last_status'], st['last_status']), 'ok'
+            due = parse_utc(st['next_due']) if st['next_due'] else None
             if j.key in self.controller.active:
                 a = self.controller.active[j.key]
-                status = f'SKANNER · {int((now - a.started).total_seconds() // 60)} min'
-            elif status == PLANNED and j.profile in busy and st['next_due'] and parse_utc(st['next_due']) <= now:
-                status = 'KØET'
-            mode = 'LIVE' if j.upload else ('PLANLAGT' if j.enabled else 'AV')
+                status, tone = f'SKANNER · {int((now - a.started).total_seconds() // 60)} MIN', 'scan'
+            elif st['last_status'] == REVIEW:
+                tone = 'warn'
+            elif st['last_status'] in (FAILED, REJECTED, TIMEOUT):
+                tone = 'bad'
+            elif not j.enabled:
+                status, tone = 'PAUSE', 'off'
+            elif status == PLANNED and j.profile in busy and due and due <= now:
+                status, tone = 'I KØ', 'scan'
+            elif j.upload:
+                tone = 'live'
+            if j.enabled and j.upload and tone in ('ok', 'live'):
+                status = 'LIVE · ' + status if status != 'PLANLAGT' else 'LIVE'
             if j.profile == 'lerkendal_legacy':
-                mode = 'LEGACY · ' + ('AKTIV' if j.enabled else 'AV')
-            tag = ('review' if st['last_status'] == REVIEW else 'error' if st['last_status'] in (FAILED, REJECTED, TIMEOUT)
-                   else 'live' if j.upload or j.key in self.controller.active else 'off' if not j.enabled else '')
-            values = (j.team, j.label, j.venue, latest['available_seated'] if latest else '—',
-                      delta_text(latest['delta']) if latest else '—', age_text(latest and latest['observed_at'], now),
-                      mode, when_text(j.kickoff_at), status.upper(), when_text(st['next_due']))
-            if self.tree.exists(j.key):
-                self.tree.item(j.key, values=values, tags=(tag,))
+                status = 'LEGACY · ' + status
+            kick = j.kickoff()
+            days = (kick - now).days
+            until = 'passert' if kick <= now else (f'om {days} d' if days >= 1 else f'om {int((kick - now).total_seconds() // 3600)} t')
+            if j.key in self.controller.active:
+                nxt = 'skanner nå …'
+            elif due and j.enabled:
+                mins = int((due - now).total_seconds() // 60)
+                nxt = ('neste: straks' if mins <= 0 else f'neste {oslo.text(due, "%H:%M")} (om {mins} min)' if mins < 120
+                       else f'neste {oslo.text(due, "%d.%m %H:%M")}')
             else:
-                self.tree.insert('', 'end', iid=j.key, values=values, tags=(tag,))
-        for iid in self.tree.get_children():
-            if iid not in keys:
-                self.tree.delete(iid)
-        if self.selected and self.selected in keys and self.tree.selection() != (self.selected,):
-            self.tree.selection_set(self.selected)
+                nxt = 'ingen planlagt'
+            cards.append({'key': j.key, 'team': j.team, 'venue': j.venue.replace('_', ' ').title(), 'label': j.label,
+                          'status': status.upper(), 'tone': tone,
+                          'kickoff': f'Avspark {oslo.text(kick, "%d.%m kl %H:%M")}  ·  {until}',
+                          'free': f"{latest['available_seated']:,}".replace(',', ' ') if latest else '—',
+                          'delta': latest['delta'] if latest else None,
+                          'measured': ('målt ' + age_text(latest['observed_at'], now) + ' siden').replace('målt nå siden', 'målt nå')
+                                      if latest else 'ikke målt ennå',
+                          'next': nxt, 'points': [h['available_seated'] for h in reversed(hist)]})
+        self.cards.sync(cards, self.selected)
+        live = [j for j in jobs if j.upload]
+        if self.controller.active:
+            self.live_pill.configure(text=f'●  SKANNER  {len(self.controller.active)}', bg='#7cc4ff', fg='#04121f')
+        elif live:
+            self.live_pill.configure(text=f'●  LIVE  ·  {len(live)} kamper publiserer', bg=ACC, fg=BG)
+        else:
+            self.live_pill.configure(text='○  INGEN LIVE-KAMPER', bg=PANEL2, fg=DIM)
         box = self.store.outbox_counts()
         pending = box.get('venter', 0) + box.get('sender', 0)
-        self.summary.configure(text=f'{len(jobs)} kamper  ·  {len(self.controller.active)} skanner nå  ·  '
-                                    f'{pending} i utboks  ·  {box.get("sendt", 0)} publisert')
+        self.summary.configure(text=f'{len(jobs)} kamper  ·  {pending} i utboks  ·  {box.get("sendt", 0)} målinger publisert'
+                                    f'  ·  versjon {__version__}')
         self.footer.configure(text='Tider vises i norsk tid. Ledige = observerte ledige sitteplasser i valgt '
                                    'billettkategori, ikke bekreftet salg. Ingen skanning starter før du aktiverer en kamp.')
         self.render_detail()
