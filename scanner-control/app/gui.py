@@ -190,8 +190,14 @@ class App:
     def start_now(self):
         def work():
             j=self.get_selected()
-            if not messagebox.askyesno('Start nå?',
-                    'Start '+j.label+' med '+('LIVE OPPLASTING' if j.upload else 'lokal registrering')+'?\nStopp eksisterende skanner for samme kamp først.',parent=self.root):
+            if j.profile=='lerkendal_legacy':
+                warning=('STARTER EKSISTERENDE LERKENDAL-MOTOR. Den kan publisere til Supabase ' 
+                         'automatisk etter sin egen kvalitetskontroll, uavhengig av LIVE-bryteren her.\n\n' 
+                         'Bekreft at den gamle Lerkendal-skanneren på samme PC er stoppet, og at du ønsker å starte publisering for denne kampen.')
+            else:
+                warning=('Start '+j.label+' med '+('LIVE OPPLASTING' if j.upload else 'kun lokal kontroll') 
+                         +'?\nStopp eksisterende skanner for samme kamp først.')
+            if not messagebox.askyesno('Start nå?',warning,parent=self.root):
                 return
             self._append(self.controller.start(j,force=True))
         self.handle(work)

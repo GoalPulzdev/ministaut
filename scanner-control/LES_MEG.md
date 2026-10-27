@@ -10,7 +10,7 @@
 4. Tre kamper er registrert som **deaktiverte** eksempler: Rosenborg–Røa (Koteng), Rosenborg–Molde og Rosenborg–Start (Lerkendal). Kontroller kampdato, kategorier og URL før aktivering.
 5. Velg RBK Kvinner – Røa, trykk `Test én gang`. Ved vellykket lokal skanning vises siste observerte ledige som et lokalt tall; ingen data sendes.
 6. Stopp gammel Koteng-sesjon på den andre PC-en før du slår på live. Velg `Aktiver / Deaktiver`, deretter `Live AV/PÅ` og bekreft. Koteng styres sentralt **hver time** mens kontrollprogrammet er åpent og PC er våken.
-7. For Lerkendal (herrer/cup), kjør `03_LAST_NED_LERKENDAL.bat` for å hente eksisterende kildekode til en **egen** mappe. Installer dens krav etter README i den kopierte `scanner`-mappen. Velg kamp og `Start nå` for å åpne en egen interaktiv Edge-konsoll som fortsatt styrer sin egen timeskanning. **Start bare én Lerkendal-sesjon på samme PC.**
+7. For Lerkendal (herrer/cup), kjør `03_LAST_NED_LERKENDAL.bat` for å hente eksisterende kildekode til en **egen** mappe. Installer dens krav etter README i den kopierte `scanner`-mappen. Velg kamp og `Start nå` for å åpne en egen interaktiv Edge-konsoll som fortsatt styrer sin egen timeskanning **og egen publisering**. LIVE-bryteren i kontrollpanelet har ikke kontroll over den gamle Lerkendal-motorens publisering. **Start bare én Lerkendal-sesjon på samme PC.**
 
 ## Sikkerhet og datakvalitet
 
