@@ -482,24 +482,25 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:ra
 <body>
 <main class="wrap">
   <header class="top">
-    <div class="brand"><span class="v2-logo" aria-hidden="true">✦</span><span><span class="brand-name">MINISTAUT</span><small>RBK BILLETTMONITOR V2</small></span></div>
+    <div class="brand"><span class="v2-logo"><svg class="v2-crown" viewBox="0 0 48 40" aria-hidden="true"><path d="M4 12 14 22 23 7 32 22 44 12 39 31H9Z" fill="currentColor"/><rect x="10" y="33" width="28" height="4" rx="1" fill="currentColor"/><circle cx="4" cy="10" r="3" fill="currentColor"/><circle cx="23" cy="5" r="3" fill="currentColor"/><circle cx="44" cy="10" r="3" fill="currentColor"/></svg></span><span><span class="brand-name">MINISTAUT</span><small>RBK BILLETTMONITOR V2</small></span></div>
     <nav class="top-links" aria-label="Hovedmeny"><a class="active" href="#page-title">Oversikt</a><a href="#matchCards">Kamper</a><a href="#chart-title">Billettpuls</a><a href="#sections-title">Tribuner</a></nav>
     <span class="preview-chip">V2 FORHÅNDSVISNING</span>
     <div class="team-mark"><img src="https://cdn.sportmonks.com/images/soccer/teams/23/1335.png" alt="Rosenborg BK" width="45" height="45"></div>
   </header>
   <section class="hero" aria-labelledby="page-title">
     <div class="overline"><span class="pulse-dot" aria-hidden="true"></span><span id="teamOverline">BILLETT PÅ LERKENDAL</span></div>
-    <h1 id="page-title">Følg kampen.<br>Fyll tribunene.</h1>
+    <h1 id="page-title">Følg billettpulsen<br>til <em>Rosenborg.</em></h1>
     <p id="teamDescription">Se hvordan de ledige plassene utvikler seg fram mot avspark. Velg kampen du vil følge – og bli med på å skape stemningen på tribunen.</p>
     <div class="hero-controls"><a class="premium-cta" href="#matchCards">Se kommende kamper &nbsp; →</a><a class="premium-ghost" href="#match-details">Utforsk billettpulsen</a></div>
     <span class="hero-caption">LERKENDAL · TRONDHEIM<br>EN BY. ETT LAG.</span>
+    <div class="hero-watermark" aria-hidden="true"><img src="https://cdn.sportmonks.com/images/soccer/teams/23/1335.png" alt=""></div>
   </section>
   <nav class="team-selector" aria-label="Velg lag">
     <button id="teamMen" class="team-choice" type="button" aria-pressed="true"><span class="team-symbol">RBK</span><span class="team-copy"><strong>RBK</strong><small>Herrelaget · Lerkendal</small></span><span class="team-count" id="teamMenCount">—</span></button>
     <button id="teamWomen" class="team-choice" type="button" aria-pressed="false"><span class="team-symbol">RBK</span><span class="team-copy"><strong>RBK Kvinner</strong><small>Koteng Arena og bortekamper</small></span><span class="team-count" id="teamWomenCount">—</span></button>
   </nav>
   <section class="picker-section" aria-labelledby="picker-title">
-    <div class="section-heading"><h2 id="picker-title" class="section-title">Velg kampen</h2><span class="section-help">Trykk på et kampkort for å se utviklingen</span></div>
+    <div class="section-heading"><h2 id="picker-title" class="section-title">Kommende hjemmekamper</h2><span class="section-help">Trykk på et kampkort for å se utviklingen</span></div>
     <div class="match-list" id="matchCards" role="group" aria-label="Velg kamp for valgt lag"><div class="empty">Henter kampene …</div></div>
     <div id="womenPending" class="women-pending" hidden>
       <div class="overline">RBK KVINNER · KOTENG ARENA</div>
@@ -511,7 +512,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:ra
   <section class="results" id="match-details" aria-labelledby="selectedMatchTitle">
     <div class="details-head">
       <div>
-        <div class="overline">BILLETTSTATUS FOR VALGT KAMP</div>
+        <div class="overline" id="matchEyebrow">KAMPDETALJER · LERKENDAL</div>
         <h2 id="selectedMatchTitle">Velg en kamp over</h2>
         <p id="kickoff">Kampstart</p>
       </div>
@@ -519,7 +520,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:ra
     </div>
     <div class="summary" id="stats">
       <article class="card primary">
-        <div id="availabilityCaption" class="caption">Ledige sitteplasser</div><div id="available" class="big">—</div>
+        <div id="availabilityCaption" class="caption">Ledige sitteplasser</div><div id="available" class="big">—</div><p class="availability-footnote">Faktisk avleste, tilgjengelige sitteplasser</p>
         <div class="pulse-insights" aria-live="polite"><div id="dailyPulse" class="daily-pulse" hidden></div><div id="weekPulse" class="daily-pulse" hidden></div><div id="pulseMomentum" class="daily-pulse" hidden></div></div>
       </article>
       <div class="stack">
@@ -555,6 +556,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:ra
           <p class="graph-desc">Følg ledige plasser over tid. Trykk på grafen for detaljer.</p></div>
         <span id="chartCount" class="graph-count">0 tellinger</span>
       </div>
+      <div class="chart-window" role="group" aria-label="Tidsperiode for graf"><button type="button" data-chart-hours="24" aria-pressed="false">24 timer</button><button type="button" data-chart-hours="168" aria-pressed="true">7 dager</button><button type="button" data-chart-hours="720" aria-pressed="false">30 dager</button><button type="button" data-chart-hours="0" aria-pressed="false">Alle</button></div>
       <div class="chart-legend" id="chartLegend" hidden><span><i class="legend-real"></i> Målt</span><span><i class="legend-projected"></i> Prognose</span><span><i class="legend-band"></i> Mulig spenn</span></div>
       <div id="chart" class="chart-wrap empty">Venter på første registrerte måling.</div>
       <div class="chart-inspect" id="chartInspect" aria-live="polite">
@@ -653,9 +655,18 @@ async function load(path){
 }
 
 let chartSignature='';
+let chartRangeHours=168,latestChartInput=[];
 function graph(points){
+  latestChartInput=points;
+  const lastPoint=points.at(-1);
+  if(chartRangeHours&&lastPoint){
+    const cutoff=Date.parse(lastPoint.observed_at)-chartRangeHours*3600000;
+    const filtered=points.filter(p=>Date.parse(p.observed_at)>=cutoff);
+    if(filtered.length)points=filtered;
+  }
+  for(const b of document.querySelectorAll('[data-chart-hours]'))b.setAttribute('aria-pressed',String(Number(b.dataset.chartHours)===chartRangeHours));
   const wrap=$('chart'),count=$('chartCount');
-  const prediction=kickoffForecast(points,selectedKickoff);
+  const prediction=kickoffForecast(latestChartInput,selectedKickoff);
   const hasProjection=prediction.status==='projected' && points.length>1;
   $('chartLegend').hidden=!hasProjection;
   count.textContent=points.length+' '+(points.length===1?'telling':'tellinger');
@@ -963,20 +974,29 @@ function createCard(match){
   const kickoff=document.createElement('span');kickoff.textContent=match.kickoff_at?'Avspark '+date(match.kickoff_at):'Kampstart kommer';top.append(kickoff);
   const pill=document.createElement('span');pill.className='tile-pill';pill.textContent='SE KAMP';top.append(pill);
   const matchup=document.createElement('span');matchup.className='tile-matchup';
-  const title=document.createElement('span');title.className='tile-title';title.textContent=match.title;matchup.append(title);
+  const title=document.createElement('span');title.className='tile-title';title.textContent=match.title;
+  const crestGroup=document.createElement('span');crestGroup.className='tile-crest-group';
+  const homeCrest=document.createElement('span');homeCrest.className='tile-team-crest';
+  const homeImg=document.createElement('img');homeImg.src='https://cdn.sportmonks.com/images/soccer/teams/23/1335.png';homeImg.alt='Rosenborg klubbmerke';homeImg.loading='lazy';homeImg.width=42;homeImg.height=42;
+  homeImg.addEventListener('error',()=>{homeCrest.textContent='RBK'});
+  homeCrest.append(homeImg);
+  const separator=document.createElement('span');separator.className='tile-crest-divider';
+  const awayCrest=document.createElement('span');awayCrest.className='tile-team-crest tile-opponent';
   const opponent=crestFor(match.title);
   if(opponent){
-    const crest=document.createElement('span');crest.className='tile-opponent';
-    const img=document.createElement('img');
-    img.src=knownOpponentCrests[opponent];img.alt=opponent+' klubbmerke';
-    img.width=32;img.height=32;img.loading='lazy';img.decoding='async';
-    img.addEventListener('error',()=>{crest.hidden=true;});
-    crest.append(img);matchup.append(crest);
+    const img=document.createElement('img');img.src=knownOpponentCrests[opponent];img.alt=opponent+' klubbmerke';
+    img.width=42;img.height=42;img.loading='lazy';img.decoding='async';
+    img.addEventListener('error',()=>{awayCrest.textContent='VS'});
+    awayCrest.append(img);
+  } else {
+    awayCrest.textContent='VS';
   }
+  crestGroup.append(homeCrest,separator,awayCrest);
+  matchup.append(title,crestGroup);
   const bottom=document.createElement('span');bottom.className='tile-bottom';
   const summary=document.createElement('span');summary.className='tile-summary';
   const value=document.createElement('span');value.className='tile-value';value.textContent='—';
-  const unit=document.createElement('span');unit.className='tile-unit';unit.textContent='ledige seter';
+  const unit=document.createElement('span');unit.className='tile-unit';unit.textContent='ledige sitteplasser';
   summary.append(value,unit);
   const spark=document.createElement('span');spark.className='tile-spark';spark.setAttribute('aria-hidden','true');
   const foot=document.createElement('span');foot.className='tile-foot';foot.textContent='Henter siste telling …';
@@ -1441,6 +1461,7 @@ async function selectMatch(id){
   $('campaignHeading').textContent='Ses på '+(selectedVenue==='koteng_arena'?'Koteng Arena!':'Lerkendal!');
   current=id;updateSelectedCards();
   $('selectedMatchTitle').textContent=match.title;
+  $('matchEyebrow').textContent=selectedVenue==='koteng_arena'?'KAMPDETALJER · KOTENG ARENA':'KAMPDETALJER · LERKENDAL';
   selectedKickoff=match.kickoff_at||null;
   $('kickoff').textContent=match.kickoff_at?'Avspark '+date(match.kickoff_at):'Avspark ikke registrert';
   const key=String(match.event_key||'');
@@ -1470,11 +1491,11 @@ async function showTeam(next,{share=true}={}){
   $('teamMenCount').textContent=allMatches.filter(m=>categoryFor(m)==='men').length+' kamper';
   $('teamWomenCount').textContent=allMatches.filter(m=>categoryFor(m)==='women').length+' kamper';
   $('teamOverline').textContent=activeTeam==='women'?'BILLETTSTATUS · RBK KVINNER':'BILLETTSTATUS · RBK';
-  $('page-title').textContent=activeTeam==='women'?'Bli med og fyll Koteng Arena.':'Bli med og fyll Lerkendal.';
+  $('page-title').innerHTML=activeTeam==='women'?'Følg billettpulsen<br>til <em>RBK Kvinner.</em>':'Følg billettpulsen<br>til <em>Rosenborg.</em>';
   $('teamDescription').textContent=activeTeam==='women'
     ?'Følg RBK Kvinners kamper og ledige sitteplasser. Historikk og tribuneoversikt kommer når målingene er godkjent for publisering.'
     :'Se hvordan de ledige plassene utvikler seg fram mot avspark. Velg kampen du vil følge – og bli med på å skape stemningen på tribunen.';
-  $('picker-title').textContent=activeTeam==='women'?'RBK Kvinner · velg kamp':'RBK · velg kamp';
+  $('picker-title').textContent=activeTeam==='women'?'RBK Kvinner · kommende kamper':'Kommende hjemmekamper';
   $('womenPending').hidden=activeTeam!=='women'||matches.length>0;
   $('match-details').hidden=matches.length===0;
   if(changed){render([]);renderSectionRecords([]);renderSections(null,null);}
@@ -1484,6 +1505,13 @@ async function showTeam(next,{share=true}={}){
   const chosen=matches.some(m=>m.id===current)?current:(chooseByLink(matches)||matches[0].id);
   await Promise.all([selectMatch(chosen),refreshCardData()]);
 }
+for(const b of document.querySelectorAll('[data-chart-hours]'))b.addEventListener('click',()=>{
+  const chosen=Number(b.dataset.chartHours);
+  if(chosen===chartRangeHours)return;
+  chartRangeHours=chosen;
+  chartSignature='';
+  graph(latestChartInput);
+});
 $('teamMen').addEventListener('click',()=>{if(activeTeam!=='men')void showTeam('men');});
 $('teamWomen').addEventListener('click',()=>{if(activeTeam!=='women')void showTeam('women');});
 async function refresh(){
