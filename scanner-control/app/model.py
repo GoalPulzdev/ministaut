@@ -1,13 +1,16 @@
 """Explicit, validated configurations: no guessed venue or category."""
 from __future__ import annotations
 from dataclasses import dataclass, asdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urlsplit
 import re
 
 EVENT = re.compile(r'^[A-Za-z0-9_-]{8,100}$')
 PROFILES = {'koteng_v24', 'lerkendal_legacy'}
+# Engine -> (venue, default engine folder relative to the control program)
+ENGINES = {'koteng_v24': ('koteng_arena', 'adapters/koteng'),
+           'lerkendal_legacy': ('lerkendal', 'sources/ministaut/scanner')}
 
 
 def checkout_key(url: str) -> str:
@@ -43,6 +46,8 @@ class Job:
     interval_minutes: int = 60
     enabled: bool = False
     upload: bool = False
+    # No new scan may start this close to kickoff (a Koteng run takes up to 15 min).
+    stop_before_minutes: int = 20
 
     def __post_init__(self):
         if not re.fullmatch(r'[a-z0-9][a-z0-9_-]{2,100}', self.key):
@@ -56,6 +61,8 @@ class Job:
         parse_utc(self.kickoff_at)
         if type(self.interval_minutes) is not int or not (30 <= self.interval_minutes <= 720):
             raise ValueError('Intervall må være 30–720 minutter')
+        if type(self.stop_before_minutes) is not int or not (0 <= self.stop_before_minutes <= 180):
+            raise ValueError('Stopp før avspark må være 0–180 minutter')
         if not self.scanner_path or '\x00' in self.scanner_path:
             raise ValueError('Skannermappe kreves')
         if self.profile == 'koteng_v24' and self.key != '6aaceecebfe408c38e1712dd':
@@ -73,6 +80,13 @@ class Job:
     @classmethod
     def from_json(cls, value: dict) -> 'Job':
         return cls(**value)
+
+    def kickoff(self) -> datetime:
+        return parse_utc(self.kickoff_at)
+
+    def last_start(self) -> datetime:
+        """Latest moment a new scan may begin."""
+        return self.kickoff() - timedelta(minutes=self.stop_before_minutes)
 
     def path(self, base: Path) -> Path:
         p = Path(self.scanner_path)

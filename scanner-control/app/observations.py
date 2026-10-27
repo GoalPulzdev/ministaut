@@ -2,6 +2,7 @@
 from __future__ import annotations
 from datetime import datetime, timezone
 import json
+import os
 from pathlib import Path
 import subprocess
 from .model import Job
@@ -37,4 +38,10 @@ def verified_new_report(job: Job, scanner_dir: Path, previous: set[Path]):
     except (ValueError, TypeError) as e:raise RuntimeError('Skannerens diagnostikk kunne ikke tolkes') from e
     if data['event_key']!=job.key or data['quality_status']!='LOCKED_LOCAL_VERIFIED' or len(data['sections'])!=6:
         raise RuntimeError('Ugyldig kamp eller feltantall i diagnostikk')
+    data['diagnostic'] = str(source)
     return data
+
+
+def token_configured(scanner_dir: Path) -> bool:
+    """Presence only; the token itself is never read by the control program."""
+    return bool(os.environ.get('MINISTAUT_TOKEN', '').strip()) or (scanner_dir / '.ministaut-token').is_file()
