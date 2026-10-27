@@ -7,9 +7,12 @@ from urllib.parse import urlsplit
 import re
 
 EVENT = re.compile(r'^[A-Za-z0-9_-]{8,100}$')
-PROFILES = {'koteng_v24', 'lerkendal_legacy'}
+PROFILES = {'koteng_v24', 'lerkendal_v23', 'lerkendal_legacy'}
+# Engines the control program runs as one unattended scan per job.
+ONE_SHOT = {'koteng_v24', 'lerkendal_v23'}
 # Engine -> (venue, default engine folder relative to the control program)
 ENGINES = {'koteng_v24': ('koteng_arena', 'adapters/koteng'),
+           'lerkendal_v23': ('lerkendal', 'adapters/lerkendal'),
            'lerkendal_legacy': ('lerkendal', 'sources/ministaut/scanner')}
 
 
@@ -69,7 +72,7 @@ class Job:
             raise ValueError('Koteng V2.4-profilen er låst til Rosenborg–Røa; annen kamp trenger ny godkjenning')
         if self.profile == 'koteng_v24' and self.venue != 'koteng_arena':
             raise ValueError('Koteng-motoren kan ikke kjøres på en annen arena')
-        if self.profile == 'lerkendal_legacy' and self.venue != 'lerkendal':
+        if self.profile in ('lerkendal_legacy', 'lerkendal_v23') and self.venue != 'lerkendal':
             raise ValueError('Lerkendal-motoren krever Lerkendal')
         if self.upload and not self.enabled:
             raise ValueError('Aktiver jobben før opplasting kan slås på')

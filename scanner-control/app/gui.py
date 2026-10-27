@@ -10,7 +10,7 @@ from tkinter import ttk, messagebox, filedialog
 from . import __version__, health, locks, oslo
 from .model import ENGINES, Job, checkout_key, parse_utc
 from .observations import token_configured
-from .runner import Controller, REVIEW, FAILED, PLANNED
+from .runner import Controller, REVIEW, FAILED, PLANNED, REJECTED, TIMEOUT
 from .storage import Store
 
 BG = '#09160f'; PANEL = '#14271b'; PANEL2 = '#1d3526'; FG = '#eaf8ec'; DIM = '#9dbba4'; ACC = '#79e8a2'
@@ -52,11 +52,11 @@ class Editor(tk.Toplevel):
         self.v = {k: tk.StringVar(value=val) for k, val in {
             'label': j.label if j else 'Rosenborg – ',
             'team': j.team if j else 'RBK Herrer',
-            'profile': j.profile if j else 'lerkendal_legacy',
+            'profile': j.profile if j else 'lerkendal_v23',
             'url': j.url if j else 'https://billett.rbk.no/checkout/',
             'date': kickoff.strftime('%d.%m.%Y') if kickoff else '',
             'time': kickoff.strftime('%H:%M') if kickoff else '',
-            'scanner_path': j.scanner_path if j else ENGINES['lerkendal_legacy'][1],
+            'scanner_path': j.scanner_path if j else ENGINES['lerkendal_v23'][1],
             'interval_minutes': str(j.interval_minutes if j else 60),
             'stop_before_minutes': str(j.stop_before_minutes if j else 20)}.items()}
         rows = [('Kampnavn', 'label', 'entry'), ('Lag', 'team', 'team'), ('Skannermotor', 'profile', 'profile'),
@@ -302,7 +302,7 @@ class App:
             j = self.get_selected(); self.controller.enable(j.key, not j.enabled, False)
             if j.enabled:
                 self.event(j.label + ': deaktivert')
-            elif j.profile == 'koteng_v24':
+            elif j.profile in ONE_SHOT:
                 self.event(j.label + ': planlagt hver ' + str(j.interval_minutes) + ' min (uten publisering)')
             else:
                 self.event(j.label + ': aktivert. Lerkendal startes manuelt med «Start nå».')
@@ -311,15 +311,17 @@ class App:
     def live(self):
         def work():
             j = self.get_selected()
-            if j.profile != 'koteng_v24':
-                raise ValueError('Lerkendal styrer publisering i egen godkjent motor; den kan ikke styres herfra.')
+            if j.profile not in ONE_SHOT:
+                raise ValueError('Legacy-Lerkendal styrer publisering i egen motor. Bytt kampen til lerkendal_v23.')
             if not j.enabled:
                 raise ValueError('Aktiver jobben først')
             desired = not j.upload
             if desired and not token_configured(j.path(self.base)):
-                raise ValueError('Token mangler. Kjør 03_KONFIGURER_TOKEN.bat i Koteng-mappen først (aldri lim token i chat/Git).')
-            if desired and not self.ask('Aktivere live?',
-                    'Er den gamle Koteng-skanneren på andre PC-er stoppet?\n\n'
+                raise ValueError('Token mangler i motormappen (.ministaut-token). Sett det opp lokalt, aldri i chat/Git.')
+            old = ('Er den gamle Lerkendal-skanneren (START_TO_KAMPER_1_TIME / hurtigkart --multi) stoppet, '
+                   'eller er denne kampen fjernet fra dens kamper.json? Ellers publiserer to skannere samme kamp.'
+                   if j.profile == 'lerkendal_v23' else 'Er den gamle Koteng-skanneren på andre PC-er stoppet?')
+            if desired and not self.ask('Aktivere live?', old + '\n\n'
                     'Bare målinger som består kontrollprogrammets egen etterkontroll publiseres som observerte '
                     'sitteplasser til Ministaut. Feilede sendinger prøves på nytt automatisk.'):
                 return
@@ -330,9 +332,9 @@ class App:
     def test(self):
         def work():
             j = self.get_selected()
-            if j.profile != 'koteng_v24':
-                raise ValueError('Lerkendal krever en interaktiv Edge-sesjon. Bruk «Start nå».')
-            if self.ask('Start lokal test?', 'Start én Koteng-skanning UTEN publisering?\n'
+            if j.profile not in ONE_SHOT:
+                raise ValueError('Legacy-Lerkendal krever en interaktiv Edge-sesjon. Bruk «Start nå».')
+            if self.ask('Start lokal test?', f'Start én {j.venue}-skanning UTEN publisering?\n'
                         'Kontroller at ingen andre skannere bruker samme kamp.'):
                 self.event(self.controller.start(replace(j, upload=False), force=True))
         self.handle(work)
@@ -412,7 +414,7 @@ class App:
         self.controller.messages.clear()
         now = datetime.now(timezone.utc)
         jobs = self.store.jobs()
-        koteng_busy = any(a.job.profile == 'koteng_v24' for a in self.controller.active.values())
+        busy = {a.job.profile for a in self.controller.active.values()}
         keys = set()
         for j in jobs:
             keys.add(j.key)
@@ -423,12 +425,12 @@ class App:
             if j.key in self.controller.active:
                 a = self.controller.active[j.key]
                 status = f'SKANNER · {int((now - a.started).total_seconds() // 60)} min'
-            elif status == PLANNED and koteng_busy and st['next_due'] and parse_utc(st['next_due']) <= now:
+            elif status == PLANNED and j.profile in busy and st['next_due'] and parse_utc(st['next_due']) <= now:
                 status = 'KØET'
             mode = 'LIVE' if j.upload else ('PLANLAGT' if j.enabled else 'AV')
             if j.profile == 'lerkendal_legacy':
                 mode = 'LEGACY · ' + ('AKTIV' if j.enabled else 'AV')
-            tag = ('review' if st['last_status'] == REVIEW else 'error' if st['last_status'] == FAILED
+            tag = ('review' if st['last_status'] == REVIEW else 'error' if st['last_status'] in (FAILED, REJECTED, TIMEOUT)
                    else 'live' if j.upload or j.key in self.controller.active else 'off' if not j.enabled else '')
             values = (j.team, j.label, j.venue, latest['available_seated'] if latest else '—',
                       delta_text(latest['delta']) if latest else '—', age_text(latest and latest['observed_at'], now),

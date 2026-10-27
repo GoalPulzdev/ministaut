@@ -13,6 +13,13 @@
 - **Bedre oversikt:** Kolonner for endring siden forrige måling og målingens alder, fargekodet status (`KØET`, `SKANNER · 4 min` osv.) og faner for målinger med publiseringsstatus, kjøringer, skannerlogg og hendelser. Tabellene blinker ikke og beholder valget ved oppdatering.
 - **Systemsjekk** (knapp): Python, Edge, diskplass, Git, motorfiler, `.venv`, Playwright og om token finnes. Selve tokenet leses aldri.
 - **Slett kamp** og trygg redigering. Billett-URL kan ikke endres på en eksisterende kamp, og en redigert kamp lagres alltid som deaktivert.
+- **Lerkendal som vanlig jobb (`lerkendal_v23`):** `engines/lerkendal_once.py` kjører den uendrede V23-motoren (`hurtigkart.py`) én runde uten ENTER og uten konsoll. Adapteren:
+  - kontrollerer at Edge viser riktig kamp før tellingen
+  - velger «Bare nødvendig» på cookiebanneret, som ellers dekker felt C–J
+  - blokkerer motorens egen opplasting
+  - bruker egen Edge-profil og port 9231, mens produksjonsskanneren bruker 9222
+
+  Etterpå kjører kontrollprogrammet motorens `validate_complete` på nytt (60/60 felt, kapasitet, konflikter, kartstruktur) og publiserer via utboksen med samme `source_run_id` som V23. Koteng og Lerkendal kan kjøre samtidig, og en skanning som henger stoppes etter 30 min. Installasjon: kopier V23-mappen til `adapters/lerkendal` **uten** `.ministaut-token`, `edge_scanner_profile` og `output`. Legg token der først når Live skal på, og ta da denne kampen ut av den gamle skannerens `kamper.json`.
 - **Ekte Windows-app:** `MinistautControl.exe` (PyInstaller, `--windowed`) med eget ikon og snarvei på skrivebordet. Ingen terminalvinduer, heller ikke for Koteng-skanning, etterkontroll og sending. Lerkendal-motoren åpner fortsatt sitt eget konsollvindu, fordi den venter på ENTER fra operatøren. Ved feil vises en dialog, og detaljene lagres i `state/logs/app-feil-*.log`.
 - Lukker du programmet mens en skanning kjører, får du tilbud om å stoppe alle skanninger først.
 - Feilrettinger: Hvert knappetrykk startet en ny oppdateringssløyfe hvert 2. sekund (de hopet seg opp). Feil under planlegging kunne stoppe hele sløyfen.
@@ -51,7 +58,7 @@ Lukk kontrollsenteret og **ta en kopi av `state/control.sqlite3`** (trengs hvis 
 | Koteng V2.4 hel motor | Ja | Profillås er foreløpig knyttet til Røa-kamp-ID |
 | Koteng automatisk per time | Ja | Appen og Edge/PC må være aktive |
 | Intern SQLite-historikk | Ja | Bare lokalt nyverifiserte Koteng-målinger; ikke import av gamle |
-| Lerkendal herrer/cup | Koble til eksisterende kildekode | Interaktiv motor med egen timesløyfe, ikke en ny én-gang-adapter ennå |
+| Lerkendal herrer/cup | Ja (0.2): `lerkendal_v23` én-runde-adapter | Testet 27.10: 60/60 felt, 4019 ledige (produksjon 4023 fem min før). `lerkendal_legacy` finnes fortsatt |
 | Nye kamper | Registrering fungerer | Krever verifisert stadionprofil og arrangementsspesifikt oppsett før kjøring |
 | Supabase | Bruker eksisterende endepunkt | Krever lokal token, ingen endring av API |
 | Varig utboks med ny sending | Ja (0.2) | Kun Koteng; Lerkendal publiserer selv |

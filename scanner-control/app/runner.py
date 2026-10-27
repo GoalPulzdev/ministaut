@@ -4,7 +4,10 @@
 - Koteng runs one-shot (`hourly_koteng.py --once`) WITHOUT upload. Publishing
   happens afterwards from the durable outbox, and only for a diagnostic that
   passed the controller's own re-verification (V0.1 uploaded before that gate).
-- Lerkendal launches its own interactive controller (not a fabricated one-shot).
+- Lerkendal V23 runs one unattended cycle through engines/lerkendal_once.py
+  (unchanged engine, own Edge profile/port, engine upload blocked) and is then
+  re-verified and published exactly like Koteng.
+- lerkendal_legacy still launches the old interactive controller.
 - No scan count is inferred from stdout.
 """
 from __future__ import annotations
@@ -17,7 +20,7 @@ import subprocess
 from typing import Callable
 from . import locks
 from .locks import lock_name, acquire  # noqa: F401  (re-exported for tests/tools)
-from .model import Job, parse_utc
+from .model import Job, ONE_SHOT, parse_utc
 from .storage import Store, now_iso
 from .runner_helpers import interpreter_for, no_window as _no_window
 
@@ -25,6 +28,15 @@ from .runner_helpers import interpreter_for, no_window as _no_window
 READY, PLANNED, SCANNING, VERIFIED, QUEUED = 'klar', 'planlagt', 'skanner', 'bekreftet lokalt', 'køet for sending'
 FAILED, STOPPED, KICKOFF, DONE, REVIEW, OFF = ('feil', 'stoppet', 'stoppet ved avspark', 'ferdig',
                                                'trenger gjennomgang', 'av')
+REJECTED, TIMEOUT = 'avvist av kvalitetskontroll', 'tidsavbrudd'
+MAX_RUNTIME = timedelta(minutes=30)  # a one-shot scan that hangs is stopped
+LERKENDAL_PORT = 9231  # never 9222: that is the production V23 scanner's Edge
+NAMES = {'koteng_v24': 'Koteng', 'lerkendal_v23': 'Lerkendal', 'lerkendal_legacy': 'Lerkendal (legacy)'}
+
+# Same payload and source_run_id as the V23 engine's own upload; ingest upserts on it.
+SEND_LERKENDAL = ('import sys;from pathlib import Path;sys.path.insert(0,".");'
+                  'from sync_ministaut import prepare,send;'
+                  'a=send(prepare(Path(sys.argv[1])));print("Registrert:",a.get("scan_id",""))')
 
 OUTBOX_MAX_ATTEMPTS = 8
 OUTBOX_MAX_AGE = timedelta(hours=6)
@@ -40,6 +52,7 @@ class Active:
     started: datetime
     previous_reports: set[Path]
     stop_reason: str | None = None
+    report: Path | None = None
 
 
 @dataclass
@@ -57,7 +70,8 @@ def get_python(path: Path) -> str:
     return interpreter_for(path)
 
 
-def command(job: Job, base: Path, python: str | None = None) -> tuple[list[str], Path, bool]:
+def command(job: Job, base: Path, python: str | None = None,
+            report: Path | None = None) -> tuple[list[str], Path, bool]:
     home = job.path(base)
     exe = python or get_python(home)
     if job.profile == 'koteng_v24':
@@ -67,6 +81,18 @@ def command(job: Job, base: Path, python: str | None = None) -> tuple[list[str],
             raise FileNotFoundError('Koteng V2.4 er ikke komplett i ' + str(home))
         # Never --upload: publication goes through the outbox after verification.
         return ([exe, str(home / 'hourly_koteng.py'), '--once'], home, False)
+    if job.profile == 'lerkendal_v23':
+        expected = ('hurtigkart.py', 'publication.py', 'sync_ministaut.py', 'match_config.py',
+                    'verified_navigation.py', 'stadion_felt.json')
+        if not all((home / p).is_file() for p in expected):
+            raise FileNotFoundError('Lerkendal V23 er ikke komplett i ' + str(home))
+        wrapper = Path(base) / 'engines' / 'lerkendal_once.py'
+        if not wrapper.is_file():
+            raise FileNotFoundError('Mangler ' + str(wrapper))
+        if report is None:
+            raise ValueError('Lerkendal trenger en rapportfil')
+        return ([exe, str(wrapper), '--url', job.url, '--port', str(LERKENDAL_PORT),
+                 '--report', str(report)], home, False)
     if job.profile == 'lerkendal_legacy':
         expected = ('hurtigkart.py', 'match_config.py', 'stadion_felt.json')
         if not all((home / p).is_file() for p in expected):
@@ -129,7 +155,7 @@ class Controller:
         locks.release(self.lock_path(key), force_own=True)
         job = self.store.job(key)
         if job is not None:
-            due = now_iso() if job.enabled and job.profile == 'koteng_v24' else None
+            due = now_iso() if job.enabled and job.profile in ONE_SHOT else None
             self.store.set_due(key, due, PLANNED if due else READY, failures=0)
 
     # --- jobs ----------------------------------------------------------------
@@ -160,7 +186,7 @@ class Controller:
             raise RuntimeError('Stopp kjørende jobb før endring')
         job = Job(**{**old.as_json(), 'enabled': enable, 'upload': upload if enable else False})
         self.store.put_job(job)
-        due = now_iso() if enable and job.profile == 'koteng_v24' else None
+        due = now_iso() if enable and job.profile in ONE_SHOT else None
         self.store.set_due(key, due, PLANNED if enable else OFF)
 
     # --- scans ---------------------------------------------------------------
@@ -178,10 +204,11 @@ class Controller:
             raise RuntimeError('Aktiver først jobben i kontrollpanelet')
         # One engine folder = one Edge profile/CDP port. Never two of a kind at once.
         if any(x.job.profile == job.profile for x in self.active.values()):
-            name = 'Lerkendal' if job.profile == 'lerkendal_legacy' else 'Koteng'
-            raise RuntimeError(f'Bare én {name}-skanning kan kjøre om gangen på denne PC-en')
+            raise RuntimeError(f'Bare én {NAMES[job.profile]}-skanning kan kjøre om gangen på denne PC-en')
         guard = self.lock_path(job.key)
-        command_args, cwd, interactive = command(job, self.base)
+        report = (self.base / 'state' / 'runs' / f"{job.key}-{now.strftime('%Y%m%dT%H%M%SZ')}.json"
+                  if job.profile == 'lerkendal_v23' else None)
+        command_args, cwd, interactive = command(job, self.base, report=report)
         try:
             acquire(guard, event=job.key)
         except FileExistsError:
@@ -207,7 +234,7 @@ class Controller:
                                   **_no_window())
             locks.record_child(guard, proc.pid)
             run_id = self.store.begin(job.key, log_path)
-            self.active[job.key] = Active(job, proc, run_id, guard, log_stream, now, previous_reports)
+            self.active[job.key] = Active(job, proc, run_id, guard, log_stream, now, previous_reports, report=report)
             return 'Kjører: ' + job.label
         except Exception:
             if log_stream:
@@ -236,16 +263,22 @@ class Controller:
                     self.stop(key, KICKOFF)  # an in-progress scan must not continue past kickoff
                 except Exception as exc:
                     self.say(f'{active.job.label}: {exc}')
+            elif (active.job.profile in ONE_SHOT and active.stop_reason is None
+                  and now - active.started > MAX_RUNTIME and active.process.poll() is None):
+                try:
+                    self.stop(key, TIMEOUT)
+                    self.say(f'{active.job.label}: skanningen brukte over {int(MAX_RUNTIME.total_seconds() // 60)} min og ble stoppet')
+                except Exception as exc:
+                    self.say(f'{active.job.label}: {exc}')
             code = active.process.poll()
             if code is None:
                 continue
             self._finish(key, active, code, now)
         self._outbox(now)
-        # No automatic Lerkendal launch: its long-running UI owns scheduling.
-        if any(a.job.profile == 'koteng_v24' for a in self.active.values()):
-            return
+        # One-shot engines are scheduled here; the legacy Lerkendal UI owns its own timing.
+        busy = {a.job.profile for a in self.active.values()}
         for job in self.store.jobs():
-            if job.key in self.active or not job.enabled or job.profile != 'koteng_v24':
+            if job.key in self.active or not job.enabled or job.profile not in ONE_SHOT or job.profile in busy:
                 continue
             state = self.store.state(job.key)
             if state['last_status'] == REVIEW:
@@ -262,7 +295,7 @@ class Controller:
                     self.say(f'{job.label}: {exc}')
                     if self.store.state(job.key)['last_status'] not in (REVIEW, DONE):
                         self.store.set_due(job.key, iso(now + timedelta(minutes=15)), FAILED, note=str(exc))
-                break
+                busy.add(job.profile)
 
     def _finish(self, key: str, active: Active, code: int, now: datetime):
         if active.log:
@@ -270,12 +303,21 @@ class Controller:
         job = active.job
         status, summary = FAILED, f'Skanneren avsluttet med kode {code}. Se logg.'
         if active.stop_reason:
-            status, summary = active.stop_reason, ('Stoppet ved avspark.' if active.stop_reason == KICKOFF
-                                                   else 'Stoppet av operatør. Målingen er forkastet.')
-        elif code == 0 and job.profile == 'koteng_v24':
+            status, summary = active.stop_reason, {KICKOFF: 'Stoppet ved avspark.',
+                                                   TIMEOUT: 'Stoppet etter tidsavbrudd. Målingen er forkastet.'
+                                                   }.get(active.stop_reason, 'Stoppet av operatør. Målingen er forkastet.')
+        elif code == 4 and job.profile == 'lerkendal_v23':
+            from .observations import lerkendal_report
             try:
-                from .observations import verified_new_report
-                result = verified_new_report(job, job.path(self.base), active.previous_reports)
+                reason = lerkendal_report(active.report).get('reason') or 'ukjent årsak'
+            except RuntimeError as exc:
+                reason = str(exc)
+            status, summary = REJECTED, 'Ikke publiserbar: ' + reason
+        elif code == 0 and job.profile in ONE_SHOT:
+            try:
+                from .observations import verified_new_report, verified_lerkendal
+                result = (verified_lerkendal(job, job.path(self.base), active.report) if job.profile == 'lerkendal_v23'
+                          else verified_new_report(job, job.path(self.base), active.previous_reports))
                 self.store.observation(result, job.upload)
                 status, summary = VERIFIED, f"Bekreftet lokalt: {result['available_seated']} ledige i {len(result['sections'])} felt."
                 if job.upload and self.store.enqueue(result, result['diagnostic']):
@@ -294,7 +336,7 @@ class Controller:
         fails = 0 if ok or status in (STOPPED, KICKOFF, DONE) else self.store.state(key)['failures'] + 1
         current = self.store.job(key) or job
         due = None
-        if current.enabled and current.profile == 'koteng_v24' and current.last_start() > now and status not in (STOPPED, KICKOFF):
+        if current.enabled and current.profile in ONE_SHOT and current.last_start() > now and status not in (STOPPED, KICKOFF):
             due = schedule_after(current, fails, now)
         self.store.finish(active.run_id, key, status, code, due, fails, summary)
         if active.lock.exists():
@@ -331,14 +373,17 @@ class Controller:
             self.store.outbox_done(row['id'], 'stoppet', 'Live er slått av')
             return
         home = job.path(self.base)
-        sync = home / 'sync_koteng.py'
+        if job.profile == 'lerkendal_v23':
+            sync, args = home / 'sync_ministaut.py', ['-c', SEND_LERKENDAL, row['diagnostic']]
+        else:
+            sync, args = home / 'sync_koteng.py', [str(home / 'sync_koteng.py'), row['diagnostic'], '--send']
         if not sync.is_file() or not Path(row['diagnostic']).is_file():
-            self.store.outbox_done(row['id'], 'forkastet', 'Diagnostikk eller sync_koteng.py mangler')
+            self.store.outbox_done(row['id'], 'forkastet', 'Måling eller ' + sync.name + ' mangler')
             return
         self.logs_dir.mkdir(parents=True, exist_ok=True)
         log = (self.logs_dir / f"outbox-{row['run_id']}.log").open('w', encoding='utf-8', errors='replace')
         try:
-            proc = self.popen([get_python(home), str(sync), row['diagnostic'], '--send'], cwd=str(home),
+            proc = self.popen([get_python(home), *args], cwd=str(home),
                               stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, **_no_window())
         except Exception as exc:
             log.close()

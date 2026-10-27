@@ -14,6 +14,7 @@ EDGE = [Path(os.environ.get(v, '')) / 'Microsoft' / 'Edge' / 'Application' / 'ms
 KOTENG_FILES = ('hourly_koteng.py', 'koteng_scanner.py', 'profile_lock.py',
                 'koteng_profile.json', 'ankerpunkter_koteng.json', 'sync_koteng.py')
 LERKENDAL_FILES = ('hurtigkart.py', 'match_config.py', 'stadion_felt.json')
+LERKENDAL_V23_FILES = LERKENDAL_FILES + ('publication.py', 'sync_ministaut.py', 'verified_navigation.py')
 
 
 def _imports(python: str, cwd: Path, module: str) -> bool:
@@ -40,8 +41,8 @@ def check(base: Path, jobs: list[Job]) -> list[tuple[bool | None, str]]:
         if home in seen:
             continue
         seen.add(home)
-        files = KOTENG_FILES if job.profile == 'koteng_v24' else LERKENDAL_FILES
-        name = 'Koteng' if job.profile == 'koteng_v24' else 'Lerkendal'
+        files = {'koteng_v24': KOTENG_FILES, 'lerkendal_v23': LERKENDAL_V23_FILES}.get(job.profile, LERKENDAL_FILES)
+        name = {'koteng_v24': 'Koteng', 'lerkendal_v23': 'Lerkendal V23'}.get(job.profile, 'Lerkendal (legacy)')
         missing = [f for f in files if not (home / f).is_file()]
         if not home.is_dir():
             out.append((False, f'{name}: mappe mangler ({home})'))
@@ -51,8 +52,10 @@ def check(base: Path, jobs: list[Job]) -> list[tuple[bool | None, str]]:
         venv = Path(python).parent.parent.name == '.venv'
         out.append((venv or None, f'{name}: eget .venv' + ('' if venv else ' mangler (bruker system-Python)')))
         out.append((_imports(python, home, 'playwright'), f'{name}: Playwright installert'))
-        if job.profile == 'koteng_v24':
+        if job.profile == 'lerkendal_v23':
+            out.append(((base / 'engines' / 'lerkendal_once.py').is_file(), 'Lerkendal V23: adapter engines/lerkendal_once.py'))
+        if job.profile in ('koteng_v24', 'lerkendal_v23'):
             out.append((token_configured(home) or None,
-                        'Koteng: token for Live ' + ('er satt opp lokalt' if token_configured(home)
+                        f'{name}: token for Live ' + ('er satt opp lokalt' if token_configured(home)
                                                      else 'mangler (kun nødvendig for Live)')))
     return out
