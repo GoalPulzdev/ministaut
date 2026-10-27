@@ -17,7 +17,7 @@
 - Feilrettinger: Hvert knappetrykk startet en ny oppdateringssløyfe hvert 2. sekund (de hopet seg opp). Feil under planlegging kunne stoppe hele sløyfen.
 
 ### Oppgradere fra 0.1
-Lukk kontrollsenteret. Kopier `app/`, `tests/`, `main.py`, `LES_MEG.md` og `*.bat` fra 0.2 over den gamle `Ministaut_Control`-mappen. **Behold** `adapters/`, `sources/` og `state/`. Databasen oppgraderes automatisk, og historikken beholdes. Aktiver Live på nytt etter første testkjøring.
+Lukk kontrollsenteret og **ta en kopi av `state/control.sqlite3`** (trengs hvis du vil tilbake til 0.1, fordi 0.1 ikke kan lese kampoppsett lagret av 0.2). Kopier `app/`, `tests/`, `main.py`, `LES_MEG.md` og `*.bat` fra 0.2 over den gamle `Ministaut_Control`-mappen. **Behold** `adapters/`, `sources/` og `state/`. Databasen oppgraderes automatisk, og historikken beholdes. Aktiver Live på nytt etter første testkjøring.
 
 ## Installering
 
