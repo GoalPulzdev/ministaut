@@ -812,6 +812,13 @@ body{background:#070707}
 }
 @media(max-width:410px){.hero-caption{display:none}}
 </style>
+<style>
+/* Historical forecast: readable but unmistakably older than a live projection. */
+.forecast-panel[data-status="stale"]{border-color:#8b7651;background:linear-gradient(145deg,#272115,#111)}
+.forecast-panel[data-status="stale"] .forecast-label{color:#f1d59c}
+.forecast-panel[data-status="stale"] .forecast-number{color:#f3e1b9}
+.forecast-panel[data-status="stale"] .forecast-range{color:#d0c0a1;line-height:1.55}
+</style>
 </head>
 <body>
 <main class="wrap">
@@ -892,7 +899,7 @@ body{background:#070707}
         <span id="chartCount" class="graph-count">Oppdateres med nye tall</span>
       </div>
       <div class="chart-window" role="group" aria-label="Tidsperiode for graf"><button type="button" data-chart-hours="24" aria-pressed="false">24 timer</button><button type="button" data-chart-hours="168" aria-pressed="true">7 dager</button><button type="button" data-chart-hours="720" aria-pressed="false">30 dager</button><button type="button" data-chart-hours="0" aria-pressed="false">Alle</button></div>
-      <div class="chart-legend" id="chartLegend" hidden><span><i class="legend-real"></i> Målt</span><span><i class="legend-projected"></i> Prognose</span><span><i class="legend-band"></i> Mulig spenn</span></div>
+      <div class="chart-legend" id="chartLegend" hidden><span><i class="legend-real"></i> Målt</span><span><i class="legend-projected"></i> <span id="chartForecastLabel">Prognose</span></span><span><i class="legend-band"></i> Mulig spenn</span></div>
       <div id="chart" class="chart-wrap empty">Venter på første registrerte måling.</div>
       <div class="chart-inspect" id="chartInspect" aria-live="polite">
         <span id="inspectTime" class="inspect-timestamp">Siste måling</span>
@@ -1019,9 +1026,10 @@ function graph(points){
   }
   for(const b of document.querySelectorAll('[data-chart-hours]'))b.setAttribute('aria-pressed',String(Number(b.dataset.chartHours)===chartRangeHours));
   const wrap=$('chart'),count=$('chartCount');
-  const prediction=kickoffForecast(latestChartInput,selectedKickoff);
+  const prediction=displayedForecast(latestChartInput,selectedKickoff);
   const hasProjection=prediction.status==='projected' && points.length>1;
   $('chartLegend').hidden=!hasProjection;
+  $('chartForecastLabel').textContent=prediction.stale?'Eldre prognose':'Prognose';
   count.textContent=points.length?'Oppdatert '+date(points.at(-1).observed_at):'Venter på tall';
   const signature=String(current)+'|'+selectedKickoff+'|'+(hasProjection?[prediction.center,prediction.low,prediction.high].join(':'):'none')+'|'+points.map(p=>p.observed_at+':'+p.available_seated+':'+(p.locked_fields||[]).join(',')).join('|');
   if(signature===chartSignature)return;
@@ -1128,7 +1136,7 @@ function median(numbers){
   const sorted=[...numbers].sort((a,b)=>a-b),m=Math.floor(sorted.length/2);
   return sorted.length%2?sorted[m]:(sorted[m-1]+sorted[m])/2;
 }
-function kickoffForecast(records,kickoffUtc,now=Date.now()){
+function kickoffForecast(records,kickoffUtc,now=Date.now(),allowStale=false){
   const kickoff=new Date(kickoffUtc||'').getTime();
   if(!Number.isFinite(kickoff))return {status:'unavailable',reason:'Kampstart er ikke bekreftet'};
   const horizon=kickoff-now;
@@ -1140,7 +1148,7 @@ function kickoffForecast(records,kickoffUtc,now=Date.now()){
     .sort((a,b)=>new Date(a.observed_at)-new Date(b.observed_at));
   if(!sorted.length)return {status:'unavailable',reason:'Venter på første telling'};
   const last=sorted.at(-1);
-  if(overdue(last.observed_at))return {status:'unavailable',reason:'Avventer en fersk måling'};
+  if(overdue(last.observed_at)&&!allowStale)return {status:'unavailable',reason:'Avventer en fersk måling'};
   const lastTime=new Date(last.observed_at).getTime();
   const sample=sorted.filter(p=>comparable(p,last)&&
       new Date(p.observed_at).getTime()>=lastTime-10*86400000).slice(-60);
@@ -1181,6 +1189,30 @@ function kickoffForecast(records,kickoffUtc,now=Date.now()){
   if(materiallyUncertain && !early)return {status:'unavailable',reason:'Utviklingen er for ujevn til et meningsfullt anslag'};
   return {status:'projected',center:Math.round(projected),low,high,count:sample.length,early,materiallyUncertain};
 }
+
+/**
+ * A non-live snapshot may still carry a useful historical estimate.
+ * Return it clearly labeled as stale; never imply it uses current inventory.
+ * The ordinary calculation keeps its original V1 freshness threshold.
+ */
+function displayedForecast(records,kickoffUtc){
+ const live=kickoffForecast(records,kickoffUtc);
+ if(live.status==='projected')return {...live,stale:false};
+ if(live.reason!=='Avventer en fersk måling')return live;
+ const last=records.at(-1);
+ const measured=Date.parse(last?.observed_at||'');
+ const kickoff=Date.parse(kickoffUtc||'');
+ const now=Date.now();
+ // Never display a frozen forecast after kickoff or when the last
+ // accepted measurement is more than 12 hours old.
+ if(!Number.isFinite(measured)||!Number.isFinite(kickoff)||kickoff<=now||
+    now-measured>12*3600000||now-measured<0)return live;
+ const historical=kickoffForecast(records,kickoffUtc,measured,true);
+ return historical.status==='projected'
+   ? {...historical,stale:true,measuredAt:last.observed_at}
+   : live;
+}
+
 // Separate, deliberately linear "what if" scenario. NOT a verified sell-out forecast.
 // Compare the last accepted snapshot with the nearest same-scope snapshot 10–14h earlier.
 function paceToZero12h(records,kickoffUtc,now=Date.now()){
@@ -1209,15 +1241,26 @@ function renderPaceForecast(records){
  $('paceForecastRate').textContent='Hvis tempoet fortsetter · ca. '+fmt(Math.round(result.perHour*24))+' færre ledige per døgn';
 }
 function renderForecast(records){
-  const result=kickoffForecast(records,selectedKickoff);
+  const result=displayedForecast(records,selectedKickoff);
   const panel=document.querySelector('.forecast-panel');
-  panel.dataset.status=result.status;
+  panel.dataset.status=result.stale?'stale':result.status;
+  const label=$('projection-label');
   if(result.status!=='projected'){
-    $('projection-value').textContent='For tidlig å anslå';
-    $('projection-range').textContent='Vi følger utviklingen fram mot avspark.';
-    $('projection-subtitle').textContent='En prognose vises når vi har nok oppdatert historikk.';
+    label.textContent='PROGNOSE VED AVSPARK';
+    $('projection-value').textContent='Avventer nye tall';
+    $('projection-range').textContent=result.reason||'Vi følger utviklingen fram mot avspark.';
+    $('projection-subtitle').textContent='Når datagrunnlaget er godt nok, vises et forsiktig anslag.';
     return;
   }
+  if(result.stale){
+    const measuredAt=date(result.measuredAt);
+    label.textContent='SISTE PROGNOSE · IKKE OPPDATERT';
+    $('projection-subtitle').textContent='Beregnet fra siste telling '+measuredAt+'. Venter på en ny telling for en oppdatert prognose.';
+    $('projection-value').textContent=fmt(result.center)+' ledige';
+    $('projection-range').textContent='Tidligere scenario: '+fmt(result.low)+'–'+fmt(result.high)+' ledige ved avspark. Kan ha endret seg.';
+    return;
+  }
+  label.textContent='PROGNOSE VED AVSPARK';
   $('projection-subtitle').textContent=result.early
     ?'Tidlig utviklingsscenario. Mye kan endre seg før kampstart.'
     :result.low===0?'Det kan bli få sitteplasser tilgjengelige før avspark. Følg utviklingen!'
