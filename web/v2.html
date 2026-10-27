@@ -741,6 +741,31 @@ body{background:#070707}
 }
 @media(max-width:600px){.field-browser .section-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 </style>
+<style>
+/* Supporter-first details and editorial polish. */
+.insight-details{grid-column:1;grid-row:4 / span 2;min-width:0;align-self:start;border:1px solid #39352d;border-radius:10px;background:#0e0e0e}
+.insight-details>summary{font-size:11px;color:#bbb;cursor:pointer;padding:11px 13px;list-style:none;display:flex;align-items:center;justify-content:space-between}
+.insight-details>summary::-webkit-details-marker{display:none}
+.insight-details>summary span{font-size:17px;color:#c9a76d}
+.insight-details[open]>summary span{transform:rotate(45deg)}
+.insight-details .insight-records{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:0;padding:4px 9px 10px}
+.insight-details .insight-record{background:#171717;padding:10px;border-color:#3d3730}
+.insight-details .insight-record strong{font-size:18px}
+.sections-panel>.insight-details{grid-column:1;grid-row:4/span 2}
+.hero .premium-cta{box-shadow:0 1px 1px #000,0 5px 25px #d8b87530}
+.match-tile{transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.match-tile:hover{transform:translateY(-2px);box-shadow:0 10px 34px #0008}
+.results>.summary .primary{position:relative;overflow:hidden}
+.results>.summary .primary::after{content:"";position:absolute;pointer-events:none;width:190px;height:190px;right:-120px;top:-85px;background:radial-gradient(circle,#c69b5330,transparent 67%)}
+.results>.graph{box-shadow:inset 0 1px 0 #ffffff08}
+.results>.forecast-panel{box-shadow:inset 0 1px 0 #f4d89e17}
+.stand-summary{box-shadow:inset 0 1px 0 #ffffff08}
+@media(max-width:850px){
+  .sections-panel>.insight-details{grid-column:1;grid-row:auto}
+  .insight-details .insight-records{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:480px){.insight-details .insight-records{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 <main class="wrap">
@@ -767,7 +792,7 @@ body{background:#070707}
     <div class="match-list" id="matchCards" role="group" aria-label="Velg kamp for valgt lag"><div class="empty">Henter kampene …</div></div>
     <div id="womenPending" class="women-pending" hidden>
       <div class="overline">RBK KVINNER · KOTENG ARENA</div>
-      <h3>Rosenborg – Røa · 1. november kl. 14.30</h3>
+      <h3>RBK Kvinner · billetter</h3>
       <p>Vi følger med på billettene til RBK Kvinner. Her finner du oversikten så snart den er tilgjengelig.</p>
       <a href="https://billett.rbk.no/checkout/6aaceecebfe408c38e1712dd" target="_blank" rel="noopener noreferrer">Se billetter til Rosenborg – Røa ↗</a>
     </div>
@@ -818,7 +843,7 @@ body{background:#070707}
       <div class="graph-header">
         <div><div id="chart-title" class="caption">Ledige plasser over tid</div>
           <p class="graph-desc">Følg ledige plasser over tid. Trykk på grafen for detaljer.</p></div>
-        <span id="chartCount" class="graph-count">0 tellinger</span>
+        <span id="chartCount" class="graph-count">Oppdateres med nye tall</span>
       </div>
       <div class="chart-window" role="group" aria-label="Tidsperiode for graf"><button type="button" data-chart-hours="24" aria-pressed="false">24 timer</button><button type="button" data-chart-hours="168" aria-pressed="true">7 dager</button><button type="button" data-chart-hours="720" aria-pressed="false">30 dager</button><button type="button" data-chart-hours="0" aria-pressed="false">Alle</button></div>
       <div class="chart-legend" id="chartLegend" hidden><span><i class="legend-real"></i> Målt</span><span><i class="legend-projected"></i> Prognose</span><span><i class="legend-band"></i> Mulig spenn</span></div>
@@ -850,7 +875,8 @@ body{background:#070707}
 </div><p class="map-note">Fargene viser andelen ledige sitteplasser i hvert felt. Ståplasser er ikke med. Kartet er veiledende – sjekk eksakt plass hos RBK før du kjøper.</p></div>
       <div class="stand-summary" id="standSummary" aria-live="polite"><div class="stand-summary-loading">Henter tribuneoversikten …</div></div>
       <details class="field-browser"><summary>Se alle sittefelt <span aria-hidden="true">+</span></summary><div class="section-grid" id="sectionGrid"><p class="section-loading">Henter ledige plasser …</p></div></details>
-      <div id="sectionDetail" class="section-detail" aria-live="polite">Velg et felt i kartet for å se ledige plasser.</div><div id="sectionRecords" class="insight-records" aria-live="polite"></div>
+      <div id="sectionDetail" class="section-detail" aria-live="polite">Velg et felt i kartet for å se ledige plasser.</div>
+      <details class="insight-details"><summary>Mer statistikk <span aria-hidden="true">+</span></summary><div id="sectionRecords" class="insight-records" aria-live="polite"></div></details>
     </section>
   </section>
   <footer class="fan-footer">MINISTAUT · En uavhengig supporteroversikt. <span class="premium-bottom">Stadionfoto: Einar Fredriksen, <a href="https://commons.wikimedia.org/wiki/File:Lerkendal_stadion_at_night.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>, <a href="https://creativecommons.org/licenses/by-sa/2.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 2.0</a>. Bearbeidet til sort-hvitt.</span></footer>
@@ -950,7 +976,7 @@ function graph(points){
   const prediction=kickoffForecast(latestChartInput,selectedKickoff);
   const hasProjection=prediction.status==='projected' && points.length>1;
   $('chartLegend').hidden=!hasProjection;
-  count.textContent=points.length+' '+(points.length===1?'telling':'tellinger');
+  count.textContent=points.length?'Oppdatert '+date(points.at(-1).observed_at):'Venter på tall';
   const signature=String(current)+'|'+selectedKickoff+'|'+(hasProjection?[prediction.center,prediction.low,prediction.high].join(':'):'none')+'|'+points.map(p=>p.observed_at+':'+p.available_seated+':'+(p.locked_fields||[]).join(',')).join('|');
   if(signature===chartSignature)return;
   chartSignature=signature;
@@ -1142,8 +1168,8 @@ function renderForecast(records){
   panel.dataset.status=result.status;
   if(result.status!=='projected'){
     $('projection-value').textContent='For tidlig å anslå';
-    $('projection-range').textContent=result.reason;
-    $('projection-subtitle').textContent='Først når vi har nok ferske og sammenlignbare målinger, viser vi et scenario.';
+    $('projection-range').textContent='Vi følger utviklingen fram mot avspark.';
+    $('projection-subtitle').textContent='En prognose vises når vi har nok oppdatert historikk.';
     return;
   }
   $('projection-subtitle').textContent=result.early
@@ -1782,7 +1808,7 @@ async function selectMatch(id){
   if(!match)return;
   const changed=current!==id,version=++selectionVersion;
   selectedVenue=venueFor(match);
-  $('availabilityCaption').textContent=selectedVenue==='koteng_arena'?'Observerte ledige sitteplasser':'Ledige sitteplasser';
+  $('availabilityCaption').textContent='Ledige sitteplasser';
   $('stadiumHeading').textContent=selectedVenue==='koteng_arena'?'KOTENG ARENA · TRIBUNEKART':'LERKENDAL · TRIBUNEKART';
   $('stadiumIntro').textContent=selectedVenue==='koteng_arena'?'Velg et felt for å se ledige sitteplasser på Koteng Arena. Ståplassene er ikke med i oversikten.':'Velg et felt for å se ledige sitteplasser på Lerkendal.';
   $('ticketLabel').textContent='Finn din plass på '+(selectedVenue==='koteng_arena'?'Koteng Arena':'Lerkendal');
