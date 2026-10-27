@@ -1,0 +1,1 @@
+Koteng V2.4 -- Screen-independent fixed CSS viewport; original V1.8 profile preserved.

@@ -1,0 +1,100 @@
+{
+  "format_version": 1,
+  "venue_id": "koteng_arena",
+  "profile_version_at_training": "koteng-v1.8-geometry-locked-20261026",
+  "training_event_key": "6aaceecebfe408c38e1712dd",
+  "trained_at_utc": "2026-10-26T15:30:52+00:00",
+  "method": "operator_approved_two_pass_live_tooltip_coordinates_20261026",
+  "reference_viewport": [
+    1294,
+    642
+  ],
+  "reference_map_region": [
+    0.0,
+    201.6,
+    863.3,
+    577.8
+  ],
+  "reference_page_zoom": 0.9,
+  "points": {
+    "FELT-1": [
+      [
+        0.1885626,
+        0.376947
+      ]
+    ],
+    "FELT-2": [
+      [
+        0.2426584,
+        0.3800623
+      ]
+    ],
+    "FELT-3": [
+      [
+        0.3145286,
+        0.3862928
+      ]
+    ],
+    "FELT-4": [
+      [
+        0.4034003,
+        0.3800623
+      ]
+    ],
+    "FELT-5": [
+      [
+        0.4760433,
+        0.3800623
+      ]
+    ],
+    "VIP": [
+      [
+        0.3369397,
+        0.3504673
+      ]
+    ]
+  },
+  "source_points_pixels": {
+    "FELT-1": [
+      [
+        244,
+        242
+      ]
+    ],
+    "FELT-2": [
+      [
+        314,
+        244
+      ]
+    ],
+    "FELT-3": [
+      [
+        407,
+        248
+      ]
+    ],
+    "FELT-4": [
+      [
+        522,
+        244
+      ]
+    ],
+    "FELT-5": [
+      [
+        616,
+        244
+      ]
+    ],
+    "VIP": [
+      [
+        436,
+        225
+      ]
+    ]
+  },
+  "manual_points_only": true,
+  "seat_availability_verified": true,
+  "public_approved": false,
+  "source_diagnostic_timestamp_utc": "2026-10-26T15:26:28.431866+00:00",
+  "seat_sellability_verified": false
+}

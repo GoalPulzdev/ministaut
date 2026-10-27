@@ -1,0 +1,825 @@
+{
+  "event_key": "6aaceecebfe408c38e1712dd",
+  "venue_id": "koteng_arena",
+  "url": "https://billett.rbk.no/checkout/6aaceecebfe408c38e1712dd",
+  "profile_version": "koteng-training-20261024-unverified",
+  "scanned_at_utc": "2026-10-26T15:26:28.431866+00:00",
+  "network_publication": false,
+  "selected_ticket_category": "ukjent",
+  "cross_category_union_verified": false,
+  "edge_maximized": true,
+  "edge_initial_fit": {
+    "fits": true,
+    "page_zoom": 0.9,
+    "viewport": [
+      1294,
+      642
+    ],
+    "map": {
+      "rect": [
+        0.0,
+        201.6,
+        863.3,
+        577.8
+      ],
+      "area": 324799,
+      "tag": "div",
+      "frame": "https://billett.rbk.no/checkout/6aaceecebfe408c38e1712dd"
+    },
+    "attempts": [
+      {
+        "zoom": 1.0,
+        "viewport": [
+          1294,
+          642
+        ],
+        "region": [
+          0.0,
+          223.9,
+          863.3,
+          642.3
+        ],
+        "fits": false
+      },
+      {
+        "zoom": 0.9,
+        "viewport": [
+          1294,
+          642
+        ],
+        "region": [
+          0.0,
+          201.6,
+          863.3,
+          577.8
+        ],
+        "fits": true
+      }
+    ]
+  },
+  "edge_final_fit": {
+    "fits": true,
+    "page_zoom": 0.9,
+    "viewport": [
+      1294,
+      642
+    ],
+    "map": {
+      "rect": [
+        0.0,
+        201.6,
+        863.3,
+        577.8
+      ],
+      "area": 324799,
+      "tag": "div",
+      "frame": "https://billett.rbk.no/checkout/6aaceecebfe408c38e1712dd"
+    },
+    "attempts": [
+      {
+        "zoom": 1.0,
+        "viewport": [
+          1294,
+          642
+        ],
+        "region": [
+          0.0,
+          223.9,
+          863.3,
+          642.0
+        ],
+        "fits": false
+      },
+      {
+        "zoom": 0.9,
+        "viewport": [
+          1294,
+          642
+        ],
+        "region": [
+          0.0,
+          201.6,
+          863.3,
+          577.8
+        ],
+        "fits": true
+      }
+    ]
+  },
+  "local_screenshot": "referanse_edge.png",
+  "map_region_candidates": [
+    {
+      "rect": [
+        0.0,
+        201.6,
+        863.3,
+        577.8
+      ],
+      "area": 324799,
+      "tag": "div",
+      "frame": "https://billett.rbk.no/checkout/6aaceecebfe408c38e1712dd"
+    },
+    {
+      "rect": [
+        0.0,
+        201.6,
+        863.3,
+        577.8
+      ],
+      "area": 324799,
+      "tag": "div",
+      "frame": "https://billett.rbk.no/checkout/6aaceecebfe408c38e1712dd"
+    },
+    {
+      "rect": [
+        0.0,
+        201.6,
+        863.2,
+        577.8
+      ],
+      "area": 324794,
+      "tag": "canvas",
+      "frame": "about:srcdoc"
+    }
+  ],
+  "scan_region": [
+    0.0,
+    201.6,
+    863.3,
+    577.8
+  ],
+  "viewport": [
+    1294,
+    642
+  ],
+  "scan_mode": "manual_koteng_anchors",
+  "anchor_file": "ankerpunkter_koteng.json",
+  "anchor_training_event": "6aaceecebfe408c38e1712dd",
+  "anchor_points_per_section": {
+    "VIP": 1,
+    "FELT-1": 1,
+    "FELT-2": 1,
+    "FELT-3": 1,
+    "FELT-4": 1,
+    "FELT-5": 1
+  },
+  "probe_points": 6,
+  "anchor_preview": "kontrollpunkter.png",
+  "historical_hints_enabled": false,
+  "pass_1_hover_hits": 6,
+  "pass_2_hover_hits": 6,
+  "anchor_point_checks_by_pass": [
+    [
+      {
+        "field": "VIP",
+        "result": "confirmed",
+        "probe_count": 2,
+        "probes": [
+          {
+            "point": [
+              436,
+              225
+            ],
+            "origin": "manual_or_preferred",
+            "result": "target_not_visible",
+            "before": [],
+            "at_point": []
+          },
+          {
+            "point": [
+              436,
+              207
+            ],
+            "origin": "near_manual",
+            "result": "confirmed",
+            "before": [],
+            "at_point": [
+              {
+                "section": "VIP",
+                "free": 45,
+                "capacity": 71
+              }
+            ]
+          }
+        ],
+        "accepted_point": [
+          436,
+          207
+        ]
+      },
+      {
+        "field": "FELT-1",
+        "result": "confirmed",
+        "probe_count": 1,
+        "probes": [
+          {
+            "point": [
+              244,
+              242
+            ],
+            "origin": "manual_or_preferred",
+            "result": "confirmed",
+            "before": [
+              {
+                "section": "VIP",
+                "free": 45,
+                "capacity": 71
+              }
+            ],
+            "at_point": [
+              {
+                "section": "FELT-1",
+                "free": 48,
+                "capacity": 49
+              }
+            ]
+          }
+        ],
+        "accepted_point": [
+          244,
+          242
+        ]
+      },
+      {
+        "field": "FELT-2",
+        "result": "confirmed",
+        "probe_count": 1,
+        "probes": [
+          {
+            "point": [
+              314,
+              244
+            ],
+            "origin": "manual_or_preferred",
+            "result": "confirmed",
+            "before": [
+              {
+                "section": "FELT-1",
+                "free": 48,
+                "capacity": 49
+              }
+            ],
+            "at_point": [
+              {
+                "section": "FELT-2",
+                "free": 125,
+                "capacity": 160
+              }
+            ]
+          }
+        ],
+        "accepted_point": [
+          314,
+          244
+        ]
+      },
+      {
+        "field": "FELT-3",
+        "result": "confirmed",
+        "probe_count": 1,
+        "probes": [
+          {
+            "point": [
+              407,
+              248
+            ],
+            "origin": "manual_or_preferred",
+            "result": "confirmed",
+            "before": [
+              {
+                "section": "FELT-2",
+                "free": 125,
+                "capacity": 160
+              }
+            ],
+            "at_point": [
+              {
+                "section": "FELT-3",
+                "free": 70,
+                "capacity": 120
+              }
+            ]
+          }
+        ],
+        "accepted_point": [
+          407,
+          248
+        ]
+      },
+      {
+        "field": "FELT-4",
+        "result": "confirmed",
+        "probe_count": 1,
+        "probes": [
+          {
+            "point": [
+              522,
+              244
+            ],
+            "origin": "manual_or_preferred",
+            "result": "confirmed",
+            "before": [
+              {
+                "section": "FELT-3",
+                "free": 70,
+                "capacity": 120
+              }
+            ],
+            "at_point": [
+              {
+                "section": "FELT-4",
+                "free": 136,
+                "capacity": 152
+              }
+            ]
+          }
+        ],
+        "accepted_point": [
+          522,
+          244
+        ]
+      },
+      {
+        "field": "FELT-5",
+        "result": "confirmed",
+        "probe_count": 1,
+        "probes": [
+          {
+            "point": [
+              616,
+              244
+            ],
+            "origin": "manual_or_preferred",
+            "result": "confirmed",
+            "before": [
+              {
+                "section": "FELT-4",
+                "free": 136,
+                "capacity": 152
+              }
+            ],
+            "at_point": [
+              {
+                "section": "FELT-5",
+                "free": 0,
+                "capacity": 49
+              }
+            ]
+          }
+        ],
+        "accepted_point": [
+          616,
+          244
+        ]
+      }
+    ],
+    [
+      {
+        "field": "VIP",
+        "result": "confirmed",
+        "probe_count": 2,
+        "probes": [
+          {
+            "point": [
+              436,
+              207
+            ],
+            "origin": "manual_or_preferred",
+            "result": "hovered_other_section",
+            "before": [
+              {
+                "section": "FELT-5",
+                "free": 0,
+                "capacity": 49
+              }
+            ],
+            "at_point": [
+              {
+                "section": "FELT-5",
+                "free": 0,
+                "capacity": 49
+              }
+            ]
+          },
+          {
+            "point": [
+              436,
+              225
+            ],
+            "origin": "manual_or_preferred",
+            "result": "confirmed",
+            "before": [
+              {
+                "section": "FELT-5",
+                "free": 0,
+                "capacity": 49
+              }
+            ],
+            "at_point": [
+              {
+                "section": "VIP",
+                "free": 45,
+                "capacity": 71
+              }
+            ]
+          }
+        ],
+        "accepted_point": [
+          436,
+          225
+        ]
+      },
+      {
+        "field": "FELT-1",
+        "result": "confirmed",
+        "probe_count": 1,
+        "probes": [
+          {
+            "point": [
+              244,
+              242
+            ],
+            "origin": "manual_or_preferred",
+            "result": "confirmed",
+            "before": [
+              {
+                "section": "VIP",
+                "free": 45,
+                "capacity": 71
+              }
+            ],
+            "at_point": [
+              {
+                "section": "FELT-1",
+                "free": 48,
+                "capacity": 49
+              }
+            ]
+          }
+        ],
+        "accepted_point": [
+          244,
+          242
+        ]
+      },
+      {
+        "field": "FELT-2",
+        "result": "confirmed",
+        "probe_count": 1,
+        "probes": [
+          {
+            "point": [
+              314,
+              244
+            ],
+            "origin": "manual_or_preferred",
+            "result": "confirmed",
+            "before": [
+              {
+                "section": "FELT-1",
+                "free": 48,
+                "capacity": 49
+              }
+            ],
+            "at_point": [
+              {
+                "section": "FELT-2",
+                "free": 125,
+                "capacity": 160
+              }
+            ]
+          }
+        ],
+        "accepted_point": [
+          314,
+          244
+        ]
+      },
+      {
+        "field": "FELT-3",
+        "result": "confirmed",
+        "probe_count": 1,
+        "probes": [
+          {
+            "point": [
+              407,
+              248
+            ],
+            "origin": "manual_or_preferred",
+            "result": "confirmed",
+            "before": [
+              {
+                "section": "FELT-2",
+                "free": 125,
+                "capacity": 160
+              }
+            ],
+            "at_point": [
+              {
+                "section": "FELT-3",
+                "free": 70,
+                "capacity": 120
+              }
+            ]
+          }
+        ],
+        "accepted_point": [
+          407,
+          248
+        ]
+      },
+      {
+        "field": "FELT-4",
+        "result": "confirmed",
+        "probe_count": 1,
+        "probes": [
+          {
+            "point": [
+              522,
+              244
+            ],
+            "origin": "manual_or_preferred",
+            "result": "confirmed",
+            "before": [
+              {
+                "section": "FELT-3",
+                "free": 70,
+                "capacity": 120
+              }
+            ],
+            "at_point": [
+              {
+                "section": "FELT-4",
+                "free": 136,
+                "capacity": 152
+              }
+            ]
+          }
+        ],
+        "accepted_point": [
+          522,
+          244
+        ]
+      },
+      {
+        "field": "FELT-5",
+        "result": "confirmed",
+        "probe_count": 1,
+        "probes": [
+          {
+            "point": [
+              616,
+              244
+            ],
+            "origin": "manual_or_preferred",
+            "result": "confirmed",
+            "before": [
+              {
+                "section": "FELT-4",
+                "free": 136,
+                "capacity": 152
+              }
+            ],
+            "at_point": [
+              {
+                "section": "FELT-5",
+                "free": 0,
+                "capacity": 49
+              }
+            ]
+          }
+        ],
+        "accepted_point": [
+          616,
+          244
+        ]
+      }
+    ]
+  ],
+  "two_pass_anchor_candidates": {
+    "FELT-1": [
+      244,
+      242
+    ],
+    "FELT-2": [
+      314,
+      244
+    ],
+    "FELT-3": [
+      407,
+      248
+    ],
+    "FELT-4": [
+      522,
+      244
+    ],
+    "FELT-5": [
+      616,
+      244
+    ],
+    "VIP": [
+      436,
+      225
+    ]
+  },
+  "validation": {
+    "quality_status": "NEEDS_REVIEW",
+    "public_approved": false,
+    "two_read_coverage_complete": true,
+    "reference_sections": 6,
+    "counted_sections": 6,
+    "confirmation_count_by_section": {
+      "FELT-1": 2,
+      "FELT-2": 2,
+      "FELT-3": 2,
+      "FELT-4": 2,
+      "FELT-5": 2,
+      "VIP": 2
+    },
+    "locked_confirmed": [],
+    "missing_sections": [],
+    "unknown_sections": [],
+    "conflicts": {},
+    "errors": [],
+    "observed_available_in_verified_fields": 424,
+    "observed_min": 424,
+    "observed_max": 424,
+    "complete": false,
+    "publishable": false,
+    "sections": {
+      "FELT-1": {
+        "section": "FELT-1",
+        "free": 48,
+        "capacity": 49,
+        "x": 244,
+        "y": 242,
+        "min_free": 48,
+        "max_free": 48,
+        "verified_passes": [
+          1,
+          2
+        ]
+      },
+      "FELT-2": {
+        "section": "FELT-2",
+        "free": 125,
+        "capacity": 160,
+        "x": 314,
+        "y": 244,
+        "min_free": 125,
+        "max_free": 125,
+        "verified_passes": [
+          1,
+          2
+        ]
+      },
+      "FELT-3": {
+        "section": "FELT-3",
+        "free": 70,
+        "capacity": 120,
+        "x": 407,
+        "y": 248,
+        "min_free": 70,
+        "max_free": 70,
+        "verified_passes": [
+          1,
+          2
+        ]
+      },
+      "FELT-4": {
+        "section": "FELT-4",
+        "free": 136,
+        "capacity": 152,
+        "x": 522,
+        "y": 244,
+        "min_free": 136,
+        "max_free": 136,
+        "verified_passes": [
+          1,
+          2
+        ]
+      },
+      "FELT-5": {
+        "section": "FELT-5",
+        "free": 0,
+        "capacity": 49,
+        "x": 616,
+        "y": 244,
+        "min_free": 0,
+        "max_free": 0,
+        "verified_passes": [
+          1,
+          2
+        ]
+      },
+      "VIP": {
+        "section": "VIP",
+        "free": 45,
+        "capacity": 71,
+        "x": 436,
+        "y": 225,
+        "min_free": 45,
+        "max_free": 45,
+        "verified_passes": [
+          1,
+          2
+        ]
+      }
+    },
+    "note": "Ikke offentliggjørbart: kapasitet/kart og salgbart inventar må kontrolleres manuelt.",
+    "within_pass_discrepancies": [
+      {},
+      {}
+    ]
+  },
+  "observations_by_pass": [
+    {
+      "VIP": {
+        "section": "VIP",
+        "free": 45,
+        "capacity": 71,
+        "x": 436,
+        "y": 207
+      },
+      "FELT-1": {
+        "section": "FELT-1",
+        "free": 48,
+        "capacity": 49,
+        "x": 244,
+        "y": 242
+      },
+      "FELT-2": {
+        "section": "FELT-2",
+        "free": 125,
+        "capacity": 160,
+        "x": 314,
+        "y": 244
+      },
+      "FELT-3": {
+        "section": "FELT-3",
+        "free": 70,
+        "capacity": 120,
+        "x": 407,
+        "y": 248
+      },
+      "FELT-4": {
+        "section": "FELT-4",
+        "free": 136,
+        "capacity": 152,
+        "x": 522,
+        "y": 244
+      },
+      "FELT-5": {
+        "section": "FELT-5",
+        "free": 0,
+        "capacity": 49,
+        "x": 616,
+        "y": 244
+      }
+    },
+    {
+      "VIP": {
+        "section": "VIP",
+        "free": 45,
+        "capacity": 71,
+        "x": 436,
+        "y": 225
+      },
+      "FELT-1": {
+        "section": "FELT-1",
+        "free": 48,
+        "capacity": 49,
+        "x": 244,
+        "y": 242
+      },
+      "FELT-2": {
+        "section": "FELT-2",
+        "free": 125,
+        "capacity": 160,
+        "x": 314,
+        "y": 244
+      },
+      "FELT-3": {
+        "section": "FELT-3",
+        "free": 70,
+        "capacity": 120,
+        "x": 407,
+        "y": 248
+      },
+      "FELT-4": {
+        "section": "FELT-4",
+        "free": 136,
+        "capacity": 152,
+        "x": 522,
+        "y": 244
+      },
+      "FELT-5": {
+        "section": "FELT-5",
+        "free": 0,
+        "capacity": 49,
+        "x": 616,
+        "y": 244
+      }
+    }
+  ]
+}

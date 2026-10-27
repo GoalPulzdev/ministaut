@@ -1,0 +1,12 @@
+<!doctype html><html lang="no"><meta charset="utf-8"><title>SYNTETISK KOTENG-FIXTURE</title>
+<style>body{margin:0;background:#eee;font:20px Arial}h1{margin:10px}svg{margin:10px;background:#165b3e}rect.seat{fill:#a8bac4;stroke:white;stroke-width:4}#tooltip{position:fixed;right:20px;top:80px;background:white;padding:14px;display:none;z-index:2}</style>
+<h1>SYNTETISK TESTKART – IKKE EKTE BILLETTER</h1>
+<svg width="1100" height="400" viewBox="0 0 1100 400">
+<rect class="seat" x="50" y="100" width="150" height="160" data-name="FELT-1" data-free="48" data-cap="49"/>
+<rect class="seat" x="220" y="100" width="150" height="160" data-name="FELT-2" data-free="125" data-cap="160"/>
+<rect class="seat" x="390" y="100" width="150" height="160" data-name="FELT-3" data-free="76" data-cap="120"/>
+<rect class="seat" x="560" y="100" width="150" height="160" data-name="FELT-4" data-free="138" data-cap="152"/>
+<rect class="seat" x="730" y="100" width="150" height="160" data-name="FELT-5" data-free="0" data-cap="49"/>
+<rect class="seat" x="390" y="10" width="150" height="70" data-name="VIP" data-free="49" data-cap="71"/>
+</svg><div id="tooltip" role="tooltip"></div>
+<script>let t=document.getElementById('tooltip');document.querySelectorAll('rect.seat').forEach(e=>{e.addEventListener('mouseenter',()=>{t.innerText=e.dataset.name+' Free Seats: '+e.dataset.free+'/'+e.dataset.cap;t.style.display='block'});e.addEventListener('mouseleave',()=>{t.style.display='none'})})</script></html>

@@ -1,0 +1,7 @@
+# Local browser state / data: NEVER commit
+edge_koteng_profile/
+edge_fixture_profile/
+diagnostikk/
+.venv/
+__pycache__/
+*.pyc

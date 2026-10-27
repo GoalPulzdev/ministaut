@@ -1,0 +1,18 @@
+KOTENG 2.4 - NY PC MED ANNEN SKJERMOPPLOESNING
+
+1. Bruk denne KOMPLETTE V2.4 ZIP-pakken. Ikke bland gamle v2.3 filer.
+2. Kjoer 01_INSTALLER.bat (bruker Python/Edge).
+3. Kjoer 02_TEST_EN_GANG.bat FOER token/live.
+4. Edge skal vise innhold 1294x642 CSS-piksler, uansett Windows-opploesning.
+   Bildet maa vise HELE kartet, inkludert alle seks sittefeltene.
+5. Programmet skal vise Pass 1: 6 felt, Pass 2: 6 felt, ingen konflikter.
+6. Sjekk diagnostikk/.../kontrollpunkter.png visuelt.
+7. Foerst da: konfigurer token og start 04_START_LIVE_TIMEVIS.bat.
+
+Dersom skjermen er for liten (typisk nettbrett/smaa 1366x768-paneler med
+hoey Windows-skalering) avvises en skanning. Proev 100% skalering i Windows
+eller stoerre skjerm. IKKE endre ankerpunkter_koteng.json eller laasen.
+Ikke la en annen PC skanne samme kamp i parallell.
+
+Viktig: Kun 6 bekreftede sittefelt, ingen staa A/B eller garantert
+kategorioversikt. Dette er observerte ledige, ikke offisielle salgstall.

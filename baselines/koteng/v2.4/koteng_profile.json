@@ -1,0 +1,61 @@
+{
+  "profile_version": "koteng-v1.8-geometry-locked-20261026",
+  "venue_id": "koteng_arena",
+  "venue_name": "Koteng Arena",
+  "inventory_model": "mixed",
+  "approved": false,
+  "public_export_enabled": false,
+  "training_source": "20261026T152628Z/diagnostikk.json + forslag_kontrollpunkter(1).json",
+  "training_checked_points": 6,
+  "map_full_coverage_verified": false,
+  "notes": "Seks nummererte sitteområder (inkl. VIP) er brukerbekreftet for lokal telling. Ståplass A/B er ikke sitteplasser. Billettkategori/HC/VIP-kjøpbarhet og felt 5 lås er ikke verifisert; aldri publiser eller beregn salg.",
+  "reference_sections": {
+    "VIP": 71,
+    "FELT-1": 49,
+    "FELT-2": 160,
+    "FELT-3": 120,
+    "FELT-4": 152,
+    "FELT-5": 49
+  },
+  "standing_sections": [
+    "STAAPLASS_A",
+    "STAAPLASS_B"
+  ],
+  "event_configs": {
+    "6aaceecebfe408c38e1712dd": {
+      "checkout_url": "https://billett.rbk.no/checkout/6aaceecebfe408c38e1712dd",
+      "venue_confirmation": "user_confirmed_koteng_arena_2026-10-26",
+      "locked_sections": [],
+      "locked_confirmation": null,
+      "selected_ticket_category": "ukjent"
+    }
+  },
+  "local_seated_profile_approved": true,
+  "local_seated_profile_approved_at": "2026-10-26",
+  "local_seated_approval_scope": "Six mapped seating sections, section capacities and two concordant live public-tooltip observations; user confirmed counted result.",
+  "reference_snapshot": {
+    "event_key": "6aaceecebfe408c38e1712dd",
+    "observed_at_utc": "2026-10-26T15:26:28.431866+00:00",
+    "available_seated_observed": 424,
+    "observed_by_section": {
+      "VIP": 45,
+      "FELT-1": 48,
+      "FELT-2": 125,
+      "FELT-3": 70,
+      "FELT-4": 136,
+      "FELT-5": 0
+    },
+    "reference_capacity_seated": 601,
+    "status": "reference_only_not_live_or_sales",
+    "observed_in_2_independent_passes": true
+  },
+  "local_profile_lock": {
+    "state": "LOCKED",
+    "event_key": "6aaceecebfe408c38e1712dd",
+    "locked_at_date": "2026-10-26",
+    "sha256": "0ce2718f54f209d0ce2442f1052139c928430d4409073f6912c43f4eebc6d7fb",
+    "kind": "local_six_section_geometry_and_capacity",
+    "scope": "Fixed section capacities, standing exclusions, viewport, map region, zoom, anchored points and event identity.",
+    "unlock_policy": "Create a new version/branch for changed geometry; do not silently retrain or overwrite."
+  }
+}
