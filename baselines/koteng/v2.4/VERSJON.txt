@@ -1,0 +1,8 @@
+KOTENG V1.8 LOCKED - 2026-10-26
+Lokal stadionprofil bekreftet av bruker, referansesnapshot 424 ledige.
+6/6 sittefelt - 2 samsvarende avlesninger hver i 26.10-diagnostikk.
+Geometri, feltkapasitet og ankerpunkter beskyttet med SHA256-sjekk.
+Ingen automatisk opplaering, ingen automatisk endring av profil.
+Felt 5 leses som 0 tilgjengelige i referansesnapshot, ikke bekreftet laast.
+Staaplass A/B telles ikke med; billettkategori ukjent.
+Supabase og offentlig publisering er AV. Lerkendal er uroert.

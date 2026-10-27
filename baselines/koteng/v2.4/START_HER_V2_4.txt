@@ -1,0 +1,48 @@
+RBK KVINNER - KOTENG ARENA - KOMPLETT INSTALLASJON V2.4
+=======================================================
+
+DETTE ER HELE LOKALPROGRAMMET, IKKE BARE EN OPPDATERING.
+Inkludert: Edge-skanneprogram, laast Koteng V1.8-profil, 6 ankerpunkter,
+referansekart, testsuite, timeplan, Supabase-integrasjon og Windows-installasjon.
+
+1) Pakk ut HELE Koteng_V2.4-mappen (f.eks. paa skrivebordet).
+2) Dobbelklikk 01_INSTALLER.bat. PC maa ha internett ved forstegangsinstallasjon.
+   Skriptet bruker Python som finnes eller prover aa installere Python 3.12
+   via winget. Edge maa vaere installert (vanlig paa Windows).
+3) Kjor 07_SJEKK_SKJERM.bat og deretter 02_TEST_EN_GANG.bat. Programmet bruker Edge og viser lokal telling,
+   uten opplasting. Ha Edge-kartet synlig og kontrollert.
+4) Kjor 03_KONFIGURER_TOKEN.bat; lim inn eksisterende Ministaut-token.
+   Alternativt: kopier den private .ministaut-token fra fungerende PC inn
+   i denne Koteng_V2.4-mappen. Token inngaar IKKE i ZIP-pakken.
+5) Stopp gammel live-skanning paa eventuell annen PC (unngaa dobbeltmaaling).
+6) Kjor 04_START_LIVE_TIMEVIS.bat. La vinduet staa aapent og hold PC vaaken.
+   Ved oppstart skannes kartet, deretter ca. hver time frem til avspark.
+   En godkjent sending skal vise status OBSERVED, ikke PENDING.
+
+LINK: https://tipspanelet.no/ministaut?lag=kvinner
+
+VIKTIG OM ANDRE SKJERMER:
+  Laast profil fra 26.10.2026 bruker Edge-visning 1294x642 CSS-piksler,
+  sidezoom 0.9 og laast kartregion. V2.4 aapner naa det laaste Edge-innholdsvinduet selv paa skjermer med
+  annen opploesning. Skjermen maa ha plass til 1294x642 CSS-piksler
+  pluss Edge-vinduskant. Hvis den er for liten eller kartet endres,
+  stopper tellingen. Ikke tolk feil som 0 ledige. Send diagnostikk.
+  IKKE laer opp kartet paa nytt eller endre profilfilene.
+
+KAMP: Rosenborg - Roa, sondag 1. november 2026 kl. 14:30 norsk tid.
+STADION: Koteng Arena, 6 sitteomraader (VIP + Felt 1-5), totalt 601
+registrert kapasitet. Staa A/B IKKE med. Observasjoner er ikke salgstall.
+
+SENTRALE FILER:
+  01_INSTALLER.bat             Installerer lokalt Python-miljo + avhengigheter
+  02_TEST_EN_GANG.bat         En lokal test, uten publisering
+  03_KONFIGURER_TOKEN.bat     Konfigurerer skannertoken uten aa vise det
+  04_START_LIVE_TIMEVIS.bat  Timevis offentlig observasjon
+  05_START_LOKALT_TIMEVIS.bat Timevis lokal telling UTEN publisering
+  06_KONTROLLER_LAAST_PROFIL.bat Kontrollerer SHA256-profilen
+  07_SJEKK_SKJERM.bat          Kontrollerer om ny skjerm har plass
+  LES_MEG_V2_4.md             Full veiledning og feilsoking
+
+PERSONVERN: ZIP-en inneholder ikke skannertoken, passord, innlogging,
+Edge-cookies eller kontoinformasjon. Kun laast referansemateriale.
+Lerkendal-skanneren paa andre PC-er blir ikke endret.

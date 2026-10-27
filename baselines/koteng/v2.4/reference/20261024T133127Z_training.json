@@ -1,0 +1,43 @@
+{
+  "timestamp": "20261024T133127Z",
+  "url": "https://billett.rbk.no/checkout/6aaceecebfe408c38e1712dd",
+  "arena": "koteng_arena",
+  "region_method": "svg/canvas",
+  "map_region": [
+    5,
+    423.75,
+    1590,
+    950
+  ],
+  "checked_points": 450,
+  "found_sections": {
+    "VIP": {
+      "capacity": 71,
+      "available_sample": 49
+    },
+    "FELT-1": {
+      "capacity": 49,
+      "available_sample": 48
+    },
+    "FELT-2": {
+      "capacity": 160,
+      "available_sample": 125
+    },
+    "FELT-3": {
+      "capacity": 120,
+      "available_sample": 76
+    },
+    "FELT-4": {
+      "capacity": 152,
+      "available_sample": 138
+    },
+    "FELT-5": {
+      "capacity": 49,
+      "available_sample": 0
+    }
+  },
+  "capacity_conflicts": {},
+  "coordinate_system": "map_normalized",
+  "map_full_coverage_verified": false,
+  "approval": "NOT_APPROVED_NO_PUBLICATION"
+}
