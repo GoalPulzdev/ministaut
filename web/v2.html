@@ -710,6 +710,37 @@ body{background:#070707}
 .section-grid .section-cell[data-level="some"]{border-left:3px solid #a4af42}
 @media(max-width:600px){.stadium-map-shell .map-legend{gap:7px 11px;font-size:10px}}
 </style>
+<style>
+/* Mock-aligned supporter panel with stand totals and optional detailed sectors. */
+.sections-panel>.stand-summary{grid-column:2;grid-row:3;min-width:0;border:1px solid #403b33;border-radius:11px;background:#121212;padding:15px 14px;align-self:start}
+.stand-summary-title{font:700 17px/1.2 Georgia,"Times New Roman",serif;margin:0 0 17px;color:#f0eee9}
+.stand-summary-loading{font-size:12px;color:#aaa}
+.stand-summary-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 8px;margin:0 0 15px;align-items:center}
+.stand-summary-labels{grid-column:1/-1;display:flex;align-items:baseline;gap:8px;font-size:11px;color:#d8d8d8}
+.stand-summary-labels strong{margin-left:auto;color:#f0d399;font-size:18px;font-variant-numeric:tabular-nums}
+.stand-summary-suffix{font-size:10px;color:#b2b2b2}
+.stand-summary-track{height:9px;overflow:hidden;border-radius:5px;background:#343434;min-width:0}
+.stand-summary-fill{height:100%;display:block;background:linear-gradient(90deg,#aa8c54,#f1d49a);border-radius:5px;transition:width .4s ease}
+.stand-summary-percent{font-size:10px;color:#aaa;white-space:nowrap}
+.stand-summary-note{font-size:10px;color:#969696;line-height:1.55;margin:12px 0 0}
+.sections-panel>.field-browser{grid-column:2;grid-row:4;min-width:0}
+.field-browser{border:1px solid #3a3a3a;border-radius:9px;background:#131313;overflow:hidden}
+.field-browser>summary{padding:11px 13px;font-size:12px;font-weight:700;cursor:pointer;color:#dedede;list-style:none;display:flex;align-items:center;justify-content:space-between}
+.field-browser>summary::-webkit-details-marker{display:none}
+.field-browser>summary span{font-size:19px;font-weight:400;color:#d6b676}
+.field-browser[open]>summary span{transform:rotate(45deg)}
+.field-browser[open]>summary{border-bottom:1px solid #3a3a3a}
+.field-browser .section-grid{max-height:260px;overflow:auto;padding:8px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.field-browser .section-cell{min-height:61px;padding:7px}
+.sections-panel>.section-detail{grid-column:2;grid-row:5;margin:0}
+.sections-panel>.insight-records{grid-column:1;grid-row:4 / span 2;margin:0;align-self:start}
+@media(max-width:850px){
+ .sections-panel>.stand-summary,.sections-panel>.field-browser,.sections-panel>.section-detail,.sections-panel>.insight-records{grid-column:1;grid-row:auto}
+ .stand-summary-item{max-width:100%}
+ .field-browser .section-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+}
+@media(max-width:600px){.field-browser .section-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+</style>
 </head>
 <body>
 <main class="wrap">
@@ -817,8 +848,9 @@ body{background:#070707}
   <span class="map-key"><i style="background:#4783b2"></i>Flere ledige</span>
   <span class="map-key"><i style="background:#4a4c52"></i>Ukjent</span>
 </div><p class="map-note">Fargene viser andelen ledige sitteplasser i hvert felt. Ståplasser er ikke med. Kartet er veiledende – sjekk eksakt plass hos RBK før du kjøper.</p></div>
-      <div class="section-grid" id="sectionGrid"><p class="section-loading">Henter ledige plasser …</p></div>
-      <div id="sectionDetail" class="section-detail" aria-live="polite">Velg et felt for flere detaljer.</div><div id="sectionRecords" class="insight-records" aria-live="polite"></div>
+      <div class="stand-summary" id="standSummary" aria-live="polite"><div class="stand-summary-loading">Henter tribuneoversikten …</div></div>
+      <details class="field-browser"><summary>Se alle sittefelt <span aria-hidden="true">+</span></summary><div class="section-grid" id="sectionGrid"><p class="section-loading">Henter ledige plasser …</p></div></details>
+      <div id="sectionDetail" class="section-detail" aria-live="polite">Velg et felt i kartet for å se ledige plasser.</div><div id="sectionRecords" class="insight-records" aria-live="polite"></div>
     </section>
   </section>
   <footer class="fan-footer">MINISTAUT · En uavhengig supporteroversikt. <span class="premium-bottom">Stadionfoto: Einar Fredriksen, <a href="https://commons.wikimedia.org/wiki/File:Lerkendal_stadion_at_night.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>, <a href="https://creativecommons.org/licenses/by-sa/2.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 2.0</a>. Bearbeidet til sort-hvitt.</span></footer>
@@ -1627,11 +1659,49 @@ function activateStadiumSection(code){
  sectionSelection=cell||null;
  if(cell)cell.setAttribute('aria-pressed','true');
 }
+// Supporter-facing stand totals use only verified seated section records.
+const STAND_GROUPS=[
+ {name:'Nordre tribune',codes:'SA RA QA PA OA NA MA Q P O N RB QB PB OB NB MB'.split(' ')},
+ {name:'Østre tribune',codes:'LB KB JB IB HB K J I'.split(' ')},
+ {name:'Søndre tribune',codes:'AB BB CB DB EB FB GB A B C D E F G PRESSE AA BA CA DA EA FA GA'.split(' ')},
+ {name:'Vestre tribune',codes:'TA UA VA WA XA TB UB U VB V WB W XB'.split(' ')}
+];
+function renderStandSummary(rows){
+ const target=$('standSummary');target.replaceChildren();
+ if(!rows?.length){target.textContent='Oversikten er ikke tilgjengelig ennå.';return;}
+ const byCode=new Map(rows.map(row=>[row.section_code,row]));
+ const groups=selectedVenue==='koteng_arena'
+  ?[{name:'Sittefeltene',codes:['FELT-1','FELT-2','FELT-3','FELT-4','FELT-5']},{name:'VIP',codes:['VIP']}]
+  :STAND_GROUPS;
+ const heading=document.createElement('h3');heading.className='stand-summary-title';heading.textContent='Ledige plasser per tribune';target.append(heading);
+ for(const group of groups){
+   const parts=group.codes.map(code=>byCode.get(code)).filter(Boolean);
+   if(!parts.length)continue;
+   const available=parts.reduce((sum,row)=>sum+row.free,0);
+   const capacity=parts.reduce((sum,row)=>sum+row.capacity,0);
+   if(capacity<=0)continue;
+   const pct=Math.round(100*available/capacity);
+   const row=document.createElement('div');row.className='stand-summary-item';
+   const labels=document.createElement('div');labels.className='stand-summary-labels';
+   const name=document.createElement('span');name.textContent=group.name;
+   const value=document.createElement('strong');value.textContent=fmt(available);
+   const suffix=document.createElement('span');suffix.className='stand-summary-suffix';suffix.textContent='ledige';
+   labels.append(name,value,suffix);
+   const meter=document.createElement('div');meter.className='stand-summary-track';meter.setAttribute('role','meter');
+   meter.setAttribute('aria-label',group.name+' – andel ledige sitteplasser');
+   meter.setAttribute('aria-valuenow',String(pct));meter.setAttribute('aria-valuemin','0');meter.setAttribute('aria-valuemax','100');
+   const fill=document.createElement('span');fill.className='stand-summary-fill';fill.style.width=pct+'%';meter.append(fill);
+   const percent=document.createElement('span');percent.className='stand-summary-percent';percent.textContent=pct+' % ledige';
+   row.append(labels,meter,percent);target.append(row);
+ }
+ const note=document.createElement('p');note.className='stand-summary-note';note.textContent='Andel ledige sitteplasser i feltene som vises i kartet.';target.append(note);
+}
 function renderSections(rows,scan){
   const grid=$('sectionGrid'),status=$('sectionStatus'),detail=$('sectionDetail');
   grid.replaceChildren();
   if(!scan || !Array.isArray(rows)){
     drawStadiumMap(null,null);
+    renderStandSummary(null);
     visibleSectionRows=[];visibleSectionScan=null;sectionDeltas=new Map();status.textContent='Tribunekartet er ikke tilgjengelig ennå';
     detail.textContent='Velg en kamp for å se ledige plasser.';
     return;
@@ -1648,11 +1718,12 @@ function renderSections(rows,scan){
   if(!complete){
     status.textContent='Tribunekartet er midlertidig utilgjengelig';
     detail.textContent='Prøv igjen litt senere.';
+    renderStandSummary(null);
     drawStadiumMap(null,null);
     return;
   }
   status.textContent='Oppdatert '+date(scan.observed_at);
-  visibleSectionRows=valid.slice();visibleSectionScan=scan;drawStadiumMap(valid,scan);
+  visibleSectionRows=valid.slice();visibleSectionScan=scan;drawStadiumMap(valid,scan);renderStandSummary(valid);
   valid.sort((a,b)=>a.section_code.localeCompare(b.section_code,'nb',{numeric:true}));
   sectionSelection=null;
   detail.textContent='Velg et felt for å se ledige plasser og størrelse.';
