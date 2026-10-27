@@ -1,0 +1,12 @@
+state/
+sources/
+__pycache__/
+*.pyc
+.venv/
+.ministaut-token
+**/.ministaut-token
+**/output/
+**/diagnostikk/
+**/historikk/
+**/user_data/
+**/edge_scanner_profile/

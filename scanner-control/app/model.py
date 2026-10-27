@@ -1,0 +1,79 @@
+"""Explicit, validated configurations: no guessed venue or category."""
+from __future__ import annotations
+from dataclasses import dataclass, asdict
+from datetime import datetime, timezone
+from pathlib import Path
+from urllib.parse import urlsplit
+import re
+
+EVENT = re.compile(r'^[A-Za-z0-9_-]{8,100}$')
+PROFILES = {'koteng_v24', 'lerkendal_legacy'}
+
+
+def checkout_key(url: str) -> str:
+    p = urlsplit(url)
+    if p.scheme != 'https' or (p.hostname or '').lower() != 'billett.rbk.no' or p.username or p.password or p.port or p.query or p.fragment:
+        raise ValueError('Krever offentlig https://billett.rbk.no/checkout/<kamp-ID>')
+    parts = p.path.strip('/').split('/')
+    if len(parts) != 2 or parts[0] != 'checkout' or not EVENT.fullmatch(parts[1]):
+        raise ValueError('Ugyldig billettadresse/kamp-ID')
+    return parts[1]
+
+
+def parse_utc(value: str) -> datetime:
+    try:
+        d = datetime.fromisoformat(value.replace('Z', '+00:00'))
+    except (ValueError, TypeError, AttributeError) as exc:
+        raise ValueError('Oppgi tidspunkt i ISO-8601 med tidssone') from exc
+    if d.tzinfo is None or d.utcoffset() is None:
+        raise ValueError('Kampstart mangler tidssone')
+    return d.astimezone(timezone.utc)
+
+
+@dataclass(frozen=True)
+class Job:
+    key: str
+    label: str
+    team: str
+    venue: str
+    url: str
+    kickoff_at: str
+    profile: str
+    scanner_path: str
+    interval_minutes: int = 60
+    enabled: bool = False
+    upload: bool = False
+
+    def __post_init__(self):
+        if not re.fullmatch(r'[a-z0-9][a-z0-9_-]{2,100}', self.key):
+            raise ValueError('Ugyldig intern jobb-ID')
+        if not (self.label.strip() and self.team.strip() and self.venue.strip()):
+            raise ValueError('Kampnavn, lag og arena kreves')
+        if self.profile not in PROFILES:
+            raise ValueError('Ukjent motor; ny arena må læres opp og godkjennes')
+        if checkout_key(self.url) != self.key:
+            raise ValueError('Kamp-ID og URL samsvarer ikke')
+        parse_utc(self.kickoff_at)
+        if type(self.interval_minutes) is not int or not (30 <= self.interval_minutes <= 720):
+            raise ValueError('Intervall må være 30–720 minutter')
+        if not self.scanner_path or '\x00' in self.scanner_path:
+            raise ValueError('Skannermappe kreves')
+        if self.profile == 'koteng_v24' and self.key != '6aaceecebfe408c38e1712dd':
+            raise ValueError('Koteng V2.4-profilen er låst til Rosenborg–Røa; annen kamp trenger ny godkjenning')
+        if self.profile == 'koteng_v24' and self.venue != 'koteng_arena':
+            raise ValueError('Koteng-motoren kan ikke kjøres på en annen arena')
+        if self.profile == 'lerkendal_legacy' and self.venue != 'lerkendal':
+            raise ValueError('Lerkendal-motoren krever Lerkendal')
+        if self.upload and not self.enabled:
+            raise ValueError('Aktiver jobben før opplasting kan slås på')
+
+    def as_json(self) -> dict:
+        return asdict(self)
+
+    @classmethod
+    def from_json(cls, value: dict) -> 'Job':
+        return cls(**value)
+
+    def path(self, base: Path) -> Path:
+        p = Path(self.scanner_path)
+        return p.resolve() if p.is_absolute() else (base / p).resolve()
