@@ -478,6 +478,207 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:ra
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style>
+<style>
+/* V2.1: align the real, data-driven layout to the approved cinematic mockups. */
+:root{--gold-light:#f1d59c;--gold:#d4b371;--gold-mid:#af8d52;--night:#060606;--grey:#a8a8a8}
+html{scroll-padding-top:75px}
+body{background:#070707}
+.wrap{max-width:1570px;padding:0 30px 34px}
+.top{height:82px;min-height:82px;padding:13px 30px;margin:0 -30px;border-color:#37322a}
+.v2-logo{display:flex;align-items:center;justify-content:center;width:44px;height:44px;filter:drop-shadow(0 1px 8px #d4b37122)}
+.v2-crown{width:40px;height:38px;color:var(--gold-light)}
+.brand{font-size:22px;gap:13px}
+.brand small{font-size:9px;color:#bdbdbd;letter-spacing:.225em}
+.top-links{gap:30px}
+.top-links a{font-weight:700}
+.preview-chip{font-size:9px;padding:7px 12px;opacity:.72}
+.team-mark{overflow:hidden}
+.hero{margin:0 -30px;padding:49px clamp(30px,5.6vw,90px) 55px;min-height:304px;max-height:358px}
+.hero::before{background-image:url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Lerkendal_stadion_at_night.jpg?width=1920");background-size:cover;background-position:center 52%;filter:grayscale(1) contrast(1.28) brightness(.7);opacity:.96}
+.hero::after{background:linear-gradient(90deg,#060606 1%,#060606f2 22%,#070707bb 44%,#07070740 75%,#05050533 100%),linear-gradient(0deg,#070707 0%,transparent 27%,transparent 78%,#06060666 100%)}
+.hero .overline{font-size:10px;letter-spacing:.19em;color:#d9bf8c}
+.hero h1{margin:10px 0 9px;font-size:clamp(49px,4.4vw,72px);line-height:.99;letter-spacing:-.046em;max-width:725px;text-wrap:balance}
+.hero h1 em{font-weight:700;font-style:normal;color:var(--gold-light);text-shadow:0 4px 25px #000}
+.hero p{font-size:14px;max-width:490px;line-height:1.55}
+.hero-controls{margin-top:19px;gap:10px}
+.hero-controls a{min-height:43px;padding:10px 20px}
+.hero-caption{right:35px;bottom:auto;top:58px;letter-spacing:.2em;line-height:1.7;color:#d4d4d4;max-width:140px}
+.hero-watermark{position:absolute;top:54px;right:13%;width:clamp(105px,13vw,190px);height:clamp(105px,13vw,190px);opacity:.17;filter:grayscale(1) brightness(2);pointer-events:none}
+.hero-watermark img{width:100%;height:100%;object-fit:contain}
+.team-selector{margin:14px 0 17px;display:flex;gap:8px;justify-content:flex-end}
+.team-choice{min-height:49px;width:auto;flex:0 0 auto;border-radius:999px;padding:8px 13px;gap:9px;background:#111;border-color:#39352d}
+.team-choice:hover{transform:none}
+.team-choice[aria-pressed=true]{border-color:#c6a568;background:#252016}
+.team-symbol{width:29px;height:29px;border-radius:50%;font-size:9px;letter-spacing:-.05em}
+.team-copy strong{font-size:13px}
+.team-copy small{font-size:10px;color:#bdbdbd}
+.team-count{margin-left:3px;padding:3px 6px;font-size:9px}
+.picker-section{margin-top:0}
+.picker-section .section-heading{margin:0 0 12px;gap:12px}
+.picker-section .section-title{font-size:22px}
+.picker-section .section-help{font-size:11px}
+.match-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.match-tile{min-height:158px;max-height:186px;padding:15px 17px 14px;gap:10px;background:linear-gradient(140deg,#171717,#080808);border:1px solid #3a3a3a;border-radius:12px}
+.match-tile[aria-pressed=true]{border-color:#dabc82;box-shadow:0 0 0 1px #bfa26755,0 0 19px #b7985233}
+.match-tile[aria-pressed=true]::before{width:3px}
+.tile-top{font-size:10px;letter-spacing:.025em;color:#bcbcbc}
+.tile-pill{padding:4px 7px;font-size:9px;letter-spacing:.035em}
+.tile-matchup{align-items:center;justify-content:space-between;gap:16px}
+.tile-title{font-size:clamp(18px,1.75vw,24px);flex:1;line-height:1.08}
+.tile-crest-group{display:flex;gap:8px;align-items:center;flex:none}
+.tile-crest-divider{width:1px;height:36px;background:#575757}
+.tile-team-crest{display:flex;align-items:center;justify-content:center;width:41px;height:41px;background:#eaeaea;color:#151515;filter:grayscale(1);border-radius:50%;overflow:hidden;font:700 10px Arial,sans-serif}
+.tile-team-crest img{width:38px;height:38px;object-fit:contain}
+.tile-opponent{padding:3px}
+.tile-bottom{grid-template-columns:minmax(0,1fr) 65px;grid-template-areas:"number spark" "meta meta";gap:3px 9px}
+.tile-summary{gap:8px}
+.tile-value{font-size:clamp(29px,2.5vw,35px);color:var(--gold-light);font-weight:780}
+.tile-unit{font-size:11px;max-width:86px;line-height:1.05;color:#e4e4e4}
+.tile-spark{width:65px;height:25px}
+.tile-foot{font-size:10px;color:#bdbdbd}
+.results{position:relative;display:grid;grid-template-columns:minmax(260px,30fr) minmax(340px,47fr) minmax(240px,23fr);gap:10px;margin-top:17px}
+.results>.details-head{grid-column:1/-1;grid-row:1;margin:0;padding:15px 20px;min-height:100px;display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:15px;align-items:center;border-radius:13px;border-color:#484039;background:linear-gradient(105deg,#211d17,#0c0c0c 75%)}
+.details-head .overline{font-size:10px;letter-spacing:.12em;color:#c8a969}
+.details-head h2{font-size:clamp(25px,2.4vw,36px);margin:5px 0 4px}
+.details-head .actions{width:auto;align-items:center;justify-content:center}
+.details-head .badge{font-size:10px;padding:8px 10px;color:#d6c49e}
+.details-head .pill{padding:8px 11px;min-height:36px;min-width:36px;font-size:11px}
+.details-head .campaign-row{background:transparent;border:0;grid-column:auto;grid-row:auto;margin:0;padding:0;min-width:0}
+.details-head .campaign-copy{display:none}
+.details-head .ticket-link{min-height:39px;padding:8px 14px;font-size:11px;white-space:nowrap;background:#18140f;border-color:#c5a365;color:#f1d59c}
+.details-head .ticket-link:hover{background:#252016;box-shadow:0 0 15px #a5853933}
+.results>.summary{grid-column:1;grid-row:2;display:flex;flex-direction:column;gap:9px;min-width:0}
+.summary>.primary{flex:1;min-height:235px;padding:20px 20px 15px;border:1px solid #4f4433;background:linear-gradient(143deg,#242019 0%,#101010 44%,#090909 100%)}
+.summary .primary .caption{font-size:11px;letter-spacing:.07em}
+.summary .primary .big{font-size:clamp(55px,5.8vw,89px);color:var(--gold-light);margin:12px 0 3px;text-shadow:0 3px 25px #d2ac4f25}
+.availability-footnote{color:#bdbdbd;font-size:10px;margin:2px 0 0;line-height:1.4}
+.summary .pulse-insights{display:flex;flex-wrap:wrap;margin-top:13px;padding-top:9px;gap:3px 10px}
+.summary .pulse-insights .daily-pulse{flex:1 1 85px;font-size:10px;line-height:1.35}
+.summary>.stack{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:1fr;gap:0;min-height:96px;background:#111}
+.summary .stack .small-card{padding:14px}
+.summary .stack .value{font-size:clamp(20px,2.3vw,28px);margin-top:6px}
+.summary .stack .caption{font-size:9px;letter-spacing:.04em}
+.summary .stack .minor{font-size:9px}
+.results>.graph{grid-column:2;grid-row:2;margin:0;padding:19px 17px 13px;min-height:349px;background:#111}
+.graph-header .caption{font:700 15px Georgia,"Times New Roman",serif;text-transform:none;letter-spacing:0;color:#e9e9e9}
+.graph-header .graph-desc{font-size:10px;line-height:1.4;margin:4px 0 5px}
+.graph-count{font-size:10px;padding:4px 9px;white-space:nowrap}
+.chart-window{display:flex;align-items:center;justify-content:flex-start;gap:0;margin:9px 0 7px}
+.chart-window button{border:1px solid #414141;border-right:0;background:#151515;color:#acacac;padding:7px 10px;font-size:10px;cursor:pointer;min-height:31px;transition:background .18s,color .18s}
+.chart-window button:first-child{border-radius:7px 0 0 7px}
+.chart-window button:last-child{border-right:1px solid #414141;border-radius:0 7px 7px 0}
+.chart-window button[aria-pressed=true]{border-color:#bb9c5c;background:#2e261a;color:#f0d499}
+.chart-window button[aria-pressed=true]+button{border-left-color:#bb9c5c}
+.chart-window button:hover{color:#f1d69e}
+.chart-legend{font-size:9px;padding:0 0 5px;gap:10px}
+.chart-wrap{min-height:160px}
+.chart-wrap svg{height:auto;display:block}
+.graph .chart-inspect{margin-top:8px;padding-top:8px;gap:4px 12px}
+.graph .inspect-timestamp,.graph .inspect-value,.graph .inspect-delta{font-size:10px}
+.results>.forecast-panel{grid-column:3;grid-row:2;padding:20px 18px;min-height:349px;gap:12px;justify-content:space-between;background:linear-gradient(130deg,#211d17,#111)}
+.forecast-lead .forecast-eyebrow{color:var(--gold-light);font-size:10px}
+.forecast-lead h3{font-size:clamp(20px,2vw,27px);line-height:1.12;margin:6px 0 8px}
+.forecast-lead p{font-size:11px;line-height:1.55}
+.forecast-result{padding:12px 0 0}
+.forecast-result .forecast-label{font-size:10px}
+.forecast-number{font-size:clamp(20px,2vw,30px)}
+.forecast-range{font-size:10px}
+.pace-forecast{padding:10px}
+.results>.sections-panel{grid-column:1/-1;grid-row:3;margin:0;padding:17px 18px;display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,.9fr);grid-template-rows:auto auto auto auto;gap:5px 14px}
+.sections-panel>.section-heading{grid-column:1/-1;margin:0}
+.sections-panel .section-title{font:700 19px Georgia,"Times New Roman",serif}
+.sections-panel .section-intro{grid-column:1/-1;margin:0 0 5px;font-size:10px}
+.sections-panel>.stadium-map-shell{grid-column:1;grid-row:3;margin:0;padding:7px 10px;border-color:#403b33}
+.stadium-map-shell .map-switch{font-size:11px}
+.stadium-map-shell #stadiumMap{width:100%;max-height:320px;overflow:hidden}
+.stadium-map-shell #stadiumMap svg{max-height:320px}
+.stadium-map-shell .map-legend{gap:7px;font-size:9px}
+.stadium-map-shell .map-note{font-size:9px;line-height:1.4}
+.sections-panel>.section-grid{grid-column:2;grid-row:3;align-content:start;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;max-height:392px;overflow:auto;padding:4px;border:1px solid #343434;border-radius:8px}
+.section-grid>.section-cell{min-height:57px;padding:6px;border-radius:6px}
+.section-grid .section-free{font-size:17px;color:var(--gold-light)}
+.section-grid .section-code{font-size:9px}
+.section-grid .section-meta{font-size:8px}
+.sections-panel>.section-detail{grid-column:2;grid-row:4;align-self:start;margin:0;padding:8px 10px}
+.sections-panel>.insight-records{grid-column:1;grid-row:4;min-width:0}
+.fan-footer{font-size:10px;padding:17px 0}
+@media(max-width:1250px){
+ .top-links{gap:16px}
+ .top-links a{font-size:11px}
+ .results{grid-template-columns:minmax(240px,.9fr) minmax(360px,1.4fr)}
+ .results>.forecast-panel{grid-column:1/-1;grid-row:3;min-height:170px;display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,.75fr);align-items:center}
+ .results>.sections-panel{grid-row:4}
+ .results>.details-head{grid-template-columns:1fr auto}
+ .details-head .campaign-row{grid-column:2}
+ .details-head .actions{grid-column:2;grid-row:1}
+ .details-head .campaign-row{grid-row:2;justify-self:end}
+ .results>.summary{grid-column:1;grid-row:2}
+ .results>.graph{grid-column:2;grid-row:2}
+}
+@media(max-width:850px){
+ .wrap{padding:0 15px 30px}
+ .top{margin:0 -15px;padding:12px 15px}
+ .hero{margin:0 -15px;min-height:315px;padding:44px 25px}
+ .hero h1{font-size:clamp(44px,6.8vw,65px)}
+ .hero-watermark{right:7%;opacity:.08}
+ .hero-caption{display:none}
+ .match-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .results{grid-template-columns:1fr;gap:10px}
+ .results>.details-head,.results>.summary,.results>.graph,.results>.forecast-panel,.results>.sections-panel{grid-column:1;grid-row:auto}
+ .results>.summary{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(210px,.8fr)}
+ .summary>.stack{grid-template-columns:1fr;grid-template-rows:repeat(2,minmax(0,1fr))}
+ .summary .stack .small-card+.small-card{border-left:0;border-top:1px solid #414141}
+ .results>.forecast-panel{display:flex;min-height:210px}
+ .results>.details-head{display:grid;grid-template-columns:1fr auto}
+ .details-head .actions{grid-column:2;grid-row:1}
+ .details-head .campaign-row{grid-column:1/-1;grid-row:2;justify-self:start}
+ .results>.sections-panel{grid-template-columns:1fr}
+ .sections-panel>.section-heading,.sections-panel>.section-intro,.sections-panel>.stadium-map-shell,.sections-panel>.section-grid,.sections-panel>.section-detail,.sections-panel>.insight-records{grid-column:1;grid-row:auto}
+ .sections-panel>.section-grid{max-height:260px;grid-template-columns:repeat(5,minmax(0,1fr))}
+}
+@media(max-width:600px){
+ .brand{font-size:17px}
+ .brand small{font-size:8px}
+ .v2-logo,.v2-crown{width:34px}
+ .hero{min-height:315px;padding:38px 19px 36px}
+ .hero h1{font-size:clamp(39px,10vw,53px);line-height:1.03}
+ .hero p{font-size:13px}
+ .hero-watermark{display:none}
+ .team-selector{justify-content:flex-start;gap:6px;margin:12px 0}
+ .team-choice{padding:7px 10px;gap:7px;min-height:42px}
+ .team-symbol{display:none}
+ .team-copy strong{font-size:12px}
+ .team-copy small{display:none}
+ .team-count{font-size:8px}
+ .match-list{grid-template-columns:1fr}
+ .match-tile{min-height:136px;max-height:none}
+ .tile-team-crest{width:36px;height:36px}
+ .tile-crest-group{gap:5px}
+ .tile-team-crest img{width:34px;height:34px}
+ .tile-title{font-size:21px}
+ .results>.details-head{padding:13px;gap:9px}
+ .details-head h2{font-size:26px}
+ .details-head .actions{display:flex;flex-wrap:wrap;justify-content:flex-end}
+ .details-head .badge{font-size:9px}
+ .details-head .campaign-row{grid-column:1/-1}
+ .results>.summary{grid-template-columns:1fr}
+ .summary>.primary{min-height:200px}
+ .summary>.stack{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:1fr}
+ .summary .stack .small-card+.small-card{border-left:1px solid #414141;border-top:0}
+ .sections-panel>.section-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .chart-window button{padding:8px 7px;font-size:9px;flex:1}
+ .graph,.forecast-panel,.sections-panel{padding:16px!important}
+}
+@media(max-width:390px){
+ .hero h1{font-size:37px}
+ .team-choice .team-count{display:none}
+ .tile-title{font-size:19px}
+ .tile-crest-group{gap:3px}
+ .tile-team-crest{width:30px;height:30px}
+ .tile-team-crest img{width:30px;height:30px}
+ .details-head .badge{max-width:180px}
+}
+</style>
 </head>
 <body>
 <main class="wrap">
@@ -517,6 +718,10 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:ra
         <p id="kickoff">Kampstart</p>
       </div>
       <div class="actions"><span id="age" class="badge" role="status">Henter siste måling …</span><button class="pill" type="button" id="refresh" aria-label="Hent oppdaterte billettmålinger">↻ Oppdater</button></div>
+      <div class="campaign-row">
+      <a id="tickets" class="ticket-link" href="https://billett.rbk.no/" target="_blank" rel="noopener noreferrer" aria-label="Gå til billettsalget for valgt Rosenborg-kamp"><span id="ticketLabel">Finn din plass på Lerkendal</span> <span aria-hidden="true">↗</span></a>
+      <div class="campaign-copy"><strong id="campaignHeading">Ses på Lerkendal!</strong><span>Ta med noen på kamp. Sammen skaper vi trøkket.</span></div>
+    </div>
     </div>
     <div class="summary" id="stats">
       <article class="card primary">
@@ -528,10 +733,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:ra
         <article class="card small-card"><div class="caption">Siden forrige måling</div><div class="value" id="delta">—</div><div class="minor" id="deltaNote">Venter på flere målinger</div></article>
       </div>
     </div>
-    <div class="campaign-row">
-      <a id="tickets" class="ticket-link" href="https://billett.rbk.no/" target="_blank" rel="noopener noreferrer" aria-label="Gå til billettsalget for valgt Rosenborg-kamp"><span id="ticketLabel">Finn din plass på Lerkendal</span> <span aria-hidden="true">↗</span></a>
-      <div class="campaign-copy"><strong id="campaignHeading">Ses på Lerkendal!</strong><span>Ta med noen på kamp. Sammen skaper vi trøkket.</span></div>
-    </div>
+
     <section class="forecast-panel" aria-labelledby="projection-title">
       <div class="forecast-lead">
         <span class="forecast-eyebrow">MOT AVSPARK</span>
