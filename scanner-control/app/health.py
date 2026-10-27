@@ -40,7 +40,7 @@ def check(base: Path, jobs: list[Job]) -> list[tuple[bool | None, str]]:
             continue
         seen.add(home)
         files = KOTENG_FILES if job.profile == 'koteng_v24' else LERKENDAL_FILES
-        name = 'Koteng V2.4' if job.profile == 'koteng_v24' else 'Lerkendal'
+        name = 'Koteng' if job.profile == 'koteng_v24' else 'Lerkendal'
         missing = [f for f in files if not (home / f).is_file()]
         if not home.is_dir():
             out.append((False, f'{name}: mappe mangler ({home})'))
