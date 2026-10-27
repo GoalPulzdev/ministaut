@@ -130,6 +130,9 @@ class Controller:
     def poll(self, when: datetime | None = None):
         now = when or datetime.now(timezone.utc)
         for key, active in tuple(self.active.items()):
+            if parse_utc(active.job.kickoff_at) <= now and active.process.poll() is None:
+                # An in-progress scan must not continue beyond kickoff.
+                self.stop(key)
             code = active.process.poll()
             if code is None:
                 continue
@@ -149,7 +152,7 @@ class Controller:
             prior = self.store.state(key)
             fails = 0 if code == 0 else prior['failures'] + 1
             status = 'fullført' if code == 0 else 'feil'
-            due = None if parse_utc(active.job.kickoff_at) <= now or not active.job.enabled else schedule_after(active.job, fails, now)
+            due = None if parse_utc(active.job.kickoff_at) <= now or not active.job.enabled or active.job.profile!='koteng_v24' else schedule_after(active.job, fails, now)
             self.store.finish(active.run_id, key, status, code, due, fails,
                               'Kontrollprosess avsluttet. Se logg; bekreftet publisering avgjøres av kildemotor.')
         # No automatic Lerkendal launch: its long-running UI owns scheduling.
@@ -186,7 +189,14 @@ class Controller:
         a = self.active.get(key)
         if a is None:
             return
-        # Prefer soft termination, but don't kill an operator's other Edge.
-        a.process.terminate()
+        # On Windows kill only descendants of this launched PID, not other
+        # independent Edge windows. Prevent orphan one-shot scanner publishing.
+        if os.name=='nt':
+            result=subprocess.run(['taskkill','/PID',str(a.process.pid),'/T','/F'],
+                                  capture_output=True, timeout=20, check=False)
+            if result.returncode not in (0, 128, 255) and a.process.poll() is None:
+                raise RuntimeError('Kunne ikke stoppe skannerens prosessgruppe')
+        else:
+            a.process.terminate()
         # poll() cleans up when the child has exited. In a crash, the lock
         # remains intentionally to force human review of possible orphan child.

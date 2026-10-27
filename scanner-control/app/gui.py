@@ -81,6 +81,7 @@ class App:
         strip=tk.Frame(self.root,bg=BG);strip.pack(fill='x',padx=23,pady=(0,10))
         self.summary=tk.Label(strip,text='',bg=BG,fg=DIM,font=('Segoe UI',10));self.summary.pack(side='left')
         ttk.Button(strip,text='+ Legg til kamp',command=self.add).pack(side='right',padx=6)
+        ttk.Button(strip,text='Rediger valgt',command=self.edit).pack(side='right',padx=6)
         ttk.Button(strip,text='Åpne scanner-mappe',command=self.folder).pack(side='right',padx=6)
         columns=('team','event','venue','free','mode','kickoff','status','next')
         table=tk.Frame(self.root,bg=BG);table.pack(fill='both',expand=True,padx=24,pady=(0,6))
@@ -140,6 +141,9 @@ class App:
 
     def add(self):
         Editor(self.root,self.base,self.store.put_job)
+
+    def edit(self):
+        self.handle(lambda: Editor(self.root,self.base,self.store.put_job,self.get_selected()))
 
     def on_select(self,_evt):
         ids=self.tree.selection();self.selected=ids[0] if ids else None
