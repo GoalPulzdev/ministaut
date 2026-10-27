@@ -679,6 +679,37 @@ body{background:#070707}
  .details-head .badge{max-width:180px}
 }
 </style>
+<style>
+/* Stadium-only visual language: traditional availability colors on premium black/gold UI. */
+.stadium-map-shell .stadium-map{filter:drop-shadow(0 12px 18px #0008)!important}
+.stadium-map-shell .stadium-map .seat-sector[data-level="ample"]{fill:#318b5f}
+.stadium-map-shell .stadium-map .seat-sector[data-level="some"]{fill:#a4af42}
+.stadium-map-shell .stadium-map .seat-sector[data-level="few"]{fill:#de983d}
+.stadium-map-shell .stadium-map .seat-sector[data-level="critical"]{fill:#c84a44}
+.stadium-map-shell .stadium-map .seat-sector[data-level="none"]{fill:#4d5255}
+.stadium-map-shell .stadium-map .seat-sector[data-level="locked"],
+.stadium-map-shell .stadium-map .seat-sector[data-level="missing"]{fill:#4a4c52;stroke-dasharray:4 3}
+.stadium-map-shell .stadium-map .seat-sector[data-heat="strong"]{fill:#c84843}
+.stadium-map-shell .stadium-map .seat-sector[data-heat="medium"]{fill:#da9042}
+.stadium-map-shell .stadium-map .seat-sector[data-heat="low"]{fill:#d7bf64}
+.stadium-map-shell .stadium-map .seat-sector[data-heat="flat"]{fill:#4e896a}
+.stadium-map-shell .stadium-map .seat-sector[data-heat="increase"]{fill:#4783b2}
+.stadium-map-shell .stadium-map .seat-sector[data-heat="unknown"]{fill:#4a4c52;stroke-dasharray:3 3}
+.stadium-map-shell .stadium-map .seat-sector:hover,
+.stadium-map-shell .stadium-map .seat-sector:focus-visible{stroke:#fafafa;stroke-width:3.4;filter:brightness(1.12) drop-shadow(0 0 7px #d4b37188)}
+.stadium-map-shell .stadium-map .seat-sector[aria-pressed="true"]{stroke:#fff;stroke-width:4;filter:brightness(1.15) drop-shadow(0 0 6px #fff8)}
+.stadium-map-shell .stadium-map .seat-label{fill:#fff;stroke:#111b16;stroke-width:2.3}
+.stadium-map-shell .map-legend{display:flex;flex-wrap:wrap;gap:9px 16px;color:#d5d5d5}
+.stadium-map-shell .map-legend[hidden]{display:none!important}
+.stadium-map-shell .map-key i{width:13px;height:13px;border:1px solid #ffffff28}
+.stadium-map-shell .map-note{max-width:850px;color:#adadad}
+.section-grid .section-cell[data-level="few"]{border-left:3px solid #de983d}
+.section-grid .section-cell[data-level="none"]{border-left:3px solid #767676}
+.section-grid .section-cell[data-level="critical"]{border-left:3px solid #c84a44}
+.section-grid .section-cell[data-level="ample"]{border-left:3px solid #318b5f}
+.section-grid .section-cell[data-level="some"]{border-left:3px solid #a4af42}
+@media(max-width:600px){.stadium-map-shell .map-legend{gap:7px 11px;font-size:10px}}
+</style>
 </head>
 <body>
 <main class="wrap">
@@ -770,7 +801,22 @@ body{background:#070707}
     <section class="card sections-panel" aria-labelledby="sections-title">
       <div class="section-heading"><h2 id="sections-title" class="section-title">Tribuneoversikt</h2><span class="section-help" id="sectionStatus">Henter tribunekart …</span></div>
       <p class="section-intro" id="stadiumIntro">Velg et felt for å se hvor mange sitteplasser som er ledige.</p>
-      <div class="stadium-map-shell"><div class="map-switch"><strong id="stadiumHeading">LERKENDAL · SITTEFELT <span class="map-revision"></span></strong><span class="section-help">Trykk på et felt</span></div><div class="insight-switch"><button id="viewAvailability" type="button" aria-pressed="true">Ledige nå</button><button id="viewHeat" type="button" aria-pressed="false">Endring siste døgn</button><span id="heatStatus"></span></div><div id="stadiumMap" aria-label="Interaktiv skjematisk stadionoversikt"></div><div class="map-legend"><span class="map-key"><i style="background:#a58a55"></i>50 % +</span><span class="map-key"><i style="background:#dec48d"></i>20–49 %</span><span class="map-key"><i style="background:#c8a664"></i>8–19 %</span><span class="map-key"><i style="background:#a58a55"></i>1–7 %</span><span class="map-key"><i style="background:#4d5255"></i>0 ledige</span><span class="map-key"><i style="background:#3c3427"></i>Låst / ukjent</span></div><p class="map-note">Fargene viser andelen ledige sitteplasser i hvert felt. Ståplasser er ikke med. Kartet er veiledende – sjekk eksakt plass hos RBK før du kjøper.</p></div>
+      <div class="stadium-map-shell"><div class="map-switch"><strong id="stadiumHeading">LERKENDAL · SITTEFELT <span class="map-revision"></span></strong><span class="section-help">Trykk på et felt</span></div><div class="insight-switch"><button id="viewAvailability" type="button" aria-pressed="true">Ledige nå</button><button id="viewHeat" type="button" aria-pressed="false">Endring siste døgn</button><span id="heatStatus"></span></div><div id="stadiumMap" aria-label="Interaktiv skjematisk stadionoversikt"></div><div id="legendAvailability" class="map-legend" aria-label="Andel ledige sitteplasser">
+  <span class="map-key"><i style="background:#318b5f"></i>Mange ledige (50 % +)</span>
+  <span class="map-key"><i style="background:#a4af42"></i>Noen ledige (20–49 %)</span>
+  <span class="map-key"><i style="background:#de983d"></i>Få ledige (8–19 %)</span>
+  <span class="map-key"><i style="background:#c84a44"></i>Nesten fullt (1–7 %)</span>
+  <span class="map-key"><i style="background:#4d5255"></i>Ingen ledige</span>
+  <span class="map-key"><i style="background:#4a4c52"></i>Ikke i salg / ukjent</span>
+</div>
+<div id="legendHeat" class="map-legend" aria-label="Endring i ledige plasser siste døgn" hidden>
+  <span class="map-key"><i style="background:#c84843"></i>Stor reduksjon</span>
+  <span class="map-key"><i style="background:#da9042"></i>Middels reduksjon</span>
+  <span class="map-key"><i style="background:#d7bf64"></i>Liten reduksjon</span>
+  <span class="map-key"><i style="background:#4e896a"></i>Uendret</span>
+  <span class="map-key"><i style="background:#4783b2"></i>Flere ledige</span>
+  <span class="map-key"><i style="background:#4a4c52"></i>Ukjent</span>
+</div><p class="map-note">Fargene viser andelen ledige sitteplasser i hvert felt. Ståplasser er ikke med. Kartet er veiledende – sjekk eksakt plass hos RBK før du kjøper.</p></div>
       <div class="section-grid" id="sectionGrid"><p class="section-loading">Henter ledige plasser …</p></div>
       <div id="sectionDetail" class="section-detail" aria-live="polite">Velg et felt for flere detaljer.</div><div id="sectionRecords" class="insight-records" aria-live="polite"></div>
     </section>
@@ -1291,7 +1337,15 @@ let stadiumByCode=new Map(),stadiumSelected=null,sectionDeltas=new Map(),section
 const historical24=(scans,end)=>{if(!end)return null;const endTime=Date.parse(end.observed_at);return scans.filter(s=>s.id!==end.id&&comparable(s,end)).map(s=>({s,gap:endTime-Date.parse(s.observed_at)})).filter(x=>x.gap>=18*3600000&&x.gap<=30*3600000).sort((a,b)=>Math.abs(a.gap-86400000)-Math.abs(b.gap-86400000))[0]?.s||null;};
 const sectionDeltaLabel=n=>n==null?'mangler sammenlignbar måling':n<0?fmt(-n)+' færre ledige':n>0?fmt(n)+' flere ledige':'uendret';
 const sectionHeat=n=>n==null?'unknown':n>0?'increase':n===0?'flat':n<=-40?'strong':n<=-15?'medium':'low';
-function chooseSectionMode(mode){sectionView=mode;$('viewAvailability').setAttribute('aria-pressed',String(mode==='availability'));$('viewHeat').setAttribute('aria-pressed',String(mode==='heat'));$('heatStatus').textContent=mode==='heat'?'Rød/oransje: størst fall i ledige plasser. Blå: flere ledige. Grå: mangler data.':'Farger viser andel ledige seter';drawStadiumMap(visibleSectionRows,visibleSectionScan);}
+function chooseSectionMode(mode){
+ sectionView=mode;
+ $('viewAvailability').setAttribute('aria-pressed',String(mode==='availability'));
+ $('viewHeat').setAttribute('aria-pressed',String(mode==='heat'));
+ $('legendAvailability').hidden=mode!=='availability';
+ $('legendHeat').hidden=mode!=='heat';
+ $('heatStatus').textContent=mode==='heat'?'Endring i ledige plasser':'Andel ledige sitteplasser';
+ drawStadiumMap(visibleSectionRows,visibleSectionScan);
+}
 function renderSectionRecords(scans){
  const box=$('sectionRecords');box.replaceChildren();
  const ordered=scans.slice().sort((a,b)=>Date.parse(a.observed_at)-Date.parse(b.observed_at));
@@ -1477,8 +1531,8 @@ function drawKotengMap(rows,scan){
   const locked=new Set(scan.locked_fields||[]);
   const heat=sectionView==='heat';
   const svg=svgEl('svg',{viewBox:'0 0 800 520',class:'stadium-map',role:'group','aria-label':'Skjematisk sitteplasskart Koteng Arena'});
-  svg.append(svgEl('rect',{x:20,y:153,width:760,height:304,rx:6,fill:'#766646',stroke:'#c8a664','stroke-width':3}));
-  for(let x=20;x<780;x+=95)svg.append(svgEl('rect',{x,y:153,width:47.5,height:304,fill:'#a58a55',opacity:'.6'}));
+  svg.append(svgEl('rect',{x:20,y:153,width:760,height:304,rx:6,fill:'#244c36',stroke:'#4c785e','stroke-width':3}));
+  for(let x=20;x<780;x+=95)svg.append(svgEl('rect',{x,y:153,width:47.5,height:304,fill:'#346348',opacity:'.35'}));
   svg.append(svgEl('rect',{x:44,y:176,width:712,height:258,fill:'none',stroke:'#e9d9bb','stroke-width':3}));
   svg.append(svgEl('line',{x1:400,y1:176,x2:400,y2:434,stroke:'#e9d9bb','stroke-width':3}));
   svg.append(svgEl('circle',{cx:400,cy:305,r:48,fill:'none',stroke:'#e9d9bb','stroke-width':3}));
@@ -1512,7 +1566,7 @@ function drawStadiumMap(rows,scan){
  const svg=svgEl('svg',{viewBox:'0 0 780 710',class:'stadium-map',role:'group','aria-label':'Tribunekart for Lerkendal, tilgjengelige sitteplasser'});
  const defs=svgEl('defs');
  const grad=svgEl('linearGradient',{id:'pitchGrad',x1:'0',x2:'0',y1:'0',y2:'1'});
- grad.append(svgEl('stop',{offset:'0%','stop-color':'#766646'}),svgEl('stop',{offset:'100%','stop-color':'#3c3427'}));
+ grad.append(svgEl('stop',{offset:'0%','stop-color':'#244d39'}),svgEl('stop',{offset:'100%','stop-color':'#132d22'}));
  defs.append(grad);svg.append(defs);
  const field={x:pitchBox.x+11,y:pitchBox.y+11,w:pitchBox.w-23,h:pitchBox.h-22};
  const fieldCenterX=field.x+field.w/2,fieldCenterY=field.y+field.h/2;
