@@ -13,6 +13,7 @@
 - **Bedre oversikt:** Kolonner for endring siden forrige måling og målingens alder, fargekodet status (`KØET`, `SKANNER · 4 min` osv.) og faner for målinger med publiseringsstatus, kjøringer, skannerlogg og hendelser. Tabellene blinker ikke og beholder valget ved oppdatering.
 - **Systemsjekk** (knapp): Python, Edge, diskplass, Git, motorfiler, `.venv`, Playwright og om token finnes. Selve tokenet leses aldri.
 - **Slett kamp** og trygg redigering. Billett-URL kan ikke endres på en eksisterende kamp, og en redigert kamp lagres alltid som deaktivert.
+- **Ekte Windows-app:** `MinistautControl.exe` (PyInstaller, `--windowed`) med eget ikon og snarvei på skrivebordet. Ingen terminalvinduer, heller ikke for Koteng-skanning, etterkontroll og sending. Lerkendal-motoren åpner fortsatt sitt eget konsollvindu, fordi den venter på ENTER fra operatøren. Ved feil vises en dialog, og detaljene lagres i `state/logs/app-feil-*.log`.
 - Lukker du programmet mens en skanning kjører, får du tilbud om å stoppe alle skanninger først.
 - Feilrettinger: Hvert knappetrykk startet en ny oppdateringssløyfe hvert 2. sekund (de hopet seg opp). Feil under planlegging kunne stoppe hele sløyfen.
 
@@ -23,7 +24,7 @@ Lukk kontrollsenteret og **ta en kopi av `state/control.sqlite3`** (trengs hvis 
 
 1. Pakk ut **hele mappen** `Ministaut_Control`. Installer Microsoft Edge.
 2. Kjør `01_INSTALLER.bat` (setter opp Koteng V2.4 og Playwright/Pillow i eget .venv).
-3. Kjør `02_START_KONTROLLSENTER.bat`. Det skal åpnes en mørkegrønn Windows-app.
+3. Kjør `05_BYGG_WINDOWS_APP.bat` én gang. Den lager `MinistautControl.exe` og snarveien **Ministaut Scanner Control** på skrivebordet. Start programmet derfra, uten terminalvindu. `02_START_KONTROLLSENTER.bat` fungerer fortsatt som reserve.
 4. Tre kamper er registrert som **deaktiverte** eksempler: Rosenborg–Røa (Koteng), Rosenborg–Molde og Rosenborg–Start (Lerkendal). Kontroller kampdato, kategorier og URL før aktivering.
 5. Velg RBK Kvinner – Røa, trykk `Test én gang`. Ved vellykket lokal skanning vises siste observerte ledige som et lokalt tall; ingen data sendes.
 6. Trykk `Systemsjekk`. Stopp gammel Koteng-sesjon på den andre PC-en før du slår på live. Velg `Aktiver / Deaktiver`, deretter `Live AV/PÅ` og bekreft. Koteng styres sentralt **hver time** mens kontrollprogrammet er åpent og PC er våken.

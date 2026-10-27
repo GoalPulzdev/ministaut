@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 import subprocess
 from .model import Job
-from .runner_helpers import interpreter_for  # imported helper isolated from controller to avoid cycles
+from .runner_helpers import interpreter_for, no_window  # imported helper isolated from controller to avoid cycles
 
 
 VALIDATE = '''import json,sys
@@ -31,7 +31,7 @@ def verified_new_report(job: Job, scanner_dir: Path, previous: set[Path]):
     source = new.pop()
     p = subprocess.run([interpreter_for(scanner_dir), '-c', VALIDATE, str(source)],
                        cwd=str(scanner_dir), text=True, stdout=subprocess.PIPE,
-                       stderr=subprocess.PIPE, timeout=35, check=False)
+                       stderr=subprocess.PIPE, timeout=35, check=False, **no_window())
     if p.returncode != 0:
         raise RuntimeError('Skannerens profil-/kvalitetskontroll avviste rapporten')
     try:data=json.loads(p.stdout.strip())

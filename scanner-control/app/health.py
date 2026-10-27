@@ -7,7 +7,7 @@ import subprocess
 import sys
 from .model import Job
 from .observations import token_configured
-from .runner_helpers import interpreter_for
+from .runner_helpers import interpreter_for, no_window
 
 EDGE = [Path(os.environ.get(v, '')) / 'Microsoft' / 'Edge' / 'Application' / 'msedge.exe'
         for v in ('ProgramFiles(x86)', 'ProgramFiles', 'LOCALAPPDATA')]
@@ -19,7 +19,7 @@ LERKENDAL_FILES = ('hurtigkart.py', 'match_config.py', 'stadion_felt.json')
 def _imports(python: str, cwd: Path, module: str) -> bool:
     try:
         return subprocess.run([python, '-c', f'import {module}'], cwd=str(cwd), capture_output=True,
-                              timeout=30, check=False).returncode == 0
+                              timeout=30, check=False, **no_window()).returncode == 0
     except (OSError, subprocess.TimeoutExpired):
         return False
 
@@ -27,7 +27,8 @@ def _imports(python: str, cwd: Path, module: str) -> bool:
 def check(base: Path, jobs: list[Job]) -> list[tuple[bool | None, str]]:
     """(True=ok, False=blocking, None=warning, text)."""
     out: list[tuple[bool | None, str]] = []
-    out.append((sys.version_info >= (3, 10), f'Python {sys.version.split()[0]}'))
+    out.append((sys.version_info >= (3, 10), ('Kontrollsenter (Windows-app)' if getattr(sys, 'frozen', False)
+                                             else f'Python {sys.version.split()[0]}')))
     if os.name == 'nt':
         out.append((any(p.is_file() for p in EDGE), 'Microsoft Edge installert'))
     usage = shutil.disk_usage(base)

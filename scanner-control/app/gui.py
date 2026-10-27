@@ -4,6 +4,7 @@ from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 import os
+import sys
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from . import __version__, health, locks, oslo
@@ -142,6 +143,12 @@ class App:
         r = self.root
         r.title(f'MINISTAUT · Scanner Control {__version__}')
         r.geometry('1240x820'); r.minsize(980, 660); r.configure(bg=BG)
+        icon = Path(getattr(sys, '_MEIPASS', self.base)) / 'ministaut.ico'
+        if icon.is_file():
+            try:
+                r.iconbitmap(default=str(icon))
+            except tk.TclError:
+                pass
         self._style()
         tk.Label(r, text=f'MINISTAUT  /  SCANNER CONTROL {__version__}', anchor='w', bg=BG, fg=ACC,
                  font=('Segoe UI', 11, 'bold')).pack(fill='x', padx=24, pady=(18, 2), anchor='w')

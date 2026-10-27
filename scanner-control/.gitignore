@@ -10,3 +10,8 @@ __pycache__/
 **/historikk/
 **/user_data/
 **/edge_scanner_profile/
+bygg/.venv/
+bygg/work/
+bygg/*.spec
+MinistautControl.exe
+ministaut.ico

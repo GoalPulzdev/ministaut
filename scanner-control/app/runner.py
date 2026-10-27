@@ -19,7 +19,7 @@ from . import locks
 from .locks import lock_name, acquire  # noqa: F401  (re-exported for tests/tools)
 from .model import Job, parse_utc
 from .storage import Store, now_iso
-from .runner_helpers import interpreter_for
+from .runner_helpers import interpreter_for, no_window as _no_window
 
 # Statuses shown to the operator (stored in jobs.last_status).
 READY, PLANNED, SCANNING, VERIFIED, QUEUED = 'klar', 'planlagt', 'skanner', 'bekreftet lokalt', 'køet for sending'
@@ -359,16 +359,12 @@ class Controller:
             db.execute("UPDATE outbox SET status='venter' WHERE status='sender'")
 
 
-def _no_window() -> dict:
-    return {'creationflags': subprocess.CREATE_NO_WINDOW} if os.name == 'nt' else {}
-
-
 def _kill_tree(process):
     # On Windows kill only descendants of this launched PID, not other
     # independent Edge windows. Prevent orphan one-shot scanner publishing.
     if os.name == 'nt':
         result = subprocess.run(['taskkill', '/PID', str(process.pid), '/T', '/F'],
-                                capture_output=True, timeout=20, check=False)
+                                capture_output=True, timeout=20, check=False, **_no_window())
         if result.returncode not in (0, 128, 255) and process.poll() is None:
             raise RuntimeError('Kunne ikke stoppe skannerens prosessgruppe')
     else:
