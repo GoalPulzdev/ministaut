@@ -36,4 +36,31 @@ for(const id of ['standSummary','legendAvailability','legendHeat'])assert.ok(ava
 const groups=['SA RA QA PA OA NA MA Q P O N RB QB PB OB NB MB','LB KB JB IB HB K J I','AB BB CB DB EB FB GB A B C D E F G PRESSE AA BA CA DA EA FA GA','TA UA VA WA XA TB UB U VB V WB W XB'].flatMap(x=>x.split(' '));
 const fieldCodes=JSON.parse(html.match(/const STADIUM_CODES=(\[[^\n]+\])/)[1]);
 assert.deepEqual(groups.slice().sort(),fieldCodes.slice().sort(),'All 60 field codes must be assigned exactly once in stand summary');
+
+for(const name of ['Pepsi Max-tribunen','Adressa-tribunen','SpareBank 1-tribunen','Coop-tribunen']){
+ assert.ok(html.includes("name:'"+name+"'"),'Expected named tribune: '+name);
+}
+assert.match(html,/SAMMEN<br>FOR<br>ROSENBORG/);
+assert.match(html,/SISTE PROGNOSE · IKKE OPPDATERT/);
+// Regressions: a stale but recent snapshot may show its *historical*
+// forecast with a label; no snapshot older than 12 hours may do so.
+const modelBegin=js.indexOf('const PROJECTION_HORIZON_DAYS=');
+const modelEnd=js.indexOf('// Separate, deliberately linear',modelBegin);
+assert.ok(modelBegin>=0&&modelEnd>modelBegin);
+const context={
+ overdue: time => !time || Date.now()-Date.parse(time)>95*60000,
+ comparable: (a,b)=>!!(a&&b&&JSON.stringify([...(a.locked_fields||[])].sort())===JSON.stringify([...(b.locked_fields||[])].sort()))
+};
+vm.runInNewContext(js.slice(modelBegin,modelEnd)+'\nthis.displayForecast=displayedForecast;',context);
+const now=Date.now();
+const kick=new Date(now+5*86400000).toISOString();
+const readings=(ageHours)=>Array.from({length:20},(_,i)=>({
+ observed_at:new Date(now-(ageHours+19-i)*3600000).toISOString(),
+ available_seated:4100-i*18,
+ locked_fields:[]
+}));
+assert.equal(context.displayForecast(readings(.5),kick).stale,false,'Fresh data should yield live projection');
+assert.equal(context.displayForecast(readings(3),kick).stale,true,'Recent stale data should yield labeled historical projection');
+assert.notEqual(context.displayForecast(readings(13),kick).status,'projected','Very old data must not be projected');
+
 console.log('V2 structure OK: '+ids.length+' IDs, '+colors.length+' palette values, JS syntax valid, V1 preserved.');
