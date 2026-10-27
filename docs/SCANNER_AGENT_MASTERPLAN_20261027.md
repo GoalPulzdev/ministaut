@@ -14,7 +14,7 @@ Utvikle **ett robust Windows-program som overvåker flere billettkamper parallel
 | `scanner/` | Eksisterende Lerkendal-kode i `main`; V20/V21-baserte skript, V19.1 dokumentert fungerende som stabil lokal baseline | Les, test og bruk som referanse; ikke modifiser den aktive skannermotoren i første fase |
 | Lerkendal herrekamp A | Samme `scanner/`-motor, egen `checkout`/`event_key` | Separat jobb og historikk, **ikke** ny kopi av motorkoden |
 | Lerkendal herrekamp B / cup | Samme motor dersom kart og feltmodell er Lerkendal; eksakt kamp-ID og lokale avvik må verifiseres på aktiv PC | Separat jobb og historikk; ikke anta at cup er særskilt arenaadapter |
-| Koteng Arena | Verifisert V1.8-motor pakket som V2.4 for ny skjerm; **original ZIP er vedlagt i samtalen**, ikke komplett i `main` før lokal import | Importer via `tools/import_koteng_v24_to_repo.py` til `baselines/koteng/v2.4/` med SHA-kontroll og legg inn absolutt alle godkjente kildefiler, testfiler og referansebilder |
+| Koteng Arena | Verifisert V1.8-motor pakket som V2.4 for ny skjerm; **komplett i `main` siden PR #28** (42 originale filer, låst profil, PNG-referanser og SHA-manifest) | Bruk eksisterende `baselines/koteng/v2.4/` direkte som låst referanse; verifiser mot faktisk kjørende Windows-installasjon og kjør de 60 lokale Koteng-testene |
 | Frontend | `web/` og Vercel-produksjon | Må ikke endres før datakontrakt, testmiljø og regressjonskontroll er på plass |
 | Supabase | Egen `ministaut-ingest` for Lerkendal, `ministaut-koteng-ingest` for Koteng; separate tabeller/policies | Ikke kjør migreringer eller endre produksjonsdata under inventar- og kodenormalisering |
 
@@ -156,4 +156,4 @@ Offentlig publikumsmetrikk = **antall sitteplasser observerbart tilgjengelig å 
 ## 10. Rapportering fra agenten
 Ved hver PR: (1) kode som er endret, (2) hvilke baselines som ble brukt, (3) faktisk kjørt testkommando + resultat, (4) hvilke scenarioer som er kun simulert, (5) Edge-skjermbilder/diagnostikk **lagret lokalt**, (6) ingen produksjonsendringer uten tillatelse, (7) ytelsestall, (8) kjente begrensninger, (9) rollback.
 
-**Startoppgave for lokal agent:** Kun Fase 0: verifiser ZIP SHA, importer kildefilene, hent/sammenlign alle lokale skannermapper, dokumenter versjoner og kjør tester. Ikke redesign grensesnitt, endre skannemotor eller Supabase ennå.
+**Startoppgave for lokal agent:** Kun Fase 0: hent allerede arkivert Koteng V2.4 fra Git, sammenlign alle lokale skannermapper mot baselines, dokumenter versjoner og kjør tester. Ikke redesign grensesnitt, endre skannemotor eller Supabase ennå.
