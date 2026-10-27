@@ -766,6 +766,52 @@ body{background:#070707}
 }
 @media(max-width:480px){.insight-details .insight-records{grid-template-columns:1fr}}
 </style>
+<style>
+/* V2 visual QA: make stadium and RBK crest as legible as the approved reference. */
+.hero{
+  isolation:isolate;
+  min-height:335px;
+  overflow:hidden;
+}
+.hero::before{
+  opacity:1;
+  filter:grayscale(1) brightness(1.65) contrast(1.1);
+  background-position:center 47%;
+}
+.hero::after{
+  background:
+    linear-gradient(90deg,#050505f9 0%,#060606e8 19%,#070707bb 36%,#07070750 56%,#07070715 78%,#05050526 100%),
+    linear-gradient(0deg,#050505e6 0%,transparent 24%,transparent 78%,#05050520 100%);
+}
+.hero-watermark{
+  right:13.5%;top:62px;
+  width:clamp(180px,19vw,282px);
+  height:clamp(180px,19vw,282px);
+  opacity:.84;
+  filter:grayscale(1) contrast(1.32) brightness(2.2) drop-shadow(0 6px 20px #000c);
+}
+.hero-watermark img{width:100%;height:100%;object-fit:contain}
+.hero-caption{
+  right:37px;top:41px;bottom:auto;
+  color:#f7f7f7;
+  font-size:12px;font-weight:740;
+  line-height:1.48;letter-spacing:.09em;
+  max-width:120px;text-align:left;
+  text-shadow:0 2px 12px #000;
+  padding-bottom:15px;
+  border-bottom:2px solid #d4b371;
+}
+@media(max-width:900px){
+  .hero-watermark{right:10%;top:79px;width:170px;height:170px;opacity:.66}
+  .hero-caption{right:22px;top:35px;font-size:10px}
+}
+@media(max-width:700px){
+  .hero::after{background:linear-gradient(90deg,#050505ee,#0505058c 65%,#05050555),linear-gradient(0deg,#050505c7,transparent 48%)}
+  .hero-watermark{right:5%;top:77px;width:115px;height:115px;opacity:.38}
+  .hero-caption{top:20px;right:20px;font-size:9px;max-width:92px}
+}
+@media(max-width:410px){.hero-caption{display:none}}
+</style>
 </head>
 <body>
 <main class="wrap">
@@ -780,7 +826,7 @@ body{background:#070707}
     <h1 id="page-title">Følg billettsalget<br>til <em>Rosenborg.</em></h1>
     <p id="teamDescription">Se hvor mange sitteplasser som er ledige, og hvordan det endrer seg fram mot avspark. Finn din plass på tribunen.</p>
     <div class="hero-controls"><a class="premium-cta" href="#matchCards">Se kommende kamper &nbsp; →</a><a class="premium-ghost" href="#match-details">Se billettutviklingen</a></div>
-    <span class="hero-caption">LERKENDAL · TRONDHEIM<br>EN BY. ETT LAG.</span>
+    <span class="hero-caption">SAMMEN<br>FOR<br>ROSENBORG</span>
     <div class="hero-watermark" aria-hidden="true"><img src="https://cdn.sportmonks.com/images/soccer/teams/23/1335.png" alt=""></div>
   </section>
   <nav class="team-selector" aria-label="Velg lag">
@@ -1639,7 +1685,7 @@ function drawStadiumMap(rows,scan){
   ['PEPSI MAX',stadiumFrame.centerX,stadiumFrame.northEdge-166],
   ['COOP',coopStand.upperX+coopStand.upperW/2,pitchBox.y-11],
   ['SPAREBANK 1',stadiumFrame.centerX,stadiumFrame.southEdge+187],
-  ['ØST',pitchBox.x+pitchBox.w+106,pitchBox.y+5]
+  ['ADRESSA',pitchBox.x+pitchBox.w+106,pitchBox.y+5]
  ];
  labels.forEach(([t,x,y])=>svg.append(svgEl('text',{x,y,'text-anchor':'middle',fill:'#dec48d','font-size':14,'font-weight':800,'letter-spacing':1.3},t)));
  // Tiny VIP label above the distinct Coop VIP band; seat fills remain data-driven.
@@ -1687,10 +1733,10 @@ function activateStadiumSection(code){
 }
 // Supporter-facing stand totals use only verified seated section records.
 const STAND_GROUPS=[
- {name:'Nordre tribune',codes:'SA RA QA PA OA NA MA Q P O N RB QB PB OB NB MB'.split(' ')},
- {name:'Østre tribune',codes:'LB KB JB IB HB K J I'.split(' ')},
- {name:'Søndre tribune',codes:'AB BB CB DB EB FB GB A B C D E F G PRESSE AA BA CA DA EA FA GA'.split(' ')},
- {name:'Vestre tribune',codes:'TA UA VA WA XA TB UB U VB V WB W XB'.split(' ')}
+ {name:'Pepsi Max-tribunen',codes:'SA RA QA PA OA NA MA Q P O N RB QB PB OB NB MB'.split(' ')},
+ {name:'Adressa-tribunen',codes:'LB KB JB IB HB K J I'.split(' ')},
+ {name:'SpareBank 1-tribunen',codes:'AB BB CB DB EB FB GB A B C D E F G PRESSE AA BA CA DA EA FA GA'.split(' ')},
+ {name:'Coop-tribunen',codes:'TA UA VA WA XA TB UB U VB V WB W XB'.split(' ')}
 ];
 function renderStandSummary(rows){
  const target=$('standSummary');target.replaceChildren();
