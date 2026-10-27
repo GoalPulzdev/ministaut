@@ -68,8 +68,6 @@ class Job:
             raise ValueError('Stopp før avspark må være 0–180 minutter')
         if not self.scanner_path or '\x00' in self.scanner_path:
             raise ValueError('Skannermappe kreves')
-        if self.profile == 'koteng_v24' and self.key != '6aaceecebfe408c38e1712dd':
-            raise ValueError('Koteng V2.4-profilen er låst til Rosenborg–Røa; annen kamp trenger ny godkjenning')
         if self.profile == 'koteng_v24' and self.venue != 'koteng_arena':
             raise ValueError('Koteng-motoren kan ikke kjøres på en annen arena')
         if self.profile in ('lerkendal_legacy', 'lerkendal_v23') and self.venue != 'lerkendal':

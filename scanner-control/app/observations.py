@@ -43,7 +43,7 @@ def lerkendal_report(report: Path) -> dict:
         raise RuntimeError('Lerkendal-adapteren skrev ingen kontrollrapport') from exc
 
 
-def verified_lerkendal(job: Job, scanner_dir: Path, report: Path) -> dict:
+def verified_lerkendal(job: Job, scanner_dir: Path, report: Path, engines: Path | None = None) -> dict:
     rep = lerkendal_report(report)
     if rep.get('event_key') != job.key or rep.get('accepted') is not True or not rep.get('output_dir'):
         raise RuntimeError('Adapteren godkjente ikke målingen: ' + str(rep.get('reason') or 'ukjent'))
@@ -59,6 +59,38 @@ def verified_lerkendal(job: Job, scanner_dir: Path, report: Path) -> dict:
         raise RuntimeError('Feil kamp eller ufullstendig feltdekning i resultatet')
     if data['observed_at'] != rep.get('time_utc') or data['available_seated'] != rep.get('available_seated'):
         raise RuntimeError('Kontrollrapport og resultat stemmer ikke overens')
+    data['diagnostic'] = str(source)
+    return data
+
+
+VALIDATE_KOTENG = '''import json,sys
+from pathlib import Path
+sys.path.insert(0,sys.argv[1]);sys.path.insert(1,'.')
+from koteng_once import install_multi_event
+_,_,s=install_multi_event(sys.argv[2])
+p=s.build_payload(Path(sys.argv[3]))
+print(json.dumps({'run_id':p['source_run_id'],'observed_at':p['observed_at'],
+ 'available_seated':p['available_seated'],'sections':p['sections'],
+ 'event_key':p['event_key'],'quality_status':p['quality_status']}))
+'''
+
+
+def verified_koteng(job: Job, scanner_dir: Path, report: Path, engines: Path) -> dict:
+    rep = lerkendal_report(report)
+    if rep.get('event_key') != job.key or rep.get('accepted') is not True or not rep.get('diagnostic'):
+        raise RuntimeError('Adapteren godkjente ikke målingen: ' + str(rep.get('reason') or 'ukjent'))
+    source = Path(rep['diagnostic'])
+    p = subprocess.run([interpreter_for(scanner_dir), '-c', VALIDATE_KOTENG, str(engines), job.key, str(source)],
+                       cwd=str(scanner_dir), text=True, stdout=subprocess.PIPE,
+                       stderr=subprocess.PIPE, timeout=35, check=False, **no_window())
+    if p.returncode != 0:
+        raise RuntimeError('Skannerens profil-/kvalitetskontroll avviste rapporten')
+    try:data=json.loads(p.stdout.strip())
+    except (ValueError, TypeError) as e:raise RuntimeError('Skannerens diagnostikk kunne ikke tolkes') from e
+    if data['event_key']!=job.key or data['quality_status']!='LOCKED_LOCAL_VERIFIED' or len(data['sections'])!=6:
+        raise RuntimeError('Ugyldig kamp eller feltantall i diagnostikk')
+    if data['available_seated'] != rep.get('available_seated'):
+        raise RuntimeError('Kontrollrapport og diagnostikk stemmer ikke overens')
     data['diagnostic'] = str(source)
     return data
 

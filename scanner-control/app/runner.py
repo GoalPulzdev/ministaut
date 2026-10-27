@@ -38,6 +38,12 @@ SEND_LERKENDAL = ('import sys;from pathlib import Path;sys.path.insert(0,".");'
                   'from sync_ministaut import prepare,send;'
                   'a=send(prepare(Path(sys.argv[1])));print("Registrert:",a.get("scan_id",""))')
 
+# Koteng: same payload as sync_koteng, with the per-match identity from koteng_once.
+SEND_KOTENG = ('import sys;from pathlib import Path;sys.path.insert(0,sys.argv[1]);sys.path.insert(1,".");'
+               'from koteng_once import install_multi_event;_,_,s=install_multi_event(sys.argv[2]);'
+               'send=getattr(s,"send",None) or s.submit;a=send(s.build_payload(Path(sys.argv[3])));'
+               'print("Registrert:",a.get("scan_id",""))')
+
 OUTBOX_MAX_ATTEMPTS = 8
 OUTBOX_MAX_AGE = timedelta(hours=6)
 
@@ -79,8 +85,14 @@ def command(job: Job, base: Path, python: str | None = None,
                     'koteng_profile.json', 'ankerpunkter_koteng.json', 'sync_koteng.py')
         if not all((home / p).is_file() for p in expected):
             raise FileNotFoundError('Koteng V2.4 er ikke komplett i ' + str(home))
-        # Never --upload: publication goes through the outbox after verification.
-        return ([exe, str(home / 'hourly_koteng.py'), '--once'], home, False)
+        # engines/koteng_once.py: any approved match on the sealed stadium lock;
+        # never uploads itself, publication goes through the outbox.
+        wrapper = Path(base) / 'engines' / 'koteng_once.py'
+        if not wrapper.is_file():
+            raise FileNotFoundError('Mangler ' + str(wrapper))
+        if report is None:
+            raise ValueError('Koteng trenger en rapportfil')
+        return ([exe, str(wrapper), '--url', job.url, '--report', str(report)], home, False)
     if job.profile == 'lerkendal_v23':
         expected = ('hurtigkart.py', 'publication.py', 'sync_ministaut.py', 'match_config.py',
                     'verified_navigation.py', 'stadion_felt.json')
@@ -102,6 +114,20 @@ def command(job: Job, base: Path, python: str | None = None,
         return ([exe, str(home / 'hurtigkart.py'), '--url', job.url,
                  '--auto-hours', str(job.interval_minutes / 60), '--port', '9222'], home, True)
     raise ValueError('Ukjent skannermotor')
+
+
+def register_koteng(job: Job, base: Path):
+    """Operator approval of a Koteng match: the engine refuses matches not listed here."""
+    import json
+    path = job.path(base) / 'godkjente_kamper.json'
+    try:
+        data = json.loads(path.read_text(encoding='utf-8'))
+    except (OSError, ValueError):
+        data = {}
+    data[job.key] = {'venue_id': 'koteng_arena', 'label': job.label, 'kickoff_at': job.kickoff_at,
+                     'approved_by': 'scanner_control_operator', 'approved_at': now_iso(), 'ticket_category': 'ukjent'}
+    if path.parent.is_dir():
+        path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
 
 
 def schedule_after(job: Job, failures: int, time: datetime) -> str:
@@ -168,6 +194,8 @@ class Controller:
         if exists and original_key is None:
             raise ValueError('Kampen finnes allerede i listen')
         self.store.put_job(job)
+        if job.profile == 'koteng_v24':
+            register_koteng(job, self.base)
         # Edits always land deactivated: the operator re-enables deliberately.
         self.store.set_due(job.key, None, OFF if exists else READY)
 
@@ -207,7 +235,7 @@ class Controller:
             raise RuntimeError(f'Bare én {NAMES[job.profile]}-skanning kan kjøre om gangen på denne PC-en')
         guard = self.lock_path(job.key)
         report = (self.base / 'state' / 'runs' / f"{job.key}-{now.strftime('%Y%m%dT%H%M%SZ')}.json"
-                  if job.profile == 'lerkendal_v23' else None)
+                  if job.profile in ONE_SHOT else None)
         command_args, cwd, interactive = command(job, self.base, report=report)
         try:
             acquire(guard, event=job.key)
@@ -306,7 +334,7 @@ class Controller:
             status, summary = active.stop_reason, {KICKOFF: 'Stoppet ved avspark.',
                                                    TIMEOUT: 'Stoppet etter tidsavbrudd. Målingen er forkastet.'
                                                    }.get(active.stop_reason, 'Stoppet av operatør. Målingen er forkastet.')
-        elif code == 4 and job.profile == 'lerkendal_v23':
+        elif code == 4 and job.profile in ONE_SHOT:
             from .observations import lerkendal_report
             try:
                 reason = lerkendal_report(active.report).get('reason') or 'ukjent årsak'
@@ -315,9 +343,9 @@ class Controller:
             status, summary = REJECTED, 'Ikke publiserbar: ' + reason
         elif code == 0 and job.profile in ONE_SHOT:
             try:
-                from .observations import verified_new_report, verified_lerkendal
-                result = (verified_lerkendal(job, job.path(self.base), active.report) if job.profile == 'lerkendal_v23'
-                          else verified_new_report(job, job.path(self.base), active.previous_reports))
+                from .observations import verified_koteng, verified_lerkendal
+                verify = verified_lerkendal if job.profile == 'lerkendal_v23' else verified_koteng
+                result = verify(job, job.path(self.base), active.report, self.base / 'engines')
                 self.store.observation(result, job.upload)
                 status, summary = VERIFIED, f"Bekreftet lokalt: {result['available_seated']} ledige i {len(result['sections'])} felt."
                 if job.upload and self.store.enqueue(result, result['diagnostic']):
@@ -376,7 +404,8 @@ class Controller:
         if job.profile == 'lerkendal_v23':
             sync, args = home / 'sync_ministaut.py', ['-c', SEND_LERKENDAL, row['diagnostic']]
         else:
-            sync, args = home / 'sync_koteng.py', [str(home / 'sync_koteng.py'), row['diagnostic'], '--send']
+            sync, args = home / 'sync_koteng.py', ['-c', SEND_KOTENG, str(self.base / 'engines'),
+                                                   row['event_key'], row['diagnostic']]
         if not sync.is_file() or not Path(row['diagnostic']).is_file():
             self.store.outbox_done(row['id'], 'forkastet', 'Måling eller ' + sync.name + ' mangler')
             return

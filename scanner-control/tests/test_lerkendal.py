@@ -86,6 +86,7 @@ class ControllerLerkendal(unittest.TestCase):
         k=self.base/'koteng';k.mkdir()
         for n in ('hourly_koteng.py','koteng_scanner.py','profile_lock.py','koteng_profile.json','ankerpunkter_koteng.json','sync_koteng.py'):
             (k/n).write_text('stub',encoding='utf-8')
+        (self.base/'engines'/'koteng_once.py').write_text('stub',encoding='utf-8')
         kj=Job('6aaceecebfe408c38e1712dd','Rosenborg – Røa','RBK Kvinner','koteng_arena','https://billett.rbk.no/checkout/6aaceecebfe408c38e1712dd',
                (datetime.now(timezone.utc)+timedelta(days=3)).isoformat(),'koteng_v24',str(k))
         self.store.put_job(kj)

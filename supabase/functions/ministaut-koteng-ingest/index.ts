@@ -2,7 +2,8 @@ import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.95.0';
 const admin=createClient(Deno.env.get('SUPABASE_URL')!,Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,{auth:{persistSession:false}});
 const capacities:Record<string,number>={'VIP':71,'FELT-1':49,'FELT-2':160,'FELT-3':120,'FELT-4':152,'FELT-5':49};
-const EVENT='6aaceecebfe408c38e1712dd';
+// Any registered Koteng match (ministaut_koteng_matches.event_key); all scans share the sealed stadium profile.
+const EVENT_KEY=/^[A-Za-z0-9_-]{8,100}$/;
 const json=(status:number,value:unknown)=>new Response(JSON.stringify(value),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
 const deny=(reason:string)=>json(422,{error:reason});
 Deno.serve(async req=>{
@@ -14,7 +15,8 @@ Deno.serve(async req=>{
   if(authError||!identity)return json(401,{error:'Unauthorized'});
   const p=await req.json().catch(()=>null);
   if(!p||typeof p!=='object')return deny('Invalid JSON');
-  if(p.event_key!==EVENT||p.venue_id!=='koteng_arena'||p.profile_version!=='koteng-v1.8-geometry-locked-20261026')return deny('Unknown event, stadium or locked profile');
+  const eventKey=String(p.event_key||'');
+  if(!EVENT_KEY.test(eventKey)||p.venue_id!=='koteng_arena'||p.profile_version!=='koteng-v1.8-geometry-locked-20261026')return deny('Unknown event, stadium or locked profile');
   if(p.quality_status!=='LOCKED_LOCAL_VERIFIED'||p.two_read_coverage_complete!==true||p.local_seated_coverage_verified!==true||p.lock_integrity_verified!==true)return deny('Unverified local scan');
   if(p.public_approved!==false||p.reading_status!=='pending')return deny('Only pending scans accepted');
   if(!/^[A-Za-z0-9_.:-]{8,160}$/.test(String(p.source_run_id||'')))return deny('Invalid run ID');
@@ -28,8 +30,8 @@ Deno.serve(async req=>{
     seen.add(s.section);total+=s.free;
   }
   if(total!==p.available_seated||p.reference_capacity_seated!==601)return deny('Total mismatch');
-  const {data:match,error:matchErr}=await admin.from('ministaut_koteng_matches').select('id,is_published').eq('event_key',EVENT).single();
-  if(matchErr||!match||match.is_published!==true)return json(503,{error:'Event not published'});
+  const {data:match,error:matchErr}=await admin.from('ministaut_koteng_matches').select('id,is_published,venue_id').eq('event_key',eventKey).maybeSingle();
+  if(matchErr||!match||match.venue_id!=='koteng_arena'||match.is_published!==true)return json(503,{error:'Event not published'});
   const {data:existing}=await admin.from('ministaut_koteng_scans').select('id,available_seated,observed_at,reading_status').eq('match_id',match.id).eq('source_run_id',p.source_run_id).maybeSingle();
   if(existing){
     if(existing.available_seated!==total||Date.parse(existing.observed_at)!==observed)return deny('Run ID collision');

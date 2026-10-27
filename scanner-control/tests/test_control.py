@@ -25,6 +25,8 @@ def sample(base,**kw):
     p.mkdir(exist_ok=True)
     for name in ('hourly_koteng.py','koteng_scanner.py','profile_lock.py','koteng_profile.json','ankerpunkter_koteng.json','sync_koteng.py'):
         (p/name).write_text('stub',encoding='utf-8')
+    (base/'engines').mkdir(exist_ok=True)
+    (base/'engines'/'koteng_once.py').write_text('stub',encoding='utf-8')
     job=Job(EVENT,'Rosenborg Røa','RBK Kvinner','koteng_arena',URL,
             (datetime.now(timezone.utc)+timedelta(days=3)).isoformat(),
             'koteng_v24',str(p))
@@ -81,7 +83,10 @@ class ModelTests(unittest.TestCase):
     def test_profile_locks_event(self):
         with tempfile.TemporaryDirectory() as td:
             j=sample(Path(td))
-            with self.assertRaises(ValueError):replace(j,key='6a9a7e3f3f93920b289b0675',url='https://billett.rbk.no/checkout/6a9a7e3f3f93920b289b0675')
+            # V0.2: any approved Koteng match (stadium lock, not match lock); key and URL must agree
+            other=replace(j,key='6ac390963b28cba4d656278f',url='https://billett.rbk.no/checkout/6ac390963b28cba4d656278f')
+            self.assertEqual(other.venue,'koteng_arena')
+            with self.assertRaises(ValueError):replace(j,key='6ac390963b28cba4d656278f')
             with self.assertRaises(ValueError):replace(j,venue='lerkendal')
             with self.assertRaises(ValueError):replace(j,interval_minutes=5)
             with self.assertRaises(ValueError):replace(j,stop_before_minutes=-1)
@@ -109,11 +114,11 @@ class ModelTests(unittest.TestCase):
     def test_command_never_uploads(self):
         with tempfile.TemporaryDirectory() as td:
             base=Path(td);j=sample(base)
-            cmd,cwd,interactive=command(j,base,python='fakepy')
-            self.assertEqual(cmd[:2],['fakepy',str(cwd/'hourly_koteng.py')])
-            self.assertIn('--once',cmd);self.assertNotIn('--upload',cmd)
+            cmd,cwd,interactive=command(j,base,python='fakepy',report=base/'r.json')
+            self.assertEqual(cmd[:2],['fakepy',str(base/'engines'/'koteng_once.py')])
+            self.assertIn(URL,cmd);self.assertNotIn('--upload',cmd);self.assertNotIn('--send',cmd)
             self.assertFalse(interactive)
-            self.assertNotIn('--upload',command(replace(j,enabled=True,upload=True),base,'python')[0])
+            self.assertNotIn('--upload',command(replace(j,enabled=True,upload=True),base,'python',report=base/'r.json')[0])
 
 class LockTests(unittest.TestCase):
     def test_own_pid_alive_dead_pid_not(self):
@@ -156,7 +161,7 @@ class ControllerTests(unittest.TestCase):
 
     def finish_scan(self,result=None,code=0,when=None):
         self.procs[-1].code=code
-        with mock.patch('app.observations.verified_new_report',return_value=result or verified()):
+        with mock.patch('app.observations.verified_koteng',return_value=result or verified()):
             self.ctrl.poll(when)
 
     def test_initially_off_and_opt_in(self):
@@ -184,7 +189,7 @@ class ControllerTests(unittest.TestCase):
     def test_bad_report_rejected(self):
         self.ctrl.start(self.job,force=True)
         self.procs[0].code=0
-        with mock.patch('app.observations.verified_new_report',side_effect=ValueError('bad signature')):
+        with mock.patch('app.observations.verified_koteng',side_effect=ValueError('bad signature')):
             self.ctrl.poll()
         self.assertEqual(self.store.state(EVENT)['last_status'],'feil')
         self.assertIsNone(self.store.latest(EVENT))
@@ -247,7 +252,7 @@ class ControllerTests(unittest.TestCase):
         self.assertEqual(self.store.state(EVENT)['last_status'],runner.QUEUED)
         # the same poll started the sender
         sender=self.procs[-1]
-        self.assertEqual(sender.args[0][1:],[str(self.job.path(self.base)/'sync_koteng.py'),str(diag),'--send'])
+        self.assertEqual(sender.args[0][1:],['-c',runner.SEND_KOTENG,str(self.base/'engines'),EVENT,str(diag)])
         self.assertEqual(self.store.outbox_counts(),{'sender':1})
         sender.code=0;self.ctrl.poll()
         self.assertEqual(self.store.outbox_counts(),{'sendt':1})
