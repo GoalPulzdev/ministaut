@@ -1,0 +1,1344 @@
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0a110d">
+  <meta name="description" content="Følg billettpulsen før Rosenborgs hjemmekamper. Velg kamp, se utviklingen og finn din plass på Lerkendal.">
+  <title>Ministaut · RBK og RBK Kvinner</title>
+  <style>
+
+:root {
+  color-scheme: dark;
+  --page: #09150e;
+  --panel: #142619;
+  --panel-deep: #102016;
+  --panel-active: #1a3a27;
+  --stroke: #314e3b;
+  --stroke-strong: #7cbd8d;
+  --ink: #f5f9f4;
+  --secondary: #bbd0bf;
+  --subtle: #9eb8a5;
+  --mint: #b6f0c1;
+  --accent: #96e2ab;
+  --warm: #f6ddaa;
+  --radius: 18px;
+  --ease: cubic-bezier(.22,1,.36,1);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  min-width: 320px;
+  background: radial-gradient(ellipse 52% 33% at 91% -10%, #2c65412b, transparent 80%), var(--page);
+  color: var(--ink);
+  font: 16px/1.5 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+button, a { -webkit-tap-highlight-color: transparent; }
+button { font: inherit; }
+button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
+  outline: 3px solid #e4ffcb;
+  outline-offset: 4px;
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding: 24px 28px 56px; }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.brand { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; font-size: 12px; font-weight: 870; letter-spacing: .135em; }
+.slash { color: var(--accent); }
+.independent { font-size: 10px; padding: 5px 7px; border: 1px solid #36523f; border-radius: 6px; font-weight: 700; letter-spacing: .04em; color: #b4c6b8; }
+.team-mark { flex: none; width: 50px; height: 50px; display: grid; place-items: center; background: #f2f5ee; border-radius: 12px; padding: 6px; }
+.team-mark img { width: 100%; height: 100%; object-fit: contain; }
+.hero { margin: 34px 0 30px; max-width: 710px; }
+.overline { color: var(--accent); font-size: 12px; font-weight: 830; line-height: 1.35; letter-spacing: .125em; text-transform: uppercase; }
+.hero .overline { display: flex; align-items: center; gap: 10px; }
+.pulse-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: #a8f5b8; box-shadow: 0 0 0 4px #83d89920, 0 0 18px #74daa977; }
+.hero h1 { max-width: 670px; margin: 10px 0 11px; font-size: clamp(35px, 4.15vw, 54px); line-height: 1.065; letter-spacing: -.054em; font-weight: 840; text-wrap: balance; }
+.hero p { max-width: 650px; margin: 0; color: var(--secondary); font-size: clamp(15px, 1.5vw, 16px); line-height: 1.65; }
+.section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+.section-title { margin: 0; font-size: 20px; font-weight: 790; line-height: 1.2; letter-spacing: -.03em; }
+.section-help { color: var(--subtle); font-size: 13px; }
+.match-list { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.match-tile {
+  min-width: 0; min-height: 163px; border-radius: var(--radius);
+  display: flex; flex-direction: column; justify-content: space-between; gap: 12px;
+  padding: 20px 21px; position: relative; overflow: hidden; cursor: pointer;
+  color: var(--ink); background: var(--panel-deep); text-align: left;
+  border: 1px solid var(--stroke);
+  transition: background-color .24s var(--ease), border-color .24s var(--ease), box-shadow .24s var(--ease), transform .24s var(--ease);
+}
+.match-tile::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: transparent; transition: background-color .24s; }
+.match-tile:hover { transform: translateY(-2px); border-color: #668e6e; background: #172d1e; }
+.match-tile:active { transform: translateY(0); }
+.match-tile[aria-pressed="true"] { border-color: var(--stroke-strong); background: var(--panel-active); box-shadow: 0 0 0 1px #a4deb01d, 0 12px 28px #00000026; }
+.match-tile[aria-pressed="true"]::before { background: var(--mint); }
+.tile-top { display: flex; align-items: center; justify-content: space-between; gap: 9px; color: var(--secondary); font-size: 13px; line-height: 1.35; }
+.tile-pill { flex: none; border: 1px solid #5a7b61; padding: 5px 10px; border-radius: 999px; font-size: 11px; font-weight: 820; color: #c5e0ca; letter-spacing: .055em; line-height: 1.4; }
+.match-tile[aria-pressed="true"] .tile-pill { background: #c8f5cd; color: #0c2414; border-color: #c8f5cd; }
+.tile-matchup { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.tile-title { min-width: 0; overflow-wrap: anywhere; font-weight: 825; letter-spacing: -.027em; font-size: clamp(19px, 2.2vw, 24px); line-height: 1.22; }
+.tile-opponent { flex: none; display: grid; place-items: center; width: 39px; height: 39px; padding: 5px; background: #f6f8f3; border-radius: 10px; }
+.tile-opponent[hidden] { display: none; }
+.tile-opponent img { width: 100%; height: 100%; object-fit: contain; }
+.tile-bottom { display: grid; grid-template-columns: minmax(0,1fr) 92px; grid-template-areas: "number spark" "meta meta"; align-items: end; gap: 5px 8px; }
+.tile-summary { grid-area: number; min-width: 0; display: flex; align-items: baseline; flex-wrap: wrap; gap: 7px; }
+.tile-value { font-size: clamp(27px, 3.1vw, 32px); font-weight: 850; line-height: 1; letter-spacing: -.045em; color: #d9fddd; font-variant-numeric: tabular-nums; }
+.tile-unit { color: var(--secondary); font-size: 13px; }
+.tile-spark { grid-area: spark; align-self: end; justify-self: end; display: block; width: 92px; height: 34px; }
+.tile-spark svg { width: 100%; height: 100%; display: block; }
+.tile-foot { grid-area: meta; color: var(--subtle); font-size: 12px; line-height: 1.4; overflow-wrap: break-word; }
+.match-tile[data-stale="true"] .tile-foot { color: #dac69e; }
+.results { scroll-margin-top: 16px; margin-top: 34px; }
+.details-head { display: flex; justify-content: space-between; align-items: end; gap: 18px; margin-bottom: 15px; }
+.details-head h2 { margin: 6px 0 5px; font-size: clamp(23px,2.8vw,29px); font-weight: 780; letter-spacing: -.035em; line-height: 1.18; }
+.details-head p { margin: 0; color: var(--secondary); font-size: 13px; }
+.actions { display: flex; align-items: center; justify-content: end; flex-wrap: wrap; gap: 9px; }
+.badge {
+  max-width: 100%; display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 12px; border: 1px solid #375640; border-radius: 999px;
+  color: #bddcc3; background: #13271a; font-size: 12px;
+  font-variant-numeric: tabular-nums; line-height: 1.4;
+}
+.badge::before { content:""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: #91e0aa; box-shadow: 0 0 0 3px #8fda9b16; }
+.badge[data-stale="true"] { color: #e5cca8; border-color: #776349; background: #28231a; }
+.badge[data-stale="true"]::before { background: #e7bc7a; box-shadow: none; }
+.pill { min-width: 44px; min-height: 44px; border: 1px solid #517159; border-radius: 10px; padding: 11px 16px; font-size: 13px; font-weight: 740; background: #203628; color: #e8f6e8; cursor: pointer; transition: background-color .2s, border-color .2s, opacity .2s; }
+.pill:hover { background: #284632; border-color: #9fdfac; }
+.pill:disabled { cursor: wait; opacity: .6; }
+.summary { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,.8fr); gap: 14px; transition: opacity .2s var(--ease); }
+.summary[aria-busy="true"] { opacity: .65; }
+.card { min-width: 0; padding: 24px; border: 1px solid var(--stroke); border-radius: var(--radius); background: var(--panel); }
+.primary { display: flex; flex-direction: column; justify-content: center; min-height: 244px; background: linear-gradient(125deg,#204a30 0%,#173724 48%,#10251a 100%); border-color: #629a70; }
+.caption { color: #a2d8af; font-size: 12px; line-height: 1.35; letter-spacing: .11em; font-weight: 825; text-transform: uppercase; }
+.big { margin: 8px 0 5px; font-size: clamp(54px,6.7vw,79px); font-weight: 870; letter-spacing: -.063em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.primary .minor { margin-top: 0; }
+.minor { font-size: 13px; color: var(--secondary); }
+.pulse-message { margin: 17px 0 0; color: #def4de; font-size: 14px; line-height: 1.5; }
+.stack { display: grid; grid-template-rows: repeat(2,minmax(0,1fr)); border: 1px solid var(--stroke); border-radius: var(--radius); background: var(--panel); overflow: hidden; }
+.stack .small-card { display: flex; flex-direction: column; justify-content: center; padding: 22px 24px; background: transparent; border: 0; border-radius: 0; }
+.stack .small-card + .small-card { border-top: 1px solid var(--stroke); }
+.stack .small-card .minor { margin-top: 2px; }
+.value { color: var(--ink); font-size: clamp(28px,3.2vw,35px); line-height: 1.13; font-weight: 835; font-variant-numeric: tabular-nums; letter-spacing: -.042em; margin-top: 7px; }
+.value[data-direction="down"] { color: var(--warm); }
+.value[data-direction="up"] { color: #aaf2c0; }
+.value[data-direction="flat"] { color: var(--secondary); }
+.campaign-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; border: 1px solid #416b4c; border-radius: 15px; padding: 17px 20px; margin: 14px 0 0; background: #152c1c; }
+.ticket-link { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 13px 20px; border-radius: 10px; border: 1px solid #d6efc6; background: #d3efbb; color: #10291a; font-size: 14px; font-weight: 850; text-decoration: none; text-align: center; transition: background-color .2s, box-shadow .2s, transform .2s var(--ease); }
+.ticket-link:hover { transform: translateY(-1px); background: #e1f8cd; box-shadow: 0 8px 24px #9af1b02c; }
+.ticket-link:active { transform: translateY(0); }
+.campaign-copy { display: flex; flex-direction: column; gap: 2px; align-items: end; text-align: right; }
+.campaign-copy strong { font-size: 16px; font-weight: 825; }
+.campaign-copy span { color: var(--secondary); font-size: 13px; }
+.graph { margin-top: 16px; padding: 24px 26px 22px; }
+.graph-header { display: flex; justify-content: space-between; align-items: start; gap: 16px; }
+.graph-desc { margin: 5px 0 13px; font-size: 13px; color: var(--secondary); }
+.graph-count { flex: none; border: 1px solid #41644a; background: #203727; border-radius: 999px; padding: 6px 10px; color: #c2dec7; font-size: 12px; font-variant-numeric: tabular-nums; }
+.chart-wrap { min-height: 110px; }
+.chart-wrap.empty { display: grid; place-items: center; padding: 30px 0; font-size: 14px; color: var(--subtle); }
+.graph svg { display: block; width: 100%; height: auto; overflow: visible; touch-action: pan-y; cursor: crosshair; }
+.chart-wrap svg:focus-visible { outline-offset: 3px; }
+.chart-inspect { display: flex; flex-wrap: wrap; align-items: baseline; gap: 7px 22px; margin-top: 12px; padding: 13px 0 0; border-top: 1px solid #375340; font-variant-numeric: tabular-nums; }
+.inspect-timestamp { color: var(--secondary); font-size: 13px; font-weight: 650; }
+.inspect-value { font-size: 15px; font-weight: 845; color: var(--ink); }
+.inspect-delta { font-size: 13px; color: #b5cebb; }
+.fan-footer { margin-top: 23px; border-top: 1px solid #2e4736; padding-top: 16px; color: var(--subtle); font-size: 12px; line-height: 1.6; }
+#error { margin-top: 12px; font-size: 13px; color: #ffcfaf; }
+#error:empty { display: none; }
+@media(max-width:840px) {
+  .details-head { align-items: start; flex-direction: column; }
+  .actions { justify-content: start; }
+  .match-tile { padding: 18px; }
+  .summary { grid-template-columns: minmax(0,1.08fr) minmax(0,.92fr); }
+}
+@media(max-width:640px) {
+  .wrap { padding: 18px 16px calc(36px + env(safe-area-inset-bottom)); }
+  .top { gap: 12px; }
+  .brand { font-size: 11px; gap: 7px; }
+  .team-mark { width: 45px; height: 45px; }
+  .hero { margin: 27px 0 25px; }
+  .hero h1 { font-size: clamp(33px,8vw,44px); line-height: 1.08; }
+  .hero p { font-size: 15px; }
+  .section-heading { margin-bottom: 11px; }
+  .section-title { font-size: 19px; }
+  .section-help { display: none; }
+  .match-list { grid-template-columns: 1fr; gap: 11px; }
+  .match-tile { min-height: 143px; gap: 9px; padding: 16px 18px; }
+  .tile-top { font-size: 12px; }
+  .tile-title { font-size: 21px; }
+  .tile-opponent { width: 36px; height: 36px; }
+  .tile-value { font-size: 28px; }
+  .tile-spark { width: 86px; height: 32px; }
+  .tile-bottom { grid-template-columns: minmax(0,1fr) 86px; }
+  .results { margin-top: 29px; }
+  .details-head { gap: 11px; }
+  .details-head h2 { font-size: 23px; }
+  .actions { width: 100%; gap: 8px; }
+  .badge { font-size: 12px; flex: 1 1 auto; justify-content: center; }
+  .pill { padding: 11px 14px; }
+  .summary { grid-template-columns: 1fr; gap: 11px; }
+  .primary { min-height: 187px; }
+  .card { padding: 21px; }
+  .big { font-size: clamp(54px,12vw,70px); }
+  .stack { grid-template-columns: repeat(2,minmax(0,1fr)); grid-template-rows: auto; }
+  .stack .small-card { min-width: 0; min-height: 119px; padding: 15px 14px; }
+  .stack .small-card + .small-card { border-top: 0; border-left: 1px solid var(--stroke); }
+  .value { font-size: clamp(27px,7vw,33px); }
+  .caption { font-size: 11px; letter-spacing: .07em; }
+  .campaign-row { flex-direction: column; align-items: stretch; padding: 14px; gap: 12px; }
+  .ticket-link { width: 100%; }
+  .campaign-copy { align-items: center; text-align: center; }
+  .graph { padding: 19px 17px; }
+  .graph-header { gap: 9px; }
+  .graph-count { padding: 5px 8px; font-size: 11px; }
+  .chart-inspect { display: grid; grid-template-columns: 1fr; gap: 3px; }
+  .inspect-value { font-size: 15px; }
+}
+@media(max-width:365px) {
+  .independent { font-size: 9px; }
+  .tile-unit { font-size: 12px; }
+  .tile-summary { gap: 5px; }
+  .tile-title { font-size: 20px; }
+  .stack .small-card { padding: 14px 11px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  .match-tile:hover, .ticket-link:hover { transform: none; }
+}
+
+
+
+/* Kickoff scenario: separate visual treatment from observed, verified seats */
+.forecast-panel{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr);gap:18px;align-items:center;margin-top:16px;padding:22px 25px;background:linear-gradient(110deg,#183321,#102219);border:1px solid #476f4e;border-radius:16px}
+.forecast-eyebrow{font-size:11px;font-weight:850;letter-spacing:.14em;color:#a9d4b0}
+.forecast-lead h3{font-size:clamp(19px,2.4vw,24px);font-weight:790;line-height:1.2;letter-spacing:-.035em;margin:5px 0 7px}
+.forecast-lead p{font-size:13px;line-height:1.5;color:#aec3b0;margin:0;max-width:390px}
+.forecast-result{min-width:0;border-left:1px solid #416548;padding-left:22px;display:flex;flex-direction:column;gap:6px;justify-content:center}
+.forecast-label{color:#b8d3bd;font-size:11px;font-weight:800;letter-spacing:.1em}
+.forecast-number{font-size:clamp(20px,2.6vw,29px);line-height:1.2;letter-spacing:-.04em;color:#e6f4e5;overflow-wrap:anywhere}
+.forecast-range{font-size:12px;color:#bbcfbe;line-height:1.5}
+.forecast-panel[data-status="projected"]{border-color:#629573}
+.forecast-panel[data-status="unavailable"]{border-color:#4c5c4f}
+@media(max-width:640px){.forecast-panel{grid-template-columns:1fr;gap:15px;padding:18px 19px}.forecast-result{border-left:0;border-top:1px solid #416548;padding:13px 0 0}.forecast-lead h3{font-size:21px}.forecast-number{font-size:26px}}
+
+
+.chart-legend{display:flex;align-items:center;gap:18px;flex-wrap:wrap;color:#bbd3c0;font-size:12px;padding:1px 0 13px}
+.chart-legend[hidden]{display:none}
+.chart-legend span{display:flex;align-items:center;gap:7px}
+.chart-legend i{width:20px;height:0;border-top:3px solid #b6edc3;display:inline-block;flex:none}
+.chart-legend i.legend-projected{border-color:#f3cb82;border-top-style:dashed}
+.chart-legend i.legend-band{width:15px;height:12px;background:#f3cb8236;border:1px solid #f3cb8280;border-radius:3px}
+
+.daily-pulse{margin-top:13px;padding-top:11px;border-top:1px solid #49785a;color:#d7e8d6;font-size:13px;font-weight:650;line-height:1.5}
+.daily-pulse[data-trend="down"]{color:#f5dba9}
+.daily-pulse[data-trend="up"]{color:#b9eed0}
+@media(max-width:640px){.daily-pulse{font-size:12px}}
+
+.pulse-insights{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 18px;margin-top:13px;padding-top:10px;border-top:1px solid #49785a}
+.pulse-insights .daily-pulse{margin:0;padding:3px 0;border:0;flex:1 1 225px}
+@media(max-width:640px){.pulse-insights{gap:2px 0}.pulse-insights .daily-pulse{flex:1 1 100%;font-size:12px}}
+
+.sections-panel{margin-top:13px;padding:14px 16px}
+.sections-panel .section-title{font-size:17px;line-height:1.25;margin:0}
+.sections-panel .section-heading{display:flex;justify-content:space-between;align-items:center;gap:9px;flex-wrap:wrap}
+.sections-panel .section-help{font-size:11px;color:#acc7b2}
+.section-intro{color:#a9c0ae;font-size:11px;line-height:1.4;margin:4px 0 10px}
+.section-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:5px}
+.section-cell{min-width:0;min-height:61px;text-align:left;border:1px solid #3f644b;background:#192d20;border-radius:8px;padding:7px 8px;cursor:pointer;color:#f0f9f0;display:flex;flex-direction:column;gap:2px}
+.section-cell:hover,.section-cell:focus-visible{border-color:#c0ecc8;background:#24422f}
+.section-cell[aria-pressed="true"]{border-color:#c2f0c9;box-shadow:inset 0 0 0 1px #a2d6ac80}
+.section-code{font-size:10px;font-weight:800;color:#b0d6b8;letter-spacing:.03em}
+.section-free{font-size:18px;line-height:1.05;font-weight:800;font-variant-numeric:tabular-nums}
+.section-meta{font-size:10px;color:#b2c5b3;line-height:1.2}
+.section-cell[data-level="few"]{border-color:#ba8950;background:#352919}
+.section-cell[data-level="none"]{background:#312322;border-color:#955e5e}
+.section-detail{margin-top:8px;padding:8px 10px;border:1px solid #385943;border-radius:8px;background:#14261b;font-size:11px;color:#c5dfc9}
+.section-loading{font-size:12px;color:#b5cbb9}
+@media(max-width:640px){.sections-panel{padding:12px}.section-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.section-cell{padding:6px;min-height:59px}.section-free{font-size:17px}.section-meta{font-size:9px}}
+
+.stadium-map-shell{background:radial-gradient(ellipse at 50% 50%,#31594430,transparent 68%),#0a1b11;border:1px solid #3d6347;border-radius:15px;padding:12px;margin:10px 0 14px}
+.stadium-map{display:block;width:100%;height:auto;max-height:565px;overflow:visible}
+.stadium-map .seat-sector{cursor:pointer;stroke:#09170e;stroke-width:2;transition:filter .15s,stroke .15s,stroke-width .15s}
+.stadium-map .seat-sector:hover,.stadium-map .seat-sector:focus-visible{filter:brightness(1.22);stroke:#f3f9d6;stroke-width:3.8;outline:none}
+.stadium-map .seat-sector[aria-pressed="true"]{stroke:#ffffff;stroke-width:4;filter:brightness(1.12)}
+.stadium-map .seat-sector[data-level="ample"]{fill:#398b58}
+.stadium-map .seat-sector[data-level="some"]{fill:#b7b857}
+.stadium-map .seat-sector[data-level="few"]{fill:#d78938}
+.stadium-map .seat-sector[data-level="critical"]{fill:#d55a50}
+.stadium-map .seat-sector[data-level="none"]{fill:#4d5255}
+.stadium-map .seat-sector[data-level="locked"]{fill:#303b46;stroke-dasharray:4 3}
+.stadium-map .seat-sector[data-level="missing"]{fill:#263a2d;stroke-dasharray:3 3}
+.stadium-map .seat-label{font-size:10px;font-weight:850;fill:#fff;paint-order:stroke;stroke:#10251b;stroke-width:2px;text-anchor:middle;pointer-events:none}
+.map-legend{display:flex;gap:8px 15px;flex-wrap:wrap;padding:4px 3px 8px;color:#b8d2bc;font-size:11px}
+.map-key{display:inline-flex;align-items:center;gap:6px}.map-key i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.map-note{font-size:11px;color:#a9bfae;line-height:1.5;margin:7px 2px 0}
+.map-switch{display:flex;align-items:center;gap:8px;justify-content:space-between;margin:0 0 5px}
+.map-switch strong{font-size:12px;color:#dcf4df}
+.map-revision{display:inline-block;margin-left:8px;padding:3px 7px;border:1px solid #41895a;border-radius:6px;background:#183827;color:#bfffd1;font-size:9px;font-weight:900;vertical-align:middle;letter-spacing:.05em}
+@media(max-width:640px){.stadium-map-shell{padding:7px}.stadium-map .seat-label{font-size:10px}.map-legend{gap:7px 10px}}
+
+
+/* Stadium V3: clearer hierarchy and more legible tiers */
+.stadium-map-shell{background:radial-gradient(ellipse 60% 60% at 50% 55%,#1d433121,transparent 82%),linear-gradient(155deg,#102519,#091810);border-color:#43694c;padding:18px 20px 13px;border-radius:18px}
+.stadium-map{max-height:650px;filter:drop-shadow(0 14px 18px #00000040)}
+.stadium-map .seat-sector{stroke:#0a1c11;stroke-width:2.5;transition:filter .15s,stroke .15s,stroke-width .15s}
+.stadium-map .seat-sector:hover,.stadium-map .seat-sector:focus-visible{filter:brightness(1.3) drop-shadow(0 0 4px #befbc877);stroke:#e5ffd6;stroke-width:3.5}
+.stadium-map .seat-sector[aria-pressed="true"]{stroke:#ffffff;stroke-width:4;filter:drop-shadow(0 0 6px #bbffcd88)}
+.stadium-map .seat-label{font-size:10px;font-weight:900;fill:#fff;stroke:#122319;stroke-width:1.9px}
+.map-legend{border-top:1px solid #365540;margin-top:10px;padding:13px 0 7px}
+.section-detail{font-size:13px;padding:12px 14px;border-radius:10px}
+@media(max-width:640px){.stadium-map-shell{padding:10px 7px}.stadium-map{max-height:580px}.stadium-map .seat-label{font-size:10px}}
+.insight-switch{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}.insight-switch button{border:1px solid #507a56;background:#13291b;color:#d4ebd9;padding:10px;border-radius:9px;cursor:pointer}.insight-switch button[aria-pressed=true]{background:#367245;color:#fff}.insight-records{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}.insight-record{padding:12px;background:#152b1c;border:1px solid #3c6243;border-radius:10px}.insight-record strong{display:block;font-size:19px;margin:5px 0}.insight-record span{font-size:11px;color:#afc9b5}.stadium-map .seat-sector[data-heat=strong]{fill:#d55849}.stadium-map .seat-sector[data-heat=medium]{fill:#d69246}.stadium-map .seat-sector[data-heat=low]{fill:#ddbe64}.stadium-map .seat-sector[data-heat=flat]{fill:#4a8563}.stadium-map .seat-sector[data-heat=increase]{fill:#438fcb}.stadium-map .seat-sector[data-heat=unknown]{fill:#33453c;stroke-dasharray:3 3}@media(max-width:640px){.insight-records{grid-template-columns:1fr}}
+.pace-forecast{padding:13px 16px;margin-top:12px;border:1px solid #3b6545;border-radius:12px;background:#0f2519;display:flex;flex-direction:column;gap:5px}.pace-forecast[hidden]{display:none}.pace-forecast-lead{font-size:13px;line-height:1.45;color:#e2f4e6;max-width:55ch}.pace-forecast-date{font-size:clamp(19px,3vw,27px);color:#e4ffea}.pace-forecast-rate{font-size:12px;color:#afc9b5}
+
+.team-selector{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 32px}
+.team-choice{min-width:0;min-height:108px;display:flex;align-items:center;gap:15px;text-align:left;padding:19px 21px;border:1px solid #436c4e;border-radius:18px;background:linear-gradient(135deg,#142c1e,#0c1e13);color:#ebfaee;cursor:pointer;transition:transform .2s,border-color .2s,background .2s}
+.team-choice:hover{transform:translateY(-2px);border-color:#a1d1ac}
+.team-choice[aria-pressed=true]{border-color:#b8f0bd;background:linear-gradient(135deg,#235438,#12311f);box-shadow:inset 0 0 0 1px #a0ecab2d}
+.team-symbol{flex:none;display:grid;place-items:center;width:49px;height:49px;border-radius:13px;background:#365945;color:#e9fced;font-weight:900;letter-spacing:-.05em;font-size:16px}
+.team-choice[aria-pressed=true] .team-symbol{background:#e2f2d9;color:#173824}
+.team-copy{min-width:0;display:flex;flex-direction:column;gap:2px}
+.team-copy strong{font-size:20px;line-height:1.2;letter-spacing:-.03em}
+.team-copy small{font-size:12px;color:#b5cfb9;line-height:1.35}
+.team-count{margin-left:auto;font-size:11px;font-weight:800;white-space:nowrap;border:1px solid #547e60;padding:5px 8px;border-radius:999px;color:#d3e8d4}
+.women-pending{margin-top:13px;padding:24px;border:1px solid #45714f;border-radius:17px;background:linear-gradient(125deg,#193824,#112719)}
+.women-pending[hidden],.results[hidden]{display:none}
+.women-pending h3{margin:9px 0 7px;font-size:24px;letter-spacing:-.04em}
+.women-pending p{max-width:62ch;color:#bdd3c1;font-size:13px;line-height:1.65;margin:0 0 17px}
+.women-pending a{display:inline-flex;min-height:44px;align-items:center;padding:11px 17px;border-radius:10px;background:#daf1cc;color:#173824;font-weight:800;text-decoration:none;font-size:13px}
+.women-pending a:hover{background:#f3ffe9}
+@media(max-width:640px){.team-selector{gap:8px;margin-bottom:23px}.team-choice{min-height:108px;flex-wrap:wrap;padding:14px 12px;gap:8px}.team-symbol{width:38px;height:38px;font-size:12px}.team-copy strong{font-size:16px}.team-copy small{font-size:10px}.team-count{margin-left:0}.women-pending{padding:19px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="top">
+    <div class="brand">MINISTAUT <span class="slash">/</span> RBK <span class="independent">UAVHENGIG</span></div>
+    <div class="team-mark"><img src="https://cdn.sportmonks.com/images/soccer/teams/23/1335.png" alt="Rosenborg BK" width="45" height="45"></div>
+  </header>
+  <section class="hero" aria-labelledby="page-title">
+    <div class="overline"><span class="pulse-dot" aria-hidden="true"></span><span id="teamOverline">BILLETT PÅ LERKENDAL</span></div>
+    <h1 id="page-title">Bli med og fyll Lerkendal.</h1>
+    <p id="teamDescription">Se hvordan de ledige plassene utvikler seg fram mot avspark. Velg kampen du vil følge – og bli med på å skape stemningen på tribunen.</p>
+  </section>
+  <nav class="team-selector" aria-label="Velg lag">
+    <button id="teamMen" class="team-choice" type="button" aria-pressed="true"><span class="team-symbol">RBK</span><span class="team-copy"><strong>RBK</strong><small>Herrelaget · Lerkendal</small></span><span class="team-count" id="teamMenCount">—</span></button>
+    <button id="teamWomen" class="team-choice" type="button" aria-pressed="false"><span class="team-symbol">RBK</span><span class="team-copy"><strong>RBK Kvinner</strong><small>Koteng Arena og bortekamper</small></span><span class="team-count" id="teamWomenCount">—</span></button>
+  </nav>
+  <section class="picker-section" aria-labelledby="picker-title">
+    <div class="section-heading"><h2 id="picker-title" class="section-title">Velg kampen</h2><span class="section-help">Trykk på et kampkort for å se utviklingen</span></div>
+    <div class="match-list" id="matchCards" role="group" aria-label="Velg kamp for valgt lag"><div class="empty">Henter kampene …</div></div>
+    <div id="womenPending" class="women-pending" hidden>
+      <div class="overline">RBK KVINNER · KOTENG ARENA</div>
+      <h3>Rosenborg – Røa · 1. november kl. 14.30</h3>
+      <p>Vi gjør klar billettpulsen for Rosenborg Kvinner. Ingen måling er offentliggjort ennå. Vi viser ikke tall før Koteng-tellingene er godkjent for publisering.</p>
+      <a href="https://billett.rbk.no/checkout/6aaceecebfe408c38e1712dd" target="_blank" rel="noopener noreferrer">Se billetter til Rosenborg – Røa ↗</a>
+    </div>
+  </section>
+  <section class="results" id="match-details" aria-labelledby="selectedMatchTitle">
+    <div class="details-head">
+      <div>
+        <div class="overline">BILLETTSTATUS FOR VALGT KAMP</div>
+        <h2 id="selectedMatchTitle">Velg en kamp over</h2>
+        <p id="kickoff">Kampstart</p>
+      </div>
+      <div class="actions"><span id="age" class="badge" role="status">Henter siste måling …</span><button class="pill" type="button" id="refresh" aria-label="Hent oppdaterte billettmålinger">↻ Oppdater</button></div>
+    </div>
+    <div class="summary" id="stats">
+      <article class="card primary">
+        <div id="availabilityCaption" class="caption">Ledige sitteplasser</div><div id="available" class="big">—</div>
+        <div class="pulse-insights" aria-live="polite"><div id="dailyPulse" class="daily-pulse" hidden></div><div id="weekPulse" class="daily-pulse" hidden></div><div id="pulseMomentum" class="daily-pulse" hidden></div></div>
+      </article>
+      <div class="stack">
+        <article class="card small-card"><div class="caption">Siden første viste telling</div><div class="value" id="sinceFirst">—</div><div class="minor" id="sinceFirstNote">Venter på flere målinger</div></article>
+        <article class="card small-card"><div class="caption">Siden forrige måling</div><div class="value" id="delta">—</div><div class="minor" id="deltaNote">Venter på flere målinger</div></article>
+      </div>
+    </div>
+    <div class="campaign-row">
+      <a id="tickets" class="ticket-link" href="https://billett.rbk.no/" target="_blank" rel="noopener noreferrer" aria-label="Gå til billettsalget for valgt Rosenborg-kamp"><span id="ticketLabel">Finn din plass på Lerkendal</span> <span aria-hidden="true">↗</span></a>
+      <div class="campaign-copy"><strong id="campaignHeading">Ses på Lerkendal!</strong><span>Ta med noen på kamp. Sammen skaper vi trøkket.</span></div>
+    </div>
+    <section class="forecast-panel" aria-labelledby="projection-title">
+      <div class="forecast-lead">
+        <span class="forecast-eyebrow">MOT AVSPARK</span>
+        <h3 id="projection-title">Hvor mange plasser er igjen på kampdag?</h3>
+        <p id="projection-subtitle">Vi følger utviklingen før vi kan gi et forsiktig anslag.</p>
+      </div>
+      <div class="forecast-result">
+        <span class="forecast-label" id="projection-label">PROGNOSE VED AVSPARK</span>
+        <strong class="forecast-number" id="projection-value">For tidlig å anslå</strong>
+        <span class="forecast-range" id="projection-range">Oppdateres når datagrunnlaget er tilstrekkelig</span>
+      </div>
+      <div id="paceForecast" class="pace-forecast" hidden aria-live="polite">
+        <span class="forecast-label">KAN SITTEPLASSENE BLI UTSOLGT?</span>
+        <span class="pace-forecast-lead">Med samme tempo som de siste 12 timene kan alle målte sitteplasser være borte innen:</span>
+        <strong id="paceForecastDate" class="pace-forecast-date"></strong>
+        <span id="paceForecastRate" class="pace-forecast-rate"></span>
+      </div>
+    </section>
+    <section class="card graph" aria-labelledby="chart-title">
+      <div class="graph-header">
+        <div><div id="chart-title" class="caption">Billettpulsen mot avspark</div>
+          <p class="graph-desc">Følg ledige plasser over tid. Trykk på grafen for detaljer.</p></div>
+        <span id="chartCount" class="graph-count">0 tellinger</span>
+      </div>
+      <div class="chart-legend" id="chartLegend" hidden><span><i class="legend-real"></i> Målt</span><span><i class="legend-projected"></i> Prognose</span><span><i class="legend-band"></i> Mulig spenn</span></div>
+      <div id="chart" class="chart-wrap empty">Venter på første registrerte måling.</div>
+      <div class="chart-inspect" id="chartInspect" aria-live="polite">
+        <span id="inspectTime" class="inspect-timestamp">Siste måling</span>
+        <span id="inspectValue" class="inspect-value">—</span>
+        <span id="inspectDelta" class="inspect-delta">Velg et punkt i grafen</span>
+      </div>
+    </section>
+    <section class="card sections-panel" aria-labelledby="sections-title">
+      <div class="section-heading"><h2 id="sections-title" class="section-title">Tribuneoversikt</h2><span class="section-help" id="sectionStatus">Henter feltdata …</span></div>
+      <p class="section-intro" id="stadiumIntro">Lerkendals fire tribunesider med feltvis tilgjengelighet. Feltplasseringen følger Lerkendals kjente tribune- og feltinndeling. Formene er skjematiske, ikke nøyaktige sektorpolygoner. Velg et felt for målt ledighet.</p>
+      <div class="stadium-map-shell"><div class="map-switch"><strong id="stadiumHeading">LERKENDAL · SITTEFELT <span class="map-revision">KART V5 · 24.10</span></strong><span class="section-help">Trykk på et felt</span></div><div class="insight-switch"><button id="viewAvailability" type="button" aria-pressed="true">Ledige nå</button><button id="viewHeat" type="button" aria-pressed="false">Endring siste døgn</button><span id="heatStatus"></span></div><div id="stadiumMap" aria-label="Interaktiv skjematisk stadionoversikt"></div><div class="map-legend"><span class="map-key"><i style="background:#398b58"></i>50 % +</span><span class="map-key"><i style="background:#b7b857"></i>20–49 %</span><span class="map-key"><i style="background:#d78938"></i>8–19 %</span><span class="map-key"><i style="background:#d55a50"></i>1–7 %</span><span class="map-key"><i style="background:#4d5255"></i>0 ledige</span><span class="map-key"><i style="background:#303b46"></i>Låst / ukjent</span></div><p class="map-note">Sittefelt avlest fra valgt kamp. Ståplasser er ikke inkludert. Farge viser andel ledige seter, ikke solgte billetter. Feltinndelingen følger stadionkartet, men rektanglene er skjematiske og ikke oppmålte feltgrenser. Kontroller alltid felt og rad hos RBK.</p></div>
+      <div class="section-grid" id="sectionGrid"><p class="section-loading">Venter på seksjonsdata …</p></div>
+      <div id="sectionDetail" class="section-detail" aria-live="polite">Velg et felt for flere detaljer.</div><div id="sectionRecords" class="insight-records" aria-live="polite"></div>
+    </section>
+  </section>
+  <footer class="fan-footer">Ministaut er en uavhengig supporteroversikt.</footer>
+  <p id="error" role="alert"></p>
+</main>
+<script>
+
+const DB = 'https://khetbokxbcujwcurvviu.supabase.co';
+const KEY = 'sb_publishable_0JuYQgbiXWfx103zy7j85Q_muDiicIL';
+const $ = id => document.getElementById(id);
+const fmt = value => typeof value === 'number' && Number.isFinite(value) ? new Intl.NumberFormat('nb-NO').format(value) : '—';
+const date = value => new Date(value).toLocaleString('nb-NO', {timeZone:'Europe/Oslo',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+const comparable = (a,b) => !!(a && b && JSON.stringify([...(a.locked_fields||[])].sort())===JSON.stringify([...(b.locked_fields||[])].sort()));
+const signed = n => n===null || n===undefined ? '—' : (n>0?'+':'')+fmt(n);
+const ageInMinutes = time => Math.max(0,Math.floor((Date.now()-new Date(time).getTime())/60000));
+const overdue = time => !time || ageInMinutes(time)>95;
+const ageLabel = time => {
+  if(!time)return 'Venter på første telling';
+  const minutes=ageInMinutes(time);
+  const elapsed=minutes<2?'akkurat nå'
+    :minutes<60?'for '+minutes+' min siden'
+    :minutes<180?'for '+Math.floor(minutes/60)+' t'+(minutes%60?' '+(minutes%60)+' min':'')+' siden'
+    :minutes<1440?'for '+Math.floor(minutes/60)+' timer siden'
+    :'den '+date(time);
+  return overdue(time)?'Ny telling avventes · målt '+elapsed:'Sist målt '+elapsed;
+};
+function showTrend(valueId,noteId,change){
+  const value=$(valueId),note=$(noteId);
+  if(change===null||change===undefined){
+    value.textContent='—';value.dataset.direction='unknown';note.textContent='Venter på flere målinger';return;
+  }
+  if(change===0){
+    value.textContent='0';value.dataset.direction='flat';note.textContent='ingen endring i ledige plasser';return;
+  }
+  value.textContent=fmt(Math.abs(change));
+  value.dataset.direction=change<0?'down':'up';
+  note.textContent=change<0?'færre ledige sitteplasser':'flere ledige sitteplasser';
+}
+function chooseByLink(available){
+  try{
+    if(typeof window==='undefined')return null;
+    const key=new URLSearchParams(window.location.search).get('kamp');
+    return available.find(m=>m.event_key===key)?.id || null;
+  }catch{return null;}
+}
+function updateShareLink(key){
+  try{
+    if(typeof window==='undefined'||!window.history?.replaceState)return;
+    const url=new URL(window.location.href);
+    url.searchParams.set('lag',activeTeam==='women'?'kvinner':'rbk');
+    if(key&&(/^[A-Za-z0-9_-]{8,100}$/).test(key))url.searchParams.set('kamp',key);
+    else url.searchParams.delete('kamp');
+    window.history.replaceState(null,'',url.pathname+url.search+url.hash);
+  }catch{/* URL state is optional; navigation still works. */}
+}
+const knownOpponentCrests={
+  molde:'https://cdn.sportmonks.com/images/soccer/teams/2/290.png',
+  start:'https://cdn.sportmonks.com/images/soccer/teams/15/2735.png'
+};
+function crestFor(title){
+  const lower=String(title||'').toLowerCase();
+  return Object.keys(knownOpponentCrests).find(name=>lower.includes(name)) || null;
+}
+const WOMEN_KEYS=new Set(['6aaceecebfe408c38e1712dd']);
+function categoryFor(match){return match.team_category==='women'?'women':match.team_category==='men'?'men':WOMEN_KEYS.has(match.event_key)?'women':'men';}
+function venueFor(match){return match.venue_id==='koteng_arena'||match.venue_id==='lerkendal'?match.venue_id:WOMEN_KEYS.has(match.event_key)?'koteng_arena':'lerkendal';}
+function teamFromURL(items){
+  try{const q=new URLSearchParams(window.location.search),linked=items.find(m=>m.event_key===q.get('kamp'));return linked?categoryFor(linked):q.get('lag')==='kvinner'?'women':'men';}catch{return 'men';}
+}
+let allMatches=[],matches=[],activeTeam='men',selectedVenue='lerkendal',teamInitialized=false;
+let current=null,cards=new Map(),cardSignature='',selectionVersion=0,refreshPromise=null,lastObservedAt=null,selectedKickoff=null,sectionSelection=null;
+function updateAgeIndicator(){
+  const badge=$('age');
+  badge.textContent=ageLabel(lastObservedAt);
+  badge.setAttribute('data-stale',String(overdue(lastObservedAt)));
+}
+
+async function load(path){
+  const res=await fetch(DB+'/rest/v1/'+path,{headers:{apikey:KEY},cache:'no-store'});
+  if(!res.ok)throw new Error('Datakilden svarte '+res.status);
+  return res.json();
+}
+
+let chartSignature='';
+function graph(points){
+  const wrap=$('chart'),count=$('chartCount');
+  const prediction=kickoffForecast(points,selectedKickoff);
+  const hasProjection=prediction.status==='projected' && points.length>1;
+  $('chartLegend').hidden=!hasProjection;
+  count.textContent=points.length+' '+(points.length===1?'telling':'tellinger');
+  const signature=String(current)+'|'+selectedKickoff+'|'+(hasProjection?[prediction.center,prediction.low,prediction.high].join(':'):'none')+'|'+points.map(p=>p.observed_at+':'+p.available_seated+':'+(p.locked_fields||[]).join(',')).join('|');
+  if(signature===chartSignature)return;
+  chartSignature=signature;
+  if(!points.length){
+    wrap.className='chart-wrap empty';
+    wrap.textContent='Ingen målinger registrert ennå.';
+    $('inspectTime').textContent='Siste måling';
+    $('inspectValue').textContent='—';
+    $('inspectDelta').textContent='Grafen fylles når nye tellinger kommer inn';
+    return;
+  }
+  const W=920,H=273,L=56,R=28,T=19,B=39;
+  const times=points.map(p=>new Date(p.observed_at).getTime());
+  const values=points.map(p=>p.available_seated);
+  const start=Math.min(...times),lastTime=Math.max(...times);
+  const kickoffMs=hasProjection?new Date(selectedKickoff).getTime():lastTime;
+  const end=Math.max(lastTime+1,kickoffMs);
+  const forecastValues=hasProjection?[prediction.low,prediction.center,prediction.high]:[];
+  const min=Math.min(...values,...forecastValues),max=Math.max(...values,...forecastValues),padding=Math.max(48,(max-min)*.16);
+  const limit=selectedVenue==='koteng_arena'?601:19015;
+  const lo=Math.max(0,min-padding),hi=Math.min(limit,Math.max(max+padding,lo+96));
+  const x=t=>L+(t-start)/(end-start)*(W-L-R);
+  const y=v=>T+(hi-v)/(hi-lo)*(H-T-B);
+  const px=times.map((t,i)=>({x:x(t),y:y(values[i])}));
+  const path=px.map((p,i)=>(i?'L':'M')+p.x.toFixed(2)+' '+p.y.toFixed(2)).join(' ');
+  const area=path+' L'+px[px.length-1].x.toFixed(2)+' '+(H-B)
+    +' L'+px[0].x.toFixed(2)+' '+(H-B)+' Z';
+  const grid=Array.from({length:4},(_,i)=>{
+    const v=lo+(hi-lo)*i/3,py=y(v);
+    return '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+py.toFixed(2)+'" y2="'+py.toFixed(2)+'" stroke="#35523e" stroke-opacity=".64" />'
+      +'<text x="'+(L-10)+'" y="'+(py+4).toFixed(2)+'" text-anchor="end" fill="#99b49f" font-size="12">'+fmt(Math.round(v))+'</text>';
+  }).join('');
+  const dot=px.length===1?'<circle cx="'+px[0].x.toFixed(2)+'" cy="'+px[0].y.toFixed(2)+'" r="4" fill="#bdebc5" />':'';
+  const xlabels='<text x="'+L+'" y="'+(H-11)+'" fill="#9db9a4" font-size="12">'+date(points[0].observed_at)+'</text>'
+    +(hasProjection?'<text x="'+(W-R)+'" y="'+(H-11)+'" text-anchor="end" fill="#eac890" font-size="12">Avspark '+date(selectedKickoff)+'</text>'
+      :points.length>1?'<text x="'+(W-R)+'" y="'+(H-11)+'" text-anchor="end" fill="#9db9a4" font-size="12">'+date(points[points.length-1].observed_at)+'</text>':'');
+  const projectedMarkup=hasProjection?(()=>{
+    const leftX=x(lastTime).toFixed(2),rightX=x(kickoffMs).toFixed(2);
+    const lastY=y(values[values.length-1]).toFixed(2),midY=y(prediction.center).toFixed(2);
+    const lowY=y(prediction.low).toFixed(2),highY=y(prediction.high).toFixed(2);
+    const band=leftX+','+lastY+' '+rightX+','+highY+' '+rightX+','+lowY;
+    return '<polygon points="'+band+'" fill="#edb45d" fill-opacity=".17" stroke="none"/>'
+      +'<line x1="'+leftX+'" y1="'+lastY+'" x2="'+rightX+'" y2="'+midY+'" stroke="#f5cd89" stroke-width="2.8" stroke-dasharray="8 7" />'
+      +'<line x1="'+rightX+'" y1="'+highY+'" x2="'+rightX+'" y2="'+lowY+'" stroke="#f1c67e" stroke-width="4" stroke-opacity=".68" />'
+      +'<circle cx="'+rightX+'" cy="'+midY+'" r="5" fill="#f9dba5" />'
+      +'<text x="'+(W-R-6)+'" y="'+Math.max(15,y(prediction.high)-12).toFixed(2)+'" text-anchor="end" fill="#f1d1a0" font-size="12">Mulig spenn</text>';
+  })():'';
+  wrap.className='chart-wrap';
+  wrap.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" tabindex="0" aria-label="Interaktiv graf over ledige sitteplasser. Bruk piltastene for å bla mellom målingene.">'
+    +'<defs><linearGradient id="pulseFill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#99efb2" stop-opacity=".27" /><stop offset="1" stop-color="#99efb2" stop-opacity=".012" /></linearGradient></defs>'
+    +grid+'<path d="'+area+'" fill="url(#pulseFill)"/><path d="'+path+'" fill="none" stroke="#b6edc3" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>'+projectedMarkup
+    +dot+'<line id="chartFocusLine" class="chart-focus-guide" x1="0" x2="0" y1="'+T+'" y2="'+(H-B)+'" stroke="#c8f7d0" stroke-opacity=".65" stroke-width="1.5" stroke-dasharray="4 5"/>'
+    +'<circle id="chartFocusHalo" class="endpoint-halo" cx="0" cy="0" r="10" fill="#adf1be" opacity=".16" />'
+    +'<circle id="chartFocusPoint" cx="0" cy="0" r="5.6" fill="#e8ffdf" stroke="#427952" stroke-width="2"/>'
+    +xlabels+'</svg>';
+  const svg=wrap.querySelector('svg'),line=wrap.querySelector('#chartFocusLine'),
+    halo=wrap.querySelector('#chartFocusHalo'),focus=wrap.querySelector('#chartFocusPoint');
+  let index=-1,sticky=false;
+  function inspect(i){
+    if(!Number.isInteger(i)||i<0||i>=points.length)return;
+    if(i===index)return;
+    index=i;
+    const point=points[i],prev=points[i-1],diff=prev?point.available_seated-prev.available_seated:null,position=px[i];
+    $('inspectTime').textContent=date(point.observed_at);
+    $('inspectValue').textContent=fmt(point.available_seated)+' ledige sitteplasser';
+    $('inspectDelta').textContent=diff===null?'Første måling'
+      :diff<0?fmt(-diff)+' færre ledige siden forrige'
+      :diff>0?fmt(diff)+' flere ledige siden forrige':'Uendret siden forrige';
+    line.setAttribute('x1',position.x.toFixed(2));line.setAttribute('x2',position.x.toFixed(2));
+    halo.setAttribute('cx',position.x.toFixed(2));halo.setAttribute('cy',position.y.toFixed(2));
+    focus.setAttribute('cx',position.x.toFixed(2));focus.setAttribute('cy',position.y.toFixed(2));
+  }
+  function fromPointer(ev){
+    const box=svg.getBoundingClientRect();
+    if(!box.width)return;
+    const virtualX=Math.max(L,Math.min(W-R,(ev.clientX-box.left)*W/box.width));
+    let nearest=0,dist=Infinity;
+    for(let i=0;i<px.length;i++){
+      const d=Math.abs(px[i].x-virtualX);
+      if(d<dist){dist=d;nearest=i;}
+    }
+    inspect(nearest);
+  }
+  svg.addEventListener('pointermove',ev=>{if(ev.pointerType==='mouse'||ev.pointerType==='pen')fromPointer(ev);});
+  svg.addEventListener('pointerdown',ev=>{sticky=true;fromPointer(ev);});
+  svg.addEventListener('pointerleave',()=>{if(!sticky)inspect(points.length-1);});
+  svg.addEventListener('keydown',ev=>{
+    if(!['ArrowLeft','ArrowRight','Home','End'].includes(ev.key))return;
+    ev.preventDefault();
+    sticky=true;
+    inspect(ev.key==='Home'?0:ev.key==='End'?points.length-1
+      :Math.max(0,Math.min(points.length-1,index+(ev.key==='ArrowRight'?1:-1))));
+  });
+  inspect(points.length-1);
+}
+
+
+/* A scenario for remaining available seats, never an official sell-out probability.
+ * Require sustained comparable observations, a fresh scan, and a short horizon.
+ * Heuristic spread is not a statistical confidence interval. */
+const PROJECTION_HORIZON_DAYS=60, PROJECTION_MAX_SEATED=19015;
+function median(numbers){
+  const sorted=[...numbers].sort((a,b)=>a-b),m=Math.floor(sorted.length/2);
+  return sorted.length%2?sorted[m]:(sorted[m-1]+sorted[m])/2;
+}
+function kickoffForecast(records,kickoffUtc,now=Date.now()){
+  const kickoff=new Date(kickoffUtc||'').getTime();
+  if(!Number.isFinite(kickoff))return {status:'unavailable',reason:'Kampstart er ikke bekreftet'};
+  const horizon=kickoff-now;
+  if(horizon<=0)return {status:'unavailable',reason:'Kampen har startet'};
+  if(horizon>PROJECTION_HORIZON_DAYS*86400000)return {status:'unavailable',reason:'Mer enn 60 dager til kampstart'};
+  const sorted=records.filter(p=>Number.isFinite(p.available_seated)&&
+      Number.isFinite(new Date(p.observed_at).getTime())&&
+      p.available_seated>=0&&p.available_seated<=PROJECTION_MAX_SEATED)
+    .sort((a,b)=>new Date(a.observed_at)-new Date(b.observed_at));
+  if(!sorted.length)return {status:'unavailable',reason:'Venter på første telling'};
+  const last=sorted.at(-1);
+  if(overdue(last.observed_at))return {status:'unavailable',reason:'Avventer en fersk måling'};
+  const lastTime=new Date(last.observed_at).getTime();
+  const sample=sorted.filter(p=>comparable(p,last)&&
+      new Date(p.observed_at).getTime()>=lastTime-10*86400000).slice(-60);
+  if(sample.length<5)return {status:'unavailable',reason:'Trenger minst fem sammenlignbare tellinger'};
+  const span=(new Date(sample.at(-1).observed_at)-new Date(sample[0].observed_at));
+  if(span<12*3600000)return {status:'unavailable',reason:'Trenger målinger over minst 12 timer'};
+  const slopes=[];
+  for(let i=0;i<sample.length;i++){
+    for(let j=i+1;j<sample.length;j++){
+      const hours=(new Date(sample[j].observed_at)-new Date(sample[i].observed_at))/3600000;
+      if(hours>=2)slopes.push((sample[j].available_seated-sample[i].available_seated)/hours);
+    }
+  }
+  if(slopes.length<3)return {status:'unavailable',reason:'Trenger flere målinger med tidsavstand'};
+  const longPace=Math.max(0,(sample[0].available_seated-last.available_seated)/((lastTime-new Date(sample[0].observed_at).getTime())/3600000));
+  const recent=sample.slice(-3);
+  const recentHours=(new Date(recent.at(-1).observed_at)-new Date(recent[0].observed_at))/3600000;
+  const recentPace=recentHours>=4?Math.max(0,(recent[0].available_seated-last.available_seated)/recentHours):longPace;
+  const rate=-(recentHours>=6?recentPace:.65*recentPace+.35*longPace);
+  const mad=median(slopes.map(x=>Math.abs(x-rate)));
+  const forwardHours=(kickoff-lastTime)/3600000;
+  if(forwardHours<=0)return {status:'unavailable',reason:'Kampstart er passert'};
+  // Conservative business rule: inventory in our forecast must never grow
+  // beyond the latest observed available seats. Do not extrapolate increases.
+  const ceiling=last.available_seated;
+  const effectiveRate=Math.min(0,rate);
+  // Gradually reduce long-horizon extrapolation instead of extending an early rush for weeks.
+  const pacedHours=14*24*(1-Math.exp(-forwardHours/(14*24)));
+  const projected=Math.max(0,Math.min(ceiling,ceiling+effectiveRate*pacedHours));
+  /* Scenario spread, not a statistical confidence interval. */
+  // Pace-based uncertainty: a fraction of expected decrease, not a multi-week MAD extrapolation.
+  const predictedReduction=ceiling-projected;
+  const spread=Math.max(15,Math.min(ceiling*.12,predictedReduction*(.12+Math.min(.08,forwardHours/1440))));
+  const low=Math.max(0,Math.min(ceiling,Math.floor(projected-spread)));
+  const high=Math.max(low,Math.min(ceiling,Math.ceil(projected+spread)));
+  const materiallyUncertain=(high-low)>Math.max(2500,last.available_seated*.75);
+  const early=forwardHours>14*24;
+  if(materiallyUncertain && !early)return {status:'unavailable',reason:'Utviklingen er for ujevn til et meningsfullt anslag'};
+  return {status:'projected',center:Math.round(projected),low,high,count:sample.length,early,materiallyUncertain};
+}
+// Separate, deliberately linear "what if" scenario. NOT a verified sell-out forecast.
+// Compare the last accepted snapshot with the nearest same-scope snapshot 10–14h earlier.
+function paceToZero12h(records,kickoffUtc,now=Date.now()){
+ const kickoff=Date.parse(kickoffUtc||'');
+ if(!Number.isFinite(kickoff)||kickoff<=now)return null;
+ const sorted=records.filter(x=>Number.isFinite(x.available_seated)&&x.available_seated>=0&&Number.isFinite(Date.parse(x.observed_at))).slice().sort((a,b)=>Date.parse(a.observed_at)-Date.parse(b.observed_at));
+ const latest=sorted.at(-1);if(!latest||overdue(latest.observed_at)||latest.available_seated===0)return null;
+ const end=Date.parse(latest.observed_at);
+ const past=sorted.slice(0,-1).filter(x=>comparable(x,latest)).map(x=>({x,hours:(end-Date.parse(x.observed_at))/3600000})).filter(x=>x.hours>=10&&x.hours<=14).sort((a,b)=>Math.abs(a.hours-12)-Math.abs(b.hours-12))[0];
+ if(!past)return null;
+ const decrease=past.x.available_seated-latest.available_seated;
+ if(decrease<=0)return null;
+ const perHour=decrease/past.hours;
+ if(perHour<0.25)return null;
+ const zeroAt=end+latest.available_seated/perHour*3600000;
+ // Don't present a date after kickoff as a pre-match zero-availability event.
+ if(zeroAt>=kickoff)return {status:'after_kickoff',perHour,hours:past.hours};
+ return {status:'before_kickoff',zeroAt,perHour,hours:past.hours};
+}
+function renderPaceForecast(records){
+ const el=$('paceForecast'),result=paceToZero12h(records,selectedKickoff);
+ el.hidden=!result||result.status!=='before_kickoff';
+ if(el.hidden)return;
+ const day=new Intl.DateTimeFormat('nb-NO',{timeZone:'Europe/Oslo',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}).format(new Date(result.zeroAt));
+ $('paceForecastDate').textContent=day;
+ $('paceForecastRate').textContent='Hvis tempoet fortsetter · ca. '+fmt(Math.round(result.perHour*24))+' færre ledige per døgn';
+}
+function renderForecast(records){
+  const result=kickoffForecast(records,selectedKickoff);
+  const panel=document.querySelector('.forecast-panel');
+  panel.dataset.status=result.status;
+  if(result.status!=='projected'){
+    $('projection-value').textContent='For tidlig å anslå';
+    $('projection-range').textContent=result.reason;
+    $('projection-subtitle').textContent='Først når vi har nok ferske og sammenlignbare målinger, viser vi et scenario.';
+    return;
+  }
+  $('projection-subtitle').textContent=result.early
+    ?'Tidlig utviklingsscenario. Mye kan endre seg før kampstart.'
+    :result.low===0?'Det kan bli få sitteplasser tilgjengelige før avspark. Følg utviklingen!'
+    :'Basert på tempoet i tidligere tellinger, ikke et garantert resultat.';
+  $('projection-value').textContent=result.early&&result.materiallyUncertain?'Tidlig anslag':fmt(result.center)+' ledige';
+  $('projection-range').textContent=(result.early?'Foreløpig spenn: ':'Mulig spenn: ')+fmt(result.low)+'–'+fmt(result.high)+' ledige sitteplasser · '+(result.early?'stor usikkerhet':'grovt scenario');
+}
+
+// Use an actual prior observed scan near 24 hours ago, never treat a
+// shorter scan interval as a full day's change.
+function dailyPulse(records){
+  if(!records.length)return null;
+  const sorted=records.slice().sort((a,b)=>new Date(a.observed_at)-new Date(b.observed_at));
+  const latest=sorted.at(-1),end=new Date(latest.observed_at).getTime();
+  const candidates=sorted.slice(0,-1).filter(p=>{
+    const hours=(end-new Date(p.observed_at).getTime())/3600000;
+    return comparable(p,latest)&&hours>=18&&hours<=30;
+  });
+  if(!candidates.length)return null;
+  const near=candidates.reduce((best,p)=>Math.abs((end-new Date(p.observed_at).getTime())/3600000-24)<
+      Math.abs((end-new Date(best.observed_at).getTime())/3600000-24)?p:best);
+  const hours=(end-new Date(near.observed_at).getTime())/3600000;
+  // A 26-hour raw delta is not a 24-hour delta. Normalize explicitly.
+  // This is a constant-rate estimate, not a measurement at exactly 24h.
+  const exact=Math.abs(hours-24)<=0.25;
+  const raw=latest.available_seated-near.available_seated;
+  const difference=exact?raw:Math.round(raw*24/hours);
+  return {hours,difference,normalized:!exact,raw};
+}
+function referencePulse(records, targetHours, toleranceHours){
+  if(!records.length)return null;
+  const sorted=records.slice().sort((a,b)=>new Date(a.observed_at)-new Date(b.observed_at));
+  const latest=sorted.at(-1),end=new Date(latest.observed_at).getTime();
+  const relevant=sorted.slice(0,-1).filter(p=>{
+    const hours=(end-new Date(p.observed_at).getTime())/3600000;
+    return comparable(p,latest)&&Math.abs(hours-targetHours)<=toleranceHours;
+  });
+  if(!relevant.length)return null;
+  const previous=relevant.reduce((best,p)=>Math.abs((end-new Date(p.observed_at).getTime())/3600000-targetHours)<
+    Math.abs((end-new Date(best.observed_at).getTime())/3600000-targetHours)?p:best);
+  return {hours:(end-new Date(previous.observed_at).getTime())/3600000,
+    difference:latest.available_seated-previous.available_seated,
+    previous};
+}
+function weeklyPulse(records){return referencePulse(records,168,24);}
+function momentumPulse(records){
+  // Compare two actual, adjacent ~24h periods, never infer from a one-hour jump.
+  const last24=referencePulse(records,24,6);
+  if(!last24)return null;
+  const previous=last24.previous;
+  const older=records.filter(p=>comparable(p,previous)&&new Date(p.observed_at)<=new Date(previous.observed_at));
+  const old24=referencePulse(older,24,6);
+  if(!old24)return null;
+  const rateNow=Math.max(0,-last24.difference)/last24.hours;
+  const rateOld=Math.max(0,-old24.difference)/old24.hours;
+  // Ignore small changes that could simply be measurement noise.
+  if(rateNow<1&&rateOld<1)return {state:'stable'};
+  if(rateOld<.25)return {state:rateNow>=1?'faster':'stable'};
+  const ratio=rateNow/rateOld;
+  return {state:ratio>=1.3?'faster':ratio<=.7?'slower':'stable'};
+}
+function render(scans){
+  const records=scans.slice().sort((a,b)=>new Date(a.observed_at)-new Date(b.observed_at));
+  const last=records.at(-1),prev=records.at(-2);
+  $('available').textContent=last?fmt(last.available_seated):'—';
+  lastObservedAt=last?.observed_at||null;
+  updateAgeIndicator();
+  const scoped=last?records.filter(p=>comparable(p,last)):[];
+  const pulse=dailyPulse(scoped);
+  const pulseElement=$('dailyPulse');
+  pulseElement.hidden=!pulse;
+  if(pulse){
+    const n=fmt(Math.abs(pulse.difference));
+    pulseElement.dataset.trend=pulse.difference<0?'down':pulse.difference>0?'up':'flat';
+    pulseElement.textContent='24 t · '+(pulse.difference<0?n+' færre ledige':pulse.difference>0?n+' flere ledige':'uendret');
+    pulseElement.title=pulse.normalized?'24-timers beregnet gjennomsnitt fra '+pulse.hours.toFixed(1).replace('.',',')+' timers måleintervall':'Målt endring over omtrent 24 timer';
+  }
+  const week=weeklyPulse(scoped),weekElement=$('weekPulse');
+  weekElement.hidden=!week;
+  if(week){
+    weekElement.dataset.trend=week.difference<0?'down':week.difference>0?'up':'flat';
+    weekElement.textContent='7 døgn · '+(week.difference<0?fmt(-week.difference)+' færre ledige':week.difference>0?fmt(week.difference)+' flere ledige':'uendret');
+  }
+  const momentum=momentumPulse(scoped),momentumElement=$('pulseMomentum');
+  momentumElement.hidden=!momentum;
+  if(momentum){
+    momentumElement.dataset.trend=momentum.state;
+    momentumElement.textContent='Tempo · '+(momentum.state==='faster'?'øker':momentum.state==='slower'?'avtar':'stabilt');
+  }
+  const sinceFirst=last && scoped.length?last.available_seated-scoped[0].available_seated:null;
+  const sinceLast=comparable(last,prev)?last.available_seated-prev.available_seated:null;
+  showTrend('sinceFirst','sinceFirstNote',sinceFirst);
+  showTrend('delta','deltaNote',sinceLast);
+  renderForecast(records);
+  renderPaceForecast(records);
+  graph(scoped);
+  // The chart count and inspected point already communicate history.
+  // Avoid another text block repeating the same information.
+}
+
+function createCard(match){
+  const button=document.createElement('button');
+  button.type='button';button.className='match-tile';button.dataset.matchId=match.id;
+  button.setAttribute('aria-label','Vis billettstatus for '+match.title);
+  button.setAttribute('aria-pressed','false');
+  const top=document.createElement('span');top.className='tile-top';
+  const kickoff=document.createElement('span');kickoff.textContent=match.kickoff_at?'Avspark '+date(match.kickoff_at):'Kampstart kommer';top.append(kickoff);
+  const pill=document.createElement('span');pill.className='tile-pill';pill.textContent='SE KAMP';top.append(pill);
+  const matchup=document.createElement('span');matchup.className='tile-matchup';
+  const title=document.createElement('span');title.className='tile-title';title.textContent=match.title;matchup.append(title);
+  const opponent=crestFor(match.title);
+  if(opponent){
+    const crest=document.createElement('span');crest.className='tile-opponent';
+    const img=document.createElement('img');
+    img.src=knownOpponentCrests[opponent];img.alt=opponent+' klubbmerke';
+    img.width=32;img.height=32;img.loading='lazy';img.decoding='async';
+    img.addEventListener('error',()=>{crest.hidden=true;});
+    crest.append(img);matchup.append(crest);
+  }
+  const bottom=document.createElement('span');bottom.className='tile-bottom';
+  const summary=document.createElement('span');summary.className='tile-summary';
+  const value=document.createElement('span');value.className='tile-value';value.textContent='—';
+  const unit=document.createElement('span');unit.className='tile-unit';unit.textContent='ledige seter';
+  summary.append(value,unit);
+  const spark=document.createElement('span');spark.className='tile-spark';spark.setAttribute('aria-hidden','true');
+  const foot=document.createElement('span');foot.className='tile-foot';foot.textContent='Henter siste telling …';
+  bottom.append(summary,spark,foot);
+  button.append(top,matchup,bottom);
+  button.addEventListener('click',()=>{
+    if(match.id===current)return;
+    updateShareLink(match.event_key);
+    void selectMatch(match.id);
+    if(typeof window!=='undefined'&&window.matchMedia?.('(max-width: 640px)').matches){
+      const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      $('match-details').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
+    }
+  });
+  return {button,pill,value,foot,spark};
+}
+
+function updateSelectedCards(){
+  for(const [id,item] of cards){
+    const selected=id===current;
+    item.button.setAttribute('aria-pressed',String(selected));
+    item.pill.textContent=selected?'VALGT KAMP':'SE KAMP';
+  }
+}
+
+function buildCards(){
+  const signature=matches.map(m=>m.id+'|'+m.title+'|'+m.kickoff_at).join(';');
+  if(signature===cardSignature){updateSelectedCards();return;}
+  cardSignature=signature;
+  cards=new Map();
+  const target=$('matchCards');
+  target.replaceChildren();
+  if(!matches.length){const empty=document.createElement('p');empty.className='empty';empty.textContent='Ingen kamper er publisert ennå.';target.append(empty);return;}
+  for(const m of matches){const card=createCard(m);cards.set(m.id,card);target.append(card.button);}
+  updateSelectedCards();
+}
+
+function drawSparkline(target, readings){
+  const signature=readings.map(p=>p.observed_at+':'+p.available_seated).join('|');
+  if(target.dataset.series===signature)return;
+  target.dataset.series=signature;
+  const values=readings.map(p=>Number(p.available_seated)).filter(Number.isFinite);
+  if(values.length<2){target.replaceChildren();return;}
+  const W=94,H=36,P=3;
+  const minimum=Math.min(...values),maximum=Math.max(...values);
+  const spread=Math.max(12,maximum-minimum);
+  const x=i=>P+(i/(values.length-1))*(W-2*P);
+  const y=v=>P+((maximum+spread*.12-v)/(spread*1.24))*(H-2*P);
+  const dots=values.map((v,i)=>[x(i).toFixed(1),y(v).toFixed(1)]);
+  const line=dots.map((p,i)=>(i?'L':'M')+p[0]+' '+p[1]).join(' ');
+  target.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true">'
+    +'<path d="'+line+'" stroke="#a8eabb" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
+    +'<circle cx="'+dots[dots.length-1][0]+'" cy="'+dots[dots.length-1][1]+'" r="3.1" fill="#e2ffe6"/></svg>';
+}
+async function refreshCardData(){
+  await Promise.all(matches.map(async match=>{
+    const card=cards.get(match.id);
+    if(!card)return;
+    try{
+      const table=categoryFor(match)==='women'?'ministaut_koteng_scans':'ministaut_scans';
+    const statusFilter=categoryFor(match)==='women'?'in.(observed,accepted)':'eq.accepted';
+      const data=await load(table+'?select=observed_at,available_seated,locked_fields&reading_status='+statusFilter+'&match_id=eq.'+encodeURIComponent(match.id)+'&order=observed_at.desc&limit=24');
+      if(cards.get(match.id)!==card)return;
+      if(!data.length){
+        card.value.textContent='—';
+        card.foot.textContent='Venter på første telling';
+        card.spark.replaceChildren();card.spark.dataset.series='';
+        card.button.setAttribute('data-stale','true');
+        return;
+      }
+      const latest=data[0],previous=data[1];
+      card.value.textContent=fmt(latest.available_seated);
+      const delta=comparable(latest,previous)?latest.available_seated-previous.available_seated:null;
+      const wording=delta===null?''
+        :delta<0?' · '+fmt(-delta)+' færre ledige'
+        :delta>0?' · '+fmt(delta)+' flere ledige':' · Uendret';
+      card.foot.textContent='Målt '+date(latest.observed_at)+wording+(overdue(latest.observed_at)?' · avventer ny telling':'');
+      const sameConfig=data.filter(p=>comparable(p,latest)).reverse();
+      drawSparkline(card.spark,sameConfig);
+      card.button.setAttribute('data-stale',String(overdue(latest.observed_at)));
+    }catch(error){card.foot.textContent='Oppdatering ikke tilgjengelig';}
+  }));
+}
+
+
+const STADIUM_CODES=["A","AA","AB","B","BA","BB","C","CA","CB","D","DA","DB","E","EA","EB","F","FA","FB","G","GA","GB","HB","I","IB","J","JB","K","KB","LB","MA","MB","N","NA","NB","O","OA","OB","P","PA","PB","PRESSE","Q","QA","QB","RA","RB","SA","TA","TB","U","UA","UB","V","VA","VB","W","WA","WB","XA","XB"];
+const SVG_NS='http://www.w3.org/2000/svg';
+let stadiumByCode=new Map(),stadiumSelected=null,sectionDeltas=new Map(),sectionView='availability',visibleSectionRows=[],visibleSectionScan=null;
+const historical24=(scans,end)=>{if(!end)return null;const endTime=Date.parse(end.observed_at);return scans.filter(s=>s.id!==end.id&&comparable(s,end)).map(s=>({s,gap:endTime-Date.parse(s.observed_at)})).filter(x=>x.gap>=18*3600000&&x.gap<=30*3600000).sort((a,b)=>Math.abs(a.gap-86400000)-Math.abs(b.gap-86400000))[0]?.s||null;};
+const sectionDeltaLabel=n=>n==null?'mangler sammenlignbar måling':n<0?fmt(-n)+' færre ledige':n>0?fmt(n)+' flere ledige':'uendret';
+const sectionHeat=n=>n==null?'unknown':n>0?'increase':n===0?'flat':n<=-40?'strong':n<=-15?'medium':'low';
+function chooseSectionMode(mode){sectionView=mode;$('viewAvailability').setAttribute('aria-pressed',String(mode==='availability'));$('viewHeat').setAttribute('aria-pressed',String(mode==='heat'));$('heatStatus').textContent=mode==='heat'?'Rød/oransje: størst fall i ledige plasser. Blå: flere ledige. Grå: mangler data.':'Farger viser andel ledige seter';drawStadiumMap(visibleSectionRows,visibleSectionScan);}
+function renderSectionRecords(scans){
+ const box=$('sectionRecords');box.replaceChildren();
+ const ordered=scans.slice().sort((a,b)=>Date.parse(a.observed_at)-Date.parse(b.observed_at));
+ const last=ordered.at(-1),scoped=last?ordered.filter(s=>comparable(s,last)):[];
+ const lowest=scoped.length?Math.min(...scoped.map(s=>s.available_seated)):null;
+ const windows=scoped.map(end=>{const start=historical24(scoped,end);return start?{fall:start.available_seated-end.available_seated,hours:(Date.parse(end.observed_at)-Date.parse(start.observed_at))/3600000}:null}).filter(x=>x&&x.fall>0);
+ const largest=windows.length?Math.max(...windows.map(x=>x.fall)):null;
+ const fastest=windows.length?Math.max(...windows.map(x=>x.fall/x.hours)):null;
+ for(const [name,num,description] of [['Laveste målte ledighet',lowest==null?'—':fmt(lowest),'Samme feltoppsett'],['Største døgnreduksjon',largest==null?'—':fmt(largest),'18–30 timers målte intervaller'],['Raskeste døgnsnitt',fastest==null?'—':fmt(Math.round(fastest))+' / t','Fall i ledige plasser per time']]){
+  const div=document.createElement('div');div.className='insight-record';const label=document.createElement('span');label.textContent=name;const strong=document.createElement('strong');strong.textContent=num;const small=document.createElement('span');small.textContent=description;div.append(label,strong,small);box.append(div);
+ }
+}
+
+function svgEl(name,attrs={},textValue=null){
+ const n=document.createElementNS(SVG_NS,name);
+ for(const [key,value] of Object.entries(attrs))n.setAttribute(key,String(value));
+ if(textValue!==null)n.textContent=textValue;
+ return n;
+}
+function stadiumColor(row,locked){
+ if(locked)return 'locked';
+ if(!row)return 'missing';
+ if(row.free===0)return 'none';
+ const pct=row.free/row.capacity;
+ return pct>=.5?'ample':pct>=.2?'some':pct>=.08?'few':'critical';
+}
+// Mapping to the four real sides follows published seating-plan groupings.
+// Within each stand coordinates are approximate, not ticket vendor exact hitboxes.
+// Source: scanner/anchors_v15.json and scanner/bekreftede_posisjoner_v16.json
+// These are click/hover reference positions, NOT verified seat-boundary polygons.
+// Hand-audited, deterministic Lerkendal section positions in 780 x 710 viewBox.
+// Visual layer ONLY. No changes to ticket data, field capacities or scan processing.
+const SEAT_LAYOUT=[
+ ["SA",209,58,48,52],
+ ["RA",264,58,52,52],
+ ["QA",323,58,71,52],
+ ["PA",401,58,79,52],
+ ["OA",487,58,78,52],
+ ["NA",572,58,48,52],
+ ["MA",627,58,41,52],
+ ["Q",272,117,75,28],
+ ["P",354,117,75,28],
+ ["O",436,117,75,28],
+ ["N",518,117,75,28],
+ ["RB",193,152,88,45],
+ ["QB",287,152,78,45],
+ ["PB",371,152,79,45],
+ ["OB",456,152,79,45],
+ ["NB",541,152,56,45],
+ ["MB",603,152,47,45],
+ ["TA",74,215,70,60],
+ ["UA",74,282,70,63],
+ ["VA",74,352,70,63],
+ ["WA",74,422,70,65],
+ ["XA",74,494,70,58],
+ ["TB",149,215,40,24],
+ ["UB",149,244,40,26],
+ ["U",149,277,40,58],
+ ["VB",149,342,40,24],
+ ["V",149,373,40,42],
+ ["WB",149,423,40,24],
+ ["W",149,453,40,47],
+ ["XB",149,507,40,45],
+ ["LB",592,205,41,43],
+ ["KB",592,255,41,49],
+ ["JB",592,312,41,62],
+ ["IB",592,381,41,74],
+ ["HB",592,462,41,89],
+ ["K",658,277,46,67],
+ ["J",658,352,46,68],
+ ["I",658,428,46,70],
+ ["AB",196,514,49,42],
+ ["BB",251,514,59,42],
+ ["CB",316,514,64,42],
+ ["DB",386,514,79,42],
+ ["EB",471,514,54,42],
+ ["FB",531,514,26,42],
+ ["GB",563,514,26,42],
+ ["A",279,564,34,25],
+ ["B",320,564,34,25],
+ ["C",361,564,34,25],
+ ["D",402,564,34,25],
+ ["E",443,564,34,25],
+ ["F",484,564,34,25],
+ ["G",525,564,34,25],
+ ["PRESSE",395,595,85,23],
+ ["AA",205,624,49,40],
+ ["BA",260,624,56,40],
+ ["CA",322,624,67,40],
+ ["DA",395,624,85,40],
+ ["EA",486,624,72,40],
+ ["FA",564,624,52,40],
+ ["GA",622,624,43,40]
+];
+// Pitch geometry is the single anchor for both longside stands and the rendered turf.
+// SEAT_LAYOUT retains field widths + the already checked west/east arrangement;
+// sectionTiles() overrides the north/south rail coordinates from this frame.
+const pitchBox=Object.freeze({x:211,y:205,w:364,h:300});
+const stadiumFrame=Object.freeze({
+ centerX:pitchBox.x+pitchBox.w/2,
+ northEdge:pitchBox.y,
+ southEdge:pitchBox.y+pitchBox.h
+});
+// Real Coop topology: upper TA/UA/VA/WA/XA, separate VIP U/V/W,
+// and lower TB/UB/VB/WB/XB against the pitch. Three distinct west lanes.
+const coopStand=Object.freeze({
+ upperX:pitchBox.x-158,upperW:69,
+ vipX:pitchBox.x-83,vipW:27,
+ lowerX:pitchBox.x-50,lowerW:32
+});
+function sectionTiles(){
+ const tiles=SEAT_LAYOUT.map(([code,x,y,w,h])=>({code,x,y,w,h}));
+ const byCode=new Map(tiles.map(t=>[t.code,t]));
+ // Center each continuous north/south rail on the exact pitch midline.
+ // Gaps are distances from the outer pitch frame, not absolute SVG Y values.
+ const alignRail=(codes,side,pitchGap,spacing=6)=>{
+  const rail=codes.map(code=>byCode.get(code));
+  if(rail.some(t=>!t||t.h!==rail[0].h))throw Error('Invalid stadium rail');
+  const span=rail.reduce((sum,t)=>sum+t.w,0)+(rail.length-1)*spacing;
+  const y=side==='north'
+   ? stadiumFrame.northEdge-pitchGap-rail[0].h
+   : stadiumFrame.southEdge+pitchGap;
+  let x=stadiumFrame.centerX-span/2;
+  rail.forEach(t=>{t.x=x;t.y=y;x+=t.w+spacing;});
+ };
+ // North: Pepsi Max outer, VIP middle and the front rail nearest the field.
+ alignRail(['SA','RA','QA','PA','OA','NA','MA'],'north',95);
+ alignRail(['Q','P','O','N'],'north',60,7);
+ alignRail(['RB','QB','PB','OB','NB','MB'],'north',8);
+ // South: front rail, VIP boxes, the central press box, then upper rail.
+ alignRail(['AB','BB','CB','DB','EB','FB','GB'],'south',9);
+ alignRail(['A','B','C','D','E','F','G'],'south',59,7);
+ alignRail(['PRESSE'],'south',90);
+ alignRail(['AA','BA','CA','DA','EA','FA','GA'],'south',119);
+ // Position VIP Coop as a dedicated lower-tier band between the A and B
+ // sections. Previously VIP U/V/W were interleaved in the same x lane as
+ // TB/UB/VB/WB/XB and therefore appeared on the wrong line.
+ const coopRows=[
+  {upper:'TA',lower:'TB',y:215,h:60},
+  {upper:'UA',vip:'U',lower:'UB',y:282,h:63},
+  {upper:'VA',vip:'V',lower:'VB',y:352,h:63},
+  {upper:'WA',vip:'W',lower:'WB',y:422,h:65},
+  {upper:'XA',lower:'XB',y:494,h:58}
+ ];
+ const placeCoop=(code,x,w,y,h)=>{
+  if(!code)return;
+  const tile=byCode.get(code);
+  if(!tile)throw Error('Missing Coop sector '+code);
+  Object.assign(tile,{x,y,w,h});
+ };
+ coopRows.forEach(({upper,vip,lower,y,h})=>{
+  placeCoop(upper,coopStand.upperX,coopStand.upperW,y,h);
+  placeCoop(vip,coopStand.vipX,coopStand.vipW,y,h);
+  placeCoop(lower,coopStand.lowerX,coopStand.lowerW,y,h);
+ });
+ if(!(coopStand.upperX+coopStand.upperW<coopStand.vipX &&
+      coopStand.vipX+coopStand.vipW<coopStand.lowerX &&
+      coopStand.lowerX+coopStand.lowerW<pitchBox.x))
+  throw Error('Invalid Coop lane spacing');
+ if(tiles.length!==60||byCode.size!==60)throw Error('Expected 60 distinct stadium sections');
+ for(let i=0;i<tiles.length;i++){
+  const a=tiles[i];
+  if(a.x<0||a.y<0||a.w<=0||a.h<=0||a.x+a.w>780||a.y+a.h>710)
+   throw Error('Out-of-bounds sector '+a.code);
+  if(Math.max(a.x,pitchBox.x)<Math.min(a.x+a.w,pitchBox.x+pitchBox.w)&&
+     Math.max(a.y,pitchBox.y)<Math.min(a.y+a.h,pitchBox.y+pitchBox.h))
+   throw Error('Sector inside pitch '+a.code);
+  for(let j=i+1;j<tiles.length;j++){
+   const b=tiles[j];
+   if(Math.max(a.x,b.x)<Math.min(a.x+a.w,b.x+b.w)&&
+      Math.max(a.y,b.y)<Math.min(a.y+a.h,b.y+b.h))
+    throw Error('Overlapping sectors '+a.code+' / '+b.code);
+  }
+ }
+ return tiles;
+}
+const KOTENG_CODES=['VIP','FELT-1','FELT-2','FELT-3','FELT-4','FELT-5'];
+function drawKotengMap(rows,scan){
+  const target=$('stadiumMap');target.replaceChildren();stadiumSelected=null;
+  if(!rows||!scan){target.textContent='Koteng-kartet vises når godkjente målinger er tilgjengelige.';return;}
+  const byCode=new Map(rows.map(r=>[r.section_code,r]));
+  stadiumByCode=byCode;
+  const locked=new Set(scan.locked_fields||[]);
+  const heat=sectionView==='heat';
+  const svg=svgEl('svg',{viewBox:'0 0 800 520',class:'stadium-map',role:'group','aria-label':'Skjematisk sitteplasskart Koteng Arena'});
+  svg.append(svgEl('rect',{x:20,y:153,width:760,height:304,rx:6,fill:'#087039',stroke:'#72bb80','stroke-width':3}));
+  for(let x=20;x<780;x+=95)svg.append(svgEl('rect',{x,y:153,width:47.5,height:304,fill:'#198448',opacity:'.6'}));
+  svg.append(svgEl('rect',{x:44,y:176,width:712,height:258,fill:'none',stroke:'#efffec','stroke-width':3}));
+  svg.append(svgEl('line',{x1:400,y1:176,x2:400,y2:434,stroke:'#efffec','stroke-width':3}));
+  svg.append(svgEl('circle',{cx:400,cy:305,r:48,fill:'none',stroke:'#efffec','stroke-width':3}));
+  svg.append(svgEl('rect',{x:44,y:245,width:100,height:120,fill:'none',stroke:'#efffec','stroke-width':3}));
+  svg.append(svgEl('rect',{x:656,y:245,width:100,height:120,fill:'none',stroke:'#efffec','stroke-width':3}));
+  const tiles=[['FELT-1',20,81,71,57],['FELT-2',97,81,190,57],['FELT-3',293,81,190,57],['FELT-4',489,81,190,57],['FELT-5',685,81,95,57],['VIP',293,19,190,54]];
+  for(const [code,x,y,w,height] of tiles){
+    const row=byCode.get(code),name=code==='VIP'?'VIP':'Felt '+code.slice(5);
+    const sector=svgEl('rect',{x,y,width:w,height,rx:4,class:'seat-sector','data-code':code,'data-level':stadiumColor(row,locked.has(code)),'data-heat':heat?sectionHeat(sectionDeltas.get(code)?.day):'','aria-pressed':'false',tabindex:0,role:'button','aria-label':name+', '+(row?row.free+' ledige av '+row.capacity:locked.has(code)?'låst':'ikke målt')});
+    sector.append(svgEl('title',{},name+' · '+(row?row.free+' ledige av '+row.capacity:locked.has(code)?'låst':'ikke målt')));
+    sector.addEventListener('click',()=>activateStadiumSection(code));
+    sector.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activateStadiumSection(code);}});
+    svg.append(sector);
+    svg.append(svgEl('text',{x:x+w/2,y:y+height/2+5,class:'seat-label'},name));
+  }
+  for(const [name,x] of [['STÅPLASS A',38],['STÅPLASS B',442]]){
+    svg.append(svgEl('rect',{x,y:469,width:320,height:37,rx:4,fill:'#26392e',stroke:'#75947b','stroke-dasharray':'5 5'}));
+    svg.append(svgEl('text',{x:x+160,y:492,'text-anchor':'middle',fill:'#b8d4bd','font-size':14},name));
+  }
+  target.append(svg);
+}
+function drawStadiumMap(rows,scan){
+  if(selectedVenue==='koteng_arena')return drawKotengMap(rows,scan);
+ const target=$('stadiumMap');
+ target.replaceChildren();stadiumSelected=null;
+ if(!rows||!scan){target.textContent='Kartet vises når målinger er tilgjengelige.';return;}
+ const byCode=new Map(rows.map(r=>[r.section_code,r]));
+ stadiumByCode=byCode;
+ const locks=new Set(scan.locked_fields||[]);
+ const heat=sectionView==='heat';
+ const svg=svgEl('svg',{viewBox:'0 0 780 710',class:'stadium-map',role:'group','aria-label':'Tribunekart for Lerkendal, tilgjengelige sitteplasser'});
+ const defs=svgEl('defs');
+ const grad=svgEl('linearGradient',{id:'pitchGrad',x1:'0',x2:'0',y1:'0',y2:'1'});
+ grad.append(svgEl('stop',{offset:'0%','stop-color':'#186f46'}),svgEl('stop',{offset:'100%','stop-color':'#0a3c28'}));
+ defs.append(grad);svg.append(defs);
+ const field={x:pitchBox.x+11,y:pitchBox.y+11,w:pitchBox.w-23,h:pitchBox.h-22};
+ const fieldCenterX=field.x+field.w/2,fieldCenterY=field.y+field.h/2;
+ svg.append(svgEl('rect',{x:pitchBox.x,y:pitchBox.y,width:pitchBox.w,height:pitchBox.h,rx:8,fill:'#0d2418',stroke:'#4e9367','stroke-width':3}));
+ svg.append(svgEl('rect',{x:field.x,y:field.y,width:field.w,height:field.h,rx:1,fill:'url(#pitchGrad)',stroke:'#d1e7d6','stroke-width':2}));
+ svg.append(svgEl('line',{x1:fieldCenterX,y1:field.y,x2:fieldCenterX,y2:field.y+field.h,stroke:'#b3d0bb','stroke-width':2}));
+ svg.append(svgEl('circle',{cx:fieldCenterX,cy:fieldCenterY,r:43,fill:'none',stroke:'#b3d0bb','stroke-width':2}));
+ svg.append(svgEl('rect',{x:field.x,y:field.y+66,width:62,height:143,fill:'none',stroke:'#b3d0bb','stroke-width':2}));
+ svg.append(svgEl('rect',{x:field.x+field.w-62,y:field.y+66,width:62,height:143,fill:'none',stroke:'#b3d0bb','stroke-width':2}));
+ svg.append(svgEl('text',{x:fieldCenterX,y:fieldCenterY+5,'text-anchor':'middle',fill:'#e4fbea','font-size':24,'font-weight':850,opacity:'.35'},'LERKENDAL'));
+ const labels=[
+  ['PEPSI MAX',stadiumFrame.centerX,stadiumFrame.northEdge-166],
+  ['COOP',coopStand.upperX+coopStand.upperW/2,pitchBox.y-11],
+  ['SPAREBANK 1',stadiumFrame.centerX,stadiumFrame.southEdge+187],
+  ['ØST',pitchBox.x+pitchBox.w+106,pitchBox.y+5]
+ ];
+ labels.forEach(([t,x,y])=>svg.append(svgEl('text',{x,y,'text-anchor':'middle',fill:'#bcd5c3','font-size':14,'font-weight':800,'letter-spacing':1.3},t)));
+ // Tiny VIP label above the distinct Coop VIP band; seat fills remain data-driven.
+ svg.append(svgEl('text',{x:coopStand.vipX+coopStand.vipW/2,y:pitchBox.y+5,
+   'text-anchor':'middle',fill:'#a9e6bb','font-size':10,'font-weight':900},'VIP'));
+ sectionTiles().forEach(tile=>{
+  const {code,x,y,w,h}=tile,row=byCode.get(code),level=stadiumColor(row,locks.has(code));
+  const sectorName=['U','V','W'].includes(code)?'VIP Coop, felt '+code:'Felt '+code;
+  const p=svgEl('rect',{x,y,width:w,height:h,rx:4,class:'seat-sector','data-code':code,'data-heat':(heat?sectionHeat(sectionDeltas.get(code)?.day):''),'data-level':level,'data-vip':(['U','V','W'].includes(code)?'coop':''),'aria-pressed':'false',tabindex:0,role:'button','aria-label':sectorName+', '+(row?row.free+' ledige av '+row.capacity:locks.has(code)?'låst':'mangler måling')});
+  p.append(svgEl('title',{},sectorName+' · '+(row?row.free+' ledige av '+row.capacity:locks.has(code)?'låst':'ikke målt')));
+  p.addEventListener('click',()=>activateStadiumSection(code));
+  p.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activateStadiumSection(code);}});
+  svg.append(p);
+  const labelAttrs={x:x+w/2,y:y+h/2+3.5,class:'seat-label'};
+  if(w<30||h<30)labelAttrs['font-size']=8;
+  svg.append(svgEl('text',labelAttrs,code));
+ });
+ // SB and Øvre Øst are contextual standing areas, never counted as seated availability.
+ // Position contextual standing areas outside the same pitch-relative rails.
+ // They are not part of the 60 seated-sector availability measurements.
+ const sbX=pitchBox.x-81,sbY=pitchBox.y-53;
+ const sb=svgEl('rect',{x:sbX,y:sbY,width:28,height:34,rx:3,fill:'#293e38',stroke:'#728578','stroke-dasharray':'3 3'});
+ svg.append(sb);svg.append(svgEl('text',{x:sbX+14,y:sbY+20,'text-anchor':'middle',fill:'#b5cdbb','font-size':10},'SB'));
+ const standingX=pitchBox.x+pitchBox.w+143,standingY=pitchBox.y+47;
+ const standing=svgEl('rect',{x:standingX,y:standingY,width:23,height:219,rx:4,fill:'#293e38',stroke:'#728578','stroke-dasharray':'3 3'});
+ const standingCX=standingX+11.5,standingCY=standingY+109.5;
+ svg.append(standing);svg.append(svgEl('text',{x:standingCX,y:standingCY,transform:'rotate(90 '+standingCX+' '+standingCY+')','text-anchor':'middle',fill:'#b5cdbb','font-size':11},'ØVRE ØST'));
+ target.append(svg);
+}
+function activateStadiumSection(code){
+ if(stadiumSelected)stadiumSelected.setAttribute('aria-pressed','false');
+ const sector=document.querySelector('.stadium-map .seat-sector[data-code="'+code+'"]');
+ stadiumSelected=sector;
+ if(sector)sector.setAttribute('aria-pressed','true');
+ const row=stadiumByCode.get(code);
+ const detail=$('sectionDetail');
+ if(!row){detail.textContent='Felt '+code+': ikke avlest eller bekreftet låst. Ingen ledighet kan fastslås.';return;}
+ const pct=Math.round(100*row.free/row.capacity);
+ const change=sectionDeltas.get(code)||{};
+ detail.textContent=(code==='VIP'?'VIP':code.startsWith('FELT-')?'Felt '+code.slice(5):'Felt '+code)+' · '+fmt(row.free)+' ledige av '+fmt(row.capacity)+' seter ('+pct+' %). Målt '+date(lastObservedAt)+'. Forrige telling: '+sectionDeltaLabel(change.previous)+'. Omtrent 24 timer: '+sectionDeltaLabel(change.day)+'.';
+ const cell=[...$('sectionGrid').children].find(el=>el.dataset?.code===code);
+ if(sectionSelection)sectionSelection.setAttribute('aria-pressed','false');
+ sectionSelection=cell||null;
+ if(cell)cell.setAttribute('aria-pressed','true');
+}
+function renderSections(rows,scan){
+  const grid=$('sectionGrid'),status=$('sectionStatus'),detail=$('sectionDetail');
+  grid.replaceChildren();
+  if(!scan || !Array.isArray(rows)){
+    drawStadiumMap(null,null);
+    visibleSectionRows=[];visibleSectionScan=null;sectionDeltas=new Map();status.textContent='Feltdata ikke tilgjengelige';
+    detail.textContent='Velg en kamp for å se sittefeltene.';
+    return;
+  }
+  const valid=rows.filter(r=>typeof r.section_code==='string'&&Number.isInteger(r.free)&&
+      Number.isInteger(r.capacity)&&r.capacity>0&&r.free>=0&&r.free<=r.capacity);
+  const codes=new Set(valid.map(r=>r.section_code));
+  const total=valid.reduce((sum,r)=>sum+r.free,0);
+  const expected=new Set(selectedVenue==='koteng_arena'?KOTENG_CODES:STADIUM_CODES);
+  const locks=scan.locked_fields||[];
+  const complete=codes.size===valid.length&&valid.every(r=>expected.has(r.section_code))&&
+    locks.every(code=>expected.has(code)&&!codes.has(code))&&valid.length+locks.length===expected.size&&
+    total===scan.available_seated;
+  if(!complete){
+    status.textContent='Feltkontroll mangler';
+    detail.textContent='Seksjonstallene vises ikke før summen stemmer med godkjent telling.';
+    drawStadiumMap(null,null);
+    return;
+  }
+  status.textContent=valid.length+' avleste felt · '+date(scan.observed_at);
+  visibleSectionRows=valid.slice();visibleSectionScan=scan;drawStadiumMap(valid,scan);
+  valid.sort((a,b)=>a.section_code.localeCompare(b.section_code,'nb',{numeric:true}));
+  sectionSelection=null;
+  detail.textContent='Velg et felt for å se ledige plasser og størrelse.';
+  for(const r of valid){
+    const btn=document.createElement('button');
+    btn.type='button';btn.className='section-cell';btn.dataset.code=r.section_code;btn.setAttribute('aria-pressed','false');
+    btn.dataset.level=r.free===0?'none':r.free<=10?'few':'normal';
+    const name=document.createElement('span');name.className='section-code';name.textContent=r.section_code==='VIP'?'VIP':r.section_code.startsWith('FELT-')?'Felt '+r.section_code.slice(5):'Felt '+r.section_code;
+    const value=document.createElement('span');value.className='section-free';value.textContent=fmt(r.free);
+    const meta=document.createElement('span');meta.className='section-meta';meta.textContent='ledige av '+fmt(r.capacity);
+    btn.append(name,value,meta);
+    btn.addEventListener('click',()=>activateStadiumSection(r.section_code));
+    grid.append(btn);
+  }
+}
+async function loadSections(scan,version,id,scans){
+  const grid=$('sectionGrid');
+  grid.textContent='Henter seksjonstall …';
+  $('sectionStatus').textContent='Henter feltdata …';
+  if(!scan){renderSections(null,null);return;}
+  try{
+    const prior=scans.filter(s=>s.id!==scan.id&&Date.parse(s.observed_at)<Date.parse(scan.observed_at)&&comparable(s,scan)).sort((a,b)=>Date.parse(b.observed_at)-Date.parse(a.observed_at))[0];
+    const day=historical24(scans,scan);
+    const unique=[scan,prior,day].filter((x,i,arr)=>x&&arr.findIndex(y=>y?.id===x.id)===i);
+    const snapshots=await Promise.all(unique.map(async item=>{
+      const table=selectedVenue==='koteng_arena'?'ministaut_koteng_section_measurements':'ministaut_section_measurements';
+      const rows=await load(table+'?select=section_code,free,capacity&scan_id=eq.'+encodeURIComponent(item.id)+'&order=section_code.asc&limit=80');
+      const expected=new Set(selectedVenue==='koteng_arena'?KOTENG_CODES:STADIUM_CODES),locks=item.locked_fields||[];
+      const valid=rows.length+locks.length===expected.size&&rows.every(r=>expected.has(r.section_code))&&
+        locks.every(code=>expected.has(code)&&!rows.some(r=>r.section_code===code))&&new Set(rows.map(r=>r.section_code)).size===rows.length&&
+        rows.reduce((a,b)=>a+b.free,0)===item.available_seated;
+      return {id:item.id,rows:valid?rows:null};
+    }));
+    if(version!==selectionVersion||current!==id)return;
+    const byId=new Map(snapshots.map(x=>[x.id,x.rows]));
+    const rows=byId.get(scan.id);if(!rows){renderSections(null,null);return;}
+    // Do not use a comparison snapshot if it covers different field capacities.
+    // Full-snapshot checks above already reject missing rows and bad totals.
+    const prev=new Map(((prior&&byId.get(prior.id))||[]).map(r=>[r.section_code,r]));
+    const daily=new Map(((day&&byId.get(day.id))||[]).map(r=>[r.section_code,r]));
+    sectionDeltas=new Map(rows.map(r=>{
+     const a=prev.get(r.section_code),b=daily.get(r.section_code);
+     return [r.section_code,{previous:a&&a.capacity===r.capacity?r.free-a.free:null,day:b&&b.capacity===r.capacity?r.free-b.free:null}];
+    }));
+    renderSections(rows,scan);
+  }catch(error){
+    if(version!==selectionVersion||current!==id)return;
+    renderSections(null,null);
+    $('sectionDetail').textContent='Kunne ikke hente seksjonsdata nå.';
+  }
+}
+$('viewAvailability').addEventListener('click',()=>chooseSectionMode('availability'));
+$('viewHeat').addEventListener('click',()=>chooseSectionMode('heat'));
+async function selectMatch(id){
+  const match=matches.find(m=>m.id===id);
+  if(!match)return;
+  const changed=current!==id,version=++selectionVersion;
+  selectedVenue=venueFor(match);
+  $('availabilityCaption').textContent=selectedVenue==='koteng_arena'?'Observerte ledige sitteplasser':'Ledige sitteplasser';
+  $('stadiumHeading').textContent=selectedVenue==='koteng_arena'?'KOTENG ARENA · SITTEFELT · V1.8':'LERKENDAL · SITTEFELT · KART V5';
+  $('stadiumIntro').textContent=selectedVenue==='koteng_arena'?'Koteng Arena har VIP og fem nummererte sittefelt. Ståplass A og B telles ikke med. Dette er dobbeltkontrollerte observasjoner av billettkartet, ikke bekreftet salg eller komplett kategoriinventar. Kartet er skjematisk.':'Lerkendals fire tribunesider med feltvis tilgjengelighet. Plasseringen er skjematisk.';
+  $('ticketLabel').textContent='Finn din plass på '+(selectedVenue==='koteng_arena'?'Koteng Arena':'Lerkendal');
+  $('campaignHeading').textContent='Ses på '+(selectedVenue==='koteng_arena'?'Koteng Arena!':'Lerkendal!');
+  current=id;updateSelectedCards();
+  $('selectedMatchTitle').textContent=match.title;
+  selectedKickoff=match.kickoff_at||null;
+  $('kickoff').textContent=match.kickoff_at?'Avspark '+date(match.kickoff_at):'Avspark ikke registrert';
+  const key=String(match.event_key||'');
+  $('tickets').href=/^[A-Za-z0-9_-]{8,100}$/.test(key)?'https://billett.rbk.no/checkout/'+key:'https://billett.rbk.no/';
+  if(changed){$('error').textContent='';render([]);renderSectionRecords([]);renderSections(null,null);}
+  $('stats').setAttribute('aria-busy','true');
+  try{
+    const table=categoryFor(match)==='women'?'ministaut_koteng_scans':'ministaut_scans';
+    const statusFilter=categoryFor(match)==='women'?'in.(observed,accepted)':'eq.accepted';
+    const data=await load(table+'?select=id,observed_at,available_seated,locked_fields&reading_status='+statusFilter+'&match_id=eq.'+encodeURIComponent(id)+'&order=observed_at.desc&limit=500');
+    if(version!==selectionVersion || id!==current)return;
+    render(data);
+    renderSectionRecords(data);
+    await loadSections(data[0]||null,version,id,data);
+  }catch(error){if(version===selectionVersion)$('error').textContent='Kunne ikke hente tall for valgt kamp. Prøv Oppdater.';}
+  finally{if(version===selectionVersion)$('stats').removeAttribute('aria-busy');}
+}
+
+async function showTeam(next,{share=true}={}){
+  if(next!=='men'&&next!=='women')return;
+  const changed=next!==activeTeam;
+  activeTeam=next;
+  if(changed){++selectionVersion;current=null;selectedKickoff=null;lastObservedAt=null;chartSignature='';}
+  matches=allMatches.filter(m=>categoryFor(m)===activeTeam);
+  $('teamMen').setAttribute('aria-pressed',String(activeTeam==='men'));
+  $('teamWomen').setAttribute('aria-pressed',String(activeTeam==='women'));
+  $('teamMenCount').textContent=allMatches.filter(m=>categoryFor(m)==='men').length+' kamper';
+  $('teamWomenCount').textContent=allMatches.filter(m=>categoryFor(m)==='women').length+' kamper';
+  $('teamOverline').textContent=activeTeam==='women'?'BILLETTSTATUS · RBK KVINNER':'BILLETTSTATUS · RBK';
+  $('page-title').textContent=activeTeam==='women'?'Bli med og fyll Koteng Arena.':'Bli med og fyll Lerkendal.';
+  $('teamDescription').textContent=activeTeam==='women'
+    ?'Følg RBK Kvinners kamper og ledige sitteplasser. Historikk og tribuneoversikt kommer når målingene er godkjent for publisering.'
+    :'Se hvordan de ledige plassene utvikler seg fram mot avspark. Velg kampen du vil følge – og bli med på å skape stemningen på tribunen.';
+  $('picker-title').textContent=activeTeam==='women'?'RBK Kvinner · velg kamp':'RBK · velg kamp';
+  $('womenPending').hidden=activeTeam!=='women'||matches.length>0;
+  $('match-details').hidden=matches.length===0;
+  if(changed){render([]);renderSectionRecords([]);renderSections(null,null);}
+  cardSignature='';buildCards();
+  if(share)updateShareLink(null);
+  if(!matches.length){current=null;return;}
+  const chosen=matches.some(m=>m.id===current)?current:(chooseByLink(matches)||matches[0].id);
+  await Promise.all([selectMatch(chosen),refreshCardData()]);
+}
+$('teamMen').addEventListener('click',()=>{if(activeTeam!=='men')void showTeam('men');});
+$('teamWomen').addEventListener('click',()=>{if(activeTeam!=='women')void showTeam('women');});
+async function refresh(){
+  if(refreshPromise)return refreshPromise;
+  refreshPromise=(async()=>{
+    $('error').textContent='';
+    const [men,women]=await Promise.all([
+      load('ministaut_matches?select=id,event_key,title,kickoff_at&is_published=eq.true&order=kickoff_at.asc'),
+      load('ministaut_koteng_matches?select=id,event_key,title,kickoff_at,venue_id,team_category&is_published=eq.true&order=kickoff_at.asc')
+    ]);
+    allMatches=men.map(m=>({...m,team_category:'men',venue_id:'lerkendal'})).concat(women);
+    if(!teamInitialized){activeTeam=teamFromURL(allMatches);teamInitialized=true;}
+    await showTeam(activeTeam,{share:false});
+  })().catch(error=>{$('error').textContent='Kunne ikke hente billettdata. Prøv Oppdater.';})
+    .finally(()=>{refreshPromise=null;});
+  return refreshPromise;
+}
+$('refresh').addEventListener('click',()=>{
+  const btn=$('refresh');
+  btn.disabled=true;btn.textContent='Henter…';btn.setAttribute('aria-busy','true');
+  void refresh().finally(()=>{
+    btn.disabled=false;btn.textContent='↻ Oppdater';btn.removeAttribute('aria-busy');
+  });
+});
+void refresh();
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)void refresh();});
+setInterval(()=>{updateAgeIndicator();if(!document.hidden)void refresh();},60000);
+
+</script>
+</body>
+</html>

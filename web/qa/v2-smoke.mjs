@@ -3,9 +3,12 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
 const html=fs.readFileSync(new URL('../v2.html',import.meta.url),'utf8');
-const v1=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
+const v1=fs.readFileSync(new URL('../v1.html',import.meta.url),'utf8');
+const home=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
 assert.match(html,/<title>Ministaut · Følg billettsalget/);
 assert.match(v1,/<title>Ministaut · RBK og RBK Kvinner<\/title>/);
+assert.equal(home,html,'V2 must be the root page, and the /v2 alias must match');
+assert.ok(!html.includes('<svg class="v2-crown"'),'Decorative crown in header must be removed');
 const js=html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
 assert.ok(js,'V2 script exists');
 new vm.Script(js,{filename:'ministaut-v2.js'});
@@ -63,4 +66,4 @@ assert.equal(context.displayForecast(readings(.5),kick).stale,false,'Fresh data 
 assert.equal(context.displayForecast(readings(3),kick).stale,true,'Recent stale data should yield labeled historical projection');
 assert.notEqual(context.displayForecast(readings(13),kick).status,'projected','Very old data must not be projected');
 
-console.log('V2 structure OK: '+ids.length+' IDs, '+colors.length+' palette values, JS syntax valid, V1 preserved.');
+console.log('V2 structure OK: '+ids.length+' IDs, '+colors.length+' palette values, JS syntax valid, V2 home active, V1 preserved at /v1.');

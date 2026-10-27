@@ -21,3 +21,10 @@ Import `GoalPulzdev/ministaut`, velg Root Directory `web`, framework Other. Publ
 
 ## Status
 GoalPulz Sql tabeller og Edge Function er opprettet. Publiseringsstatus i Vercel avhenger av kobling til GitHub. Skannerens opplasting må prøves fra den faktiske Windows-installasjonen.
+## Produksjonsversjon fra 27.10.2026
+- V2 er nå hovedversjon: `web/index.html` (canonical) og `web/v2.html` (kompatibilitetsadresse).
+- V1 ligger uendret i `web/v1.html` og blir publisert på `/v1` som reserve.
+- `web/build.js` lager `public/index.html`, `public/v2.html` og `public/v1.html`.
+- Tipspanelet `/ministaut` har Next.js rewrite til `https://ministaut-web.vercel.app/`, så byttet aktiverer live-forsiden på begge adresser.
+- Videre designendringer må gjøres i `web/index.html` og synkroniseres med `web/v2.html` slik at de to adressene viser identisk side.
+- Ingen endring av billettskanner, Supabase-mottak eller datadefinisjoner.
