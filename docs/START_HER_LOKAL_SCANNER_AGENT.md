@@ -6,7 +6,7 @@
 
 > Du skal bygge grunnlaget for **én komplett Ministaut Scanner Control**, med støtte for alle lag og kamper via versjonerte arenaadaptere. Dette er ikke en frontend-oppgave. Les `docs/SCANNER_AGENT_MASTERPLAN_20261027.md` og `docs/SCANNER_BASELINES_20261027.md` i sin helhet før du endrer kode.
 >
-> **Start kun FASE 0**: Arkiver og verifiser originale skannere. Den fungerende Lerkendal-koden ligger i `scanner/`. Koteng V2.4 kommer som en original 455 KB ZIP i samme PC-mappe som agenten har tilgang til. Bruk `tools/import_koteng_v24_to_repo.py` og verifiser SHA256 `b0ea10aacd80da2d2acf323dc2aadb5268cd9c6c8e0476bc6afa9cd0401d5d6a`. Importer alle filer til `baselines/koteng/v2.4/`.
+> **Start kun FASE 0**: Verifiser originale skannere. Lerkendal-koden ligger i `scanner/`. Koteng V2.4 ligger **allerede komplett i Git** i `baselines/koteng/v2.4/` (PR #28): 42 originale filer og et SHA-manifest. Ingen ZIP-import kreves. Kjør eksisterende tester, sammenlign kjørende installasjoner med Git og dokumenter avvik.
 >
 > Sjekk de **to øvrige scannerinstallasjonene fysisk på PC**. Identifiser om de begge bruker Lerkendal-motoren eller om én av dem har egne modifikasjoner for cup. Registrer kildefilhash, aktiv kamp-ID, konfigurasjon (kun ikke-hemmelige felt), versjon og testresultater. Ingen gjettede versjoner eller kamp-ID-er.
 >
@@ -22,12 +22,11 @@ Kjør i en mappe der du har lov til å lagre prosjektkode:
 git clone https://github.com/GoalPulzdev/ministaut.git
 cd ministaut
 git switch -c feat/scanner-platform-baseline
-py -3 tools/import_koteng_v24_to_repo.py --zip "C:\sti\til\RBK_Koteng_V2_4_NY_SKJERM_KOMPLETT.zip"
-py -3 tools/import_koteng_v24_to_repo.py --zip "C:\sti\til\RBK_Koteng_V2_4_NY_SKJERM_KOMPLETT.zip" --apply
+py -3 -m unittest discover -s scanner-control/tests -v
 git status --short
 ```
 
-**Bytt ut eksempelfilstien med den virkelige ZIP-plasseringen.** Første kommando er «dry run». Ingen Git push gjøres automatisk.
+**Koteng V2.4 er allerede i Git.** Ikke kjør import-skriptet. Test først de arkiverte kildefilene og de aktive installasjonene, uten å endre produksjonskjøringer.
 
 Kjør så eksisterende lokale tester fra riktig skannerkatalog:
 
