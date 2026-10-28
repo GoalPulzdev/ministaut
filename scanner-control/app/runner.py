@@ -131,8 +131,8 @@ def register_koteng(job: Job, base: Path):
 
 
 def schedule_after(job: Job, failures: int, time: datetime) -> str:
-    minutes = job.interval_minutes if failures == 0 else min(60, 5 * (2 ** min(failures, 4)))
-    return iso(time + timedelta(minutes=minutes))
+    minutes = None if failures == 0 else min(60, 5 * (2 ** min(failures, 4)))
+    return iso(job.next_after(time, minutes))
 
 
 def outbox_retry(attempts: int, time: datetime, jitter: float | None = None) -> str:
@@ -222,12 +222,9 @@ class Controller:
         now = when or datetime.now(timezone.utc)
         if job.key in self.active:
             raise RuntimeError('Kamp er allerede i gang')
-        if job.kickoff() <= now:
-            self.store.set_due(job.key, None, DONE)
-            raise RuntimeError('Kampstart er passert; skanneren stoppes')
-        if job.last_start() <= now:
-            self.store.set_due(job.key, None, DONE, note=f'Ingen nye skanninger de siste {job.stop_before_minutes} min før avspark.')
-            raise RuntimeError(f'For nær avspark (sperre {job.stop_before_minutes} min)')
+        if job.start_deadline() <= now:
+            self.store.set_due(job.key, None, DONE, note='Siste skanning for kampen er passert.')
+            raise RuntimeError('Siste skanning for kampen er passert')
         if not force and not job.enabled:
             raise RuntimeError('Aktiver først jobben i kontrollpanelet')
         # One engine folder = one Edge profile/CDP port. Never two of a kind at once.
@@ -286,9 +283,9 @@ class Controller:
     def poll(self, when: datetime | None = None):
         now = when or datetime.now(timezone.utc)
         for key, active in tuple(self.active.items()):
-            if active.job.kickoff() <= now and active.process.poll() is None and active.stop_reason is None:
+            if active.job.hard_stop() <= now and active.process.poll() is None and active.stop_reason is None:
                 try:
-                    self.stop(key, KICKOFF)  # an in-progress scan must not continue past kickoff
+                    self.stop(key, KICKOFF)  # an in-progress scan must not run on after the last slot
                 except Exception as exc:
                     self.say(f'{active.job.label}: {exc}')
             elif (active.job.profile in ONE_SHOT and active.stop_reason is None
@@ -311,11 +308,16 @@ class Controller:
             state = self.store.state(job.key)
             if state['last_status'] == REVIEW:
                 continue
-            if job.last_start() <= now:
+            if job.start_deadline() <= now:
                 if state['next_due'] or state['last_status'] != DONE:
                     self.store.set_due(job.key, None, DONE)
                 continue
             due = state['next_due']
+            if due:
+                pulled = job.effective_due(parse_utc(due), now)
+                if pulled != parse_utc(due):
+                    due = iso(pulled)
+                    self.store.set_due(job.key, due, None, note=state['note'])
             if due and parse_utc(due) <= now:
                 try:
                     self.start(job, when=now)
@@ -364,7 +366,7 @@ class Controller:
         fails = 0 if ok or status in (STOPPED, KICKOFF, DONE) else self.store.state(key)['failures'] + 1
         current = self.store.job(key) or job
         due = None
-        if current.enabled and current.profile in ONE_SHOT and current.last_start() > now and status not in (STOPPED, KICKOFF):
+        if current.enabled and current.profile in ONE_SHOT and current.start_deadline() > now and status not in (STOPPED, KICKOFF):
             due = schedule_after(current, fails, now)
         self.store.finish(active.run_id, key, status, code, due, fails, summary)
         if active.lock.exists():

@@ -89,11 +89,11 @@ class ModelTests(unittest.TestCase):
             with self.assertRaises(ValueError):replace(j,key='6ac390963b28cba4d656278f')
             with self.assertRaises(ValueError):replace(j,venue='lerkendal')
             with self.assertRaises(ValueError):replace(j,interval_minutes=5)
-            with self.assertRaises(ValueError):replace(j,stop_before_minutes=-1)
+            with self.assertRaises(ValueError):replace(j,stop_before_minutes=-31)
     def test_v01_config_loads(self):
         with tempfile.TemporaryDirectory() as td:
             data=sample(Path(td)).as_json();data.pop('stop_before_minutes')
-            self.assertEqual(Job.from_json(data).stop_before_minutes,20)
+            self.assertEqual(Job.from_json(data).stop_before_minutes,-5)
     def test_schedule_and_no_catchup(self):
         with tempfile.TemporaryDirectory() as td:
             j=sample(Path(td))
@@ -101,6 +101,24 @@ class ModelTests(unittest.TestCase):
             self.assertEqual(parse_utc(schedule_after(j,0,t))-t,timedelta(hours=1))
             self.assertEqual(parse_utc(schedule_after(j,1,t))-t,timedelta(minutes=10))
             self.assertEqual(parse_utc(schedule_after(j,5,t))-t,timedelta(minutes=60))
+    def test_final_phase_every_15_min(self):
+        with tempfile.TemporaryDirectory() as td:
+            j=replace(sample(Path(td)),kickoff_at='2026-10-29T17:00:00+00:00')
+            k=j.kickoff();fs=k-timedelta(minutes=85)
+            self.assertEqual(j.final_start(),fs);self.assertEqual(j.last_start(),k+timedelta(minutes=5))
+            # follow the slots -85,-70,...,-10,+5 (a scan finishing ~30 s after its slot)
+            t,slots=fs-timedelta(minutes=20),[]
+            while t<j.start_deadline():
+                t=parse_utc(schedule_after(j,0,t));slots.append(int((t-k).total_seconds()//60));t+=timedelta(seconds=30)
+            self.assertEqual(slots,[-85,-70,-55,-40,-25,-10,5,20])
+            self.assertEqual(parse_utc(schedule_after(j,3,fs+timedelta(seconds=30))),fs+timedelta(minutes=15))
+            # a slot planned with the old hourly rule is pulled forward
+            self.assertEqual(j.effective_due(fs+timedelta(minutes=40),fs-timedelta(hours=1)),fs)
+            self.assertEqual(j.effective_due(fs+timedelta(minutes=50),fs+timedelta(minutes=5)),fs+timedelta(minutes=15))
+            self.assertEqual(j.effective_due(fs+timedelta(minutes=15),fs+timedelta(minutes=16)),fs+timedelta(minutes=15))
+            with self.assertRaises(ValueError):replace(j,final_interval_minutes=5)
+            data=j.as_json();data.pop('final_window_minutes');data.pop('final_interval_minutes')
+            self.assertEqual((Job.from_json(data).final_window_minutes,Job.from_json(data).final_interval_minutes),(90,15))
     def test_outbox_backoff(self):
         t=datetime(2026,10,27,10,tzinfo=timezone.utc)
         self.assertEqual(parse_utc(outbox_retry(1,t,0))-t,timedelta(minutes=2))
@@ -204,17 +222,27 @@ class ControllerTests(unittest.TestCase):
         self.assertEqual(self.store.state(EVENT)['last_status'],'ferdig')
 
     def test_no_start_inside_kickoff_margin(self):
-        soon=replace(self.job,kickoff_at=(datetime.now(timezone.utc)+timedelta(minutes=10)).isoformat(),enabled=True)
+        soon=replace(self.job,kickoff_at=(datetime.now(timezone.utc)+timedelta(minutes=10)).isoformat(),enabled=True,stop_before_minutes=20)
         self.store.put_job(soon)
         with self.assertRaises(RuntimeError):self.ctrl.start(soon,force=True)
         self.assertEqual(self.store.state(EVENT)['last_status'],'ferdig')
         self.assertEqual(self.procs,[])
 
-    def test_running_scan_killed_at_kickoff(self):
-        self.ctrl.start(self.job,force=True)
+    def test_scan_after_kickoff_allowed_until_last_slot(self):
+        started=replace(self.job,kickoff_at=(datetime.now(timezone.utc)-timedelta(minutes=4)).isoformat(),enabled=True)
+        self.store.put_job(started)
+        self.ctrl.start(started,force=True)  # last slot is kickoff + 5 min
+        self.assertEqual(len(self.procs),1)
+
+    def test_running_scan_killed_after_last_slot(self):
+        job=replace(self.job,kickoff_at=(datetime.now(timezone.utc)+timedelta(minutes=3)).isoformat())
+        self.store.put_job(job)
+        self.ctrl.start(job,force=True)
         with mock.patch('app.runner._kill_tree',side_effect=lambda p:setattr(p,'code',1)):
-            self.ctrl.poll(self.job.kickoff()+timedelta(seconds=1))
-            self.ctrl.poll(self.job.kickoff()+timedelta(seconds=3))
+            self.ctrl.poll(job.kickoff()+timedelta(seconds=1))
+            self.assertIsNone(self.ctrl.active[EVENT].stop_reason)  # kickoff alone no longer stops it
+            self.ctrl.poll(job.hard_stop()+timedelta(seconds=1))
+            self.ctrl.poll(job.hard_stop()+timedelta(seconds=3))
         self.assertEqual(self.store.state(EVENT)['last_status'],runner.KICKOFF)
         self.assertIsNone(self.store.latest(EVENT))
 

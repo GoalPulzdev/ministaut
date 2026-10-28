@@ -64,12 +64,16 @@ class Editor(tk.Toplevel):
             'time': kickoff.strftime('%H:%M') if kickoff else '',
             'scanner_path': j.scanner_path if j else ENGINES['lerkendal_v23'][1],
             'interval_minutes': str(j.interval_minutes if j else 60),
-            'stop_before_minutes': str(j.stop_before_minutes if j else 20)}.items()}
+            'stop_before_minutes': str(j.stop_before_minutes if j else -5),
+            'final_window_minutes': str(j.final_window_minutes if j else 90),
+            'final_interval_minutes': str(j.final_interval_minutes if j else 15)}.items()}
         rows = [('Kampnavn', 'label', 'entry'), ('Lag', 'team', 'team'), ('Skannermotor', 'profile', 'profile'),
                 ('Billett-URL (checkout)', 'url', 'url'), ('Avspark dato (dd.mm.åååå)', 'date', 'entry'),
                 ('Avspark klokkeslett, norsk tid', 'time', 'entry'), ('Mappe med skannermotor', 'scanner_path', 'entry'),
                 ('Intervall (minutter)', 'interval_minutes', 'entry'),
-                ('Ingen ny skanning siste … min før avspark', 'stop_before_minutes', 'entry')]
+                ('Siste skanning, min før avspark (−5 = 5 min etter)', 'stop_before_minutes', 'entry'),
+                ('Sluttfase: siste … min før avspark', 'final_window_minutes', 'entry'),
+                ('Intervall i sluttfasen (minutter)', 'final_interval_minutes', 'entry')]
         for i, (label, key, kind) in enumerate(rows):
             tk.Label(self, text=label, bg=BG, fg=FG, font=('Segoe UI', 10)).grid(row=i, column=0, padx=15, pady=6, sticky='w')
             if kind == 'team':
@@ -106,9 +110,9 @@ class Editor(tk.Toplevel):
         try:
             v = {k: x.get().strip() for k, x in self.v.items()}
             kickoff = oslo.parse_local(v.pop('date'), v.pop('time'))
-            for k in ('interval_minutes', 'stop_before_minutes'):
+            for k in ('interval_minutes', 'stop_before_minutes', 'final_window_minutes', 'final_interval_minutes'):
                 try:
-                    v[k] = int(v[k])
+                    v[k] = int(v[k].replace('−', '-'))
                 except ValueError:
                     raise ValueError('Intervall og sperre må være hele minutter') from None
             v['venue'] = ENGINES[v['profile']][0]
@@ -494,7 +498,7 @@ class App:
         if j is None:
             self.note.configure(text='Velg en kamp for detaljer.', fg=DIM)
             return
-        lead = f'{j.label}  ·  {j.team}  ·  avspark {when_text(j.kickoff_at)}  ·  siste start {oslo.text(j.last_start(), "%d.%m %H:%M")}'
+        lead = f'{j.label}  ·  {j.team}  ·  avspark {when_text(j.kickoff_at)}  ·  siste skanning {oslo.text(j.last_start(), "%d.%m %H:%M")}'
         note = st.get('note') or ''
         self.note.configure(text=lead + (('\n' + note) if note else ''),
                             fg=WARN if st['last_status'] == REVIEW else BAD if st['last_status'] == FAILED else DIM)
