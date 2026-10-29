@@ -28,3 +28,11 @@ GoalPulz Sql tabeller og Edge Function er opprettet. Publiseringsstatus i Vercel
 - Tipspanelet `/ministaut` har Next.js rewrite til `https://ministaut-web.vercel.app/`, så byttet aktiverer live-forsiden på begge adresser.
 - Videre designendringer må gjøres i `web/index.html` og synkroniseres med `web/v2.html` slik at de to adressene viser identisk side.
 - Ingen endring av billettskanner, Supabase-mottak eller datadefinisjoner.
+
+## Supporter-, medie- og driftsfunksjoner (fra 29.10.2026)
+- Kampside: «Blir det fullt?», trøkk-indeks (100 = et vanlig salgsdøgn på arenaen), salgskurve mot tidligere kamper, anslag fra tidligere kamper, felt som gikk først, «Skal dere være flere?», «Når bør du kjøpe?», «Slik gikk kampdagen» for spilte kamper, og **Del** (ferdig tekst + bilde 1080×1080).
+- Lagside: «Sesongen så langt» med rekorder fra alle fulgte kamper.
+- Push-varsler: `supabase/functions/ministaut-push` (påmelding) og `ministaut-push-notify` (pg_cron hvert 10. min), tabeller i `supabase/push_alerts.sql`. Nøkler ligger kun i Supabase secrets/Vault.
+- Nye kamper: `supabase/functions/ministaut-register-match` (skannertoken) publiserer kampen når Live slås på i Scanner Control.
+- Drift: `/status` (ikke indeksert) sjekker hver kamp ut fra de offentlige målingene.
+- Alt bygger på de samme målingene; ingen nye datakilder. Ledige ≠ bekreftet solgt.

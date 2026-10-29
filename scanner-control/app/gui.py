@@ -10,6 +10,7 @@ from tkinter import ttk, messagebox, filedialog
 from . import __version__, health, locks, oslo
 from .model import ENGINES, ONE_SHOT, Job, checkout_key, parse_utc
 from .observations import token_configured
+from .publish import register_on_web
 from .runner import Controller, REVIEW, FAILED, PLANNED, REJECTED, TIMEOUT
 from .storage import Store
 from .cards import CardGrid
@@ -18,10 +19,18 @@ BG = '#09160f'; PANEL = '#14271b'; PANEL2 = '#1d3526'; FG = '#eaf8ec'; DIM = '#9
 WARN = '#ffcf7a'; BAD = '#ff8f8f'
 TICK_MS = 2000
 # Compact badge text for the cards; full status stays in the detail line.
+# Team -> engine for a home match; editing the team picks the matching scanner.
+TEAM_ENGINE = {'RBK Herrer': 'lerkendal_v23', 'RBK Kvinner': 'koteng_v24'}
 SHORT = {'publisert observasjon': 'PUBLISERT', 'bekreftet lokalt': 'BEKREFTET', 'køet for sending': 'SENDES',
          'avvist av kvalitetskontroll': 'AVVIST', 'trenger gjennomgang': 'SJEKK LÅS', 'stoppet ved avspark': 'AVSPARK',
          'tidsavbrudd': 'TIDSAVBRUDD', 'planlagt': 'PLANLAGT', 'ferdig': 'FERDIG', 'feil': 'FEIL', 'klar': 'KLAR',
          'av': 'PAUSE', 'stoppet': 'STOPPET'}
+
+
+def clean_checkout(url: str) -> str:
+    """Accept a pasted ticket link with tracking parameters or a trailing slash."""
+    url = url.strip().split('#', 1)[0].split('?', 1)[0].rstrip('/')
+    return url.replace('http://', 'https://', 1)
 
 
 def when_text(value: str | None) -> str:
@@ -78,6 +87,7 @@ class Editor(tk.Toplevel):
             tk.Label(self, text=label, bg=BG, fg=FG, font=('Segoe UI', 10)).grid(row=i, column=0, padx=15, pady=6, sticky='w')
             if kind == 'team':
                 w = ttk.Combobox(self, textvariable=self.v[key], values=teams, width=50)
+                w.bind('<<ComboboxSelected>>', self.team_changed)
             elif kind == 'profile':
                 w = ttk.Combobox(self, textvariable=self.v[key], values=sorted(ENGINES), state='readonly', width=50)
                 w.bind('<<ComboboxSelected>>', self.engine_changed)
@@ -91,13 +101,20 @@ class Editor(tk.Toplevel):
         self.engine_changed(keep_path=True)
         bar = tk.Frame(self, bg=BG); bar.grid(row=len(rows) + 1, column=1, sticky='ew', padx=10, pady=14)
         ttk.Button(bar, text='Velg mappe', command=self.browse).pack(side='left')
-        ttk.Button(bar, text='Lagre (deaktivert)', command=self.save).pack(side='right')
+        ttk.Button(bar, text='Lagre og aktiver', command=lambda: self.save(True), style='Primary.TButton').pack(side='right')
+        ttk.Button(bar, text='Lagre (deaktivert)', command=self.save).pack(side='right', padx=(0, 6))
         self.bind('<Escape>', lambda _e: self.destroy())
+
+    def team_changed(self, _evt=None):
+        engine = TEAM_ENGINE.get(self.v['team'].get())
+        if engine and not self.existing:
+            self.v['profile'].set(engine)
+            self.engine_changed()
 
     def engine_changed(self, _evt=None, keep_path=False):
         venue, folder = ENGINES[self.v['profile'].get()]
-        self.venue.configure(text='Arena: ' + venue + ('   ·   Koteng-motoren er låst til Rosenborg–Røa'
-                                                        if venue == 'koteng_arena' else ''))
+        self.venue.configure(text='Arena: ' + venue.replace('_', ' ').title()
+                             + '   ·   publiseres på nettsiden når du slår på Live')
         if not keep_path:
             self.v['scanner_path'].set(folder)
 
@@ -106,9 +123,10 @@ class Editor(tk.Toplevel):
         if dest:
             self.v['scanner_path'].set(dest)
 
-    def save(self):
+    def save(self, activate: bool = False):
         try:
             v = {k: x.get().strip() for k, x in self.v.items()}
+            v['url'] = clean_checkout(v['url'])
             kickoff = oslo.parse_local(v.pop('date'), v.pop('time'))
             for k in ('interval_minutes', 'stop_before_minutes', 'final_window_minutes', 'final_interval_minutes'):
                 try:
@@ -119,7 +137,7 @@ class Editor(tk.Toplevel):
             v['key'] = checkout_key(v['url'])
             v['kickoff_at'] = kickoff.isoformat()
             job = Job(**v, enabled=False, upload=False)
-            self.on_save(job, self.existing.key if self.existing else None)
+            self.on_save(job, self.existing.key if self.existing else None, activate)
             self.destroy()
         except Exception as exc:
             messagebox.showerror('Kan ikke lagre kamp', str(exc), parent=self)
@@ -277,10 +295,14 @@ class App:
         self.events.see('end'); self.events.configure(state='disabled')
 
     # --- actions -------------------------------------------------------------
-    def save_job(self, job: Job, original: str | None):
+    def save_job(self, job: Job, original: str | None, activate: bool = False):
         self.controller.save_job(job, original)
         self.selected = job.key
-        self.event(f'{job.label}: lagret (deaktivert til du aktiverer)')
+        if activate:
+            self.controller.enable(job.key, True, False)
+            self.event(f'{job.label}: lagret og aktivert (lokal skanning, slå på Live for å publisere)')
+        else:
+            self.event(f'{job.label}: lagret (deaktivert til du aktiverer)')
         self.render()
 
     def teams(self) -> list[str]:
@@ -338,9 +360,27 @@ class App:
                     'Bare målinger som består kontrollprogrammets egen etterkontroll publiseres som observerte '
                     'sitteplasser til Ministaut. Feilede sendinger prøves på nytt automatisk.'):
                 return
+            if desired and not self.publish_match(j):
+                return
             self.controller.enable(j.key, True, desired)
             self.event('Live ' + ('aktivert' if desired else 'deaktivert') + ' for ' + j.label)
         self.handle(work)
+
+    def publish_match(self, j: Job) -> bool:
+        """Put the match on the web page (title, kickoff) before the first live scan."""
+        self.root.config(cursor='watch'); self.root.update_idletasks()
+        try:
+            match = register_on_web(j, self.base)
+        except RuntimeError as exc:
+            koteng = j.venue == 'koteng_arena'
+            return self.ask('Ikke publisert på nettsiden', f'Kunne ikke publisere «{j.label}» på nettsiden:\n{exc}\n\n'
+                            + ('Koteng-målinger blir liggende i utboksen til kampen er registrert.'
+                               if koteng else 'Lerkendal-kampen opprettes uansett ved første godkjente måling.')
+                            + '\n\nSlå på Live likevel?')
+        finally:
+            self.root.config(cursor='')
+        self.event(f"{j.label}: publisert på nettsiden (avspark {when_text(match.get('kickoff_at'))})")
+        return True
 
     def test(self):
         def work():
