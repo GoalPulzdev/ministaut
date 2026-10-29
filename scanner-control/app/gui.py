@@ -8,7 +8,7 @@ import sys
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from . import __version__, health, locks, oslo
-from .model import ENGINES, Job, checkout_key, parse_utc
+from .model import ENGINES, ONE_SHOT, Job, checkout_key, parse_utc
 from .observations import token_configured
 from .runner import Controller, REVIEW, FAILED, PLANNED, REJECTED, TIMEOUT
 from .storage import Store
@@ -141,6 +141,7 @@ class App:
         self._seed()
         self.controller.mark_stale_locks()
         self.selected: str | None = None
+        self.show_archive = False
         self.closing = False
         self._log_shown = ('', 0.0)
         self._detail_shown = None
@@ -176,6 +177,8 @@ class App:
                                   ('Aktiver / Pause', self.toggle, 'TButton'), ('Live av/på', self.live, 'TButton'),
                                   ('Stopp', self.stop, 'Danger.TButton')]:
             ttk.Button(bar, text=label, command=fun, style=style).pack(side='left', padx=(0, 6))
+        self.archive_button = ttk.Button(bar, text='Arkiv', command=self.toggle_archive, style='Ghost.TButton')
+        self.archive_button.pack(side='right', padx=(6, 0))
         for label, fun in [('Systemsjekk', self.health), ('Frigi lås', self.release), ('Åpne mappe', self.folder),
                            ('Slett', self.delete), ('Rediger', self.edit), ('+ Legg til kamp', self.add)]:
             ttk.Button(bar, text=label, command=fun, style='Ghost.TButton' if label[0] != '+' else 'Primary.TButton'
@@ -400,6 +403,12 @@ class App:
             self.event('Systemsjekk: ' + ('avvik funnet' if blocking else 'ingen blokkerende feil'))
         self.handle(work)
 
+    def toggle_archive(self):
+        self.show_archive = not self.show_archive
+        self.selected = None
+        self._detail_shown = None
+        self.render()
+
     def pick(self, key: str):
         self.selected = key
         self._log_shown = ('', 0.0)
@@ -423,9 +432,13 @@ class App:
         self.controller.messages.clear()
         now = datetime.now(timezone.utc)
         jobs = self.store.jobs()
+        # Played matches leave the scanner view; a scan still running is never hidden.
+        archived = [j for j in jobs if j.finished(now) and j.key not in self.controller.active]
+        current = [j for j in jobs if j not in archived]
         busy = {a.job.profile for a in self.controller.active.values()}
         cards = []
-        for j in jobs:
+        shown = sorted(archived, key=Job.kickoff, reverse=True) if self.show_archive else current
+        for j in shown:
             st = self.store.state(j.key)
             hist = self.store.history(j.key, 24)
             latest = hist[0] if hist else None
@@ -448,10 +461,14 @@ class App:
                 status = 'LIVE · ' + status if status != 'PLANLAGT' else 'LIVE'
             if j.profile == 'lerkendal_legacy':
                 status = 'LEGACY · ' + status
+            if j in archived:
+                status, tone = 'SPILT', 'off'
             kick = j.kickoff()
             days = (kick - now).days
-            until = 'passert' if kick <= now else (f'om {days} d' if days >= 1 else f'om {int((kick - now).total_seconds() // 3600)} t')
-            if j.key in self.controller.active:
+            until = 'spilt' if j in archived else 'passert' if kick <= now else (f'om {days} d' if days >= 1 else f'om {int((kick - now).total_seconds() // 3600)} t')
+            if j in archived:
+                nxt = 'arkivert'
+            elif j.key in self.controller.active:
                 nxt = 'skanner nå …'
             elif due and j.enabled:
                 mins = int((due - now).total_seconds() // 60)
@@ -467,8 +484,9 @@ class App:
                           'measured': ('målt ' + age_text(latest['observed_at'], now) + ' siden').replace('målt nå siden', 'målt nå')
                                       if latest else 'ikke målt ennå',
                           'next': nxt, 'points': [h['available_seated'] for h in reversed(hist)]})
-        self.cards.sync(cards, self.selected)
-        live = [j for j in jobs if j.upload]
+        self.cards.sync(cards, self.selected, 'Ingen spilte kamper ennå.' if self.show_archive else None)
+        self.archive_button.configure(text='← Tilbake til kamper' if self.show_archive else f'Arkiv ({len(archived)})')
+        live = [j for j in current if j.upload]
         if self.controller.active:
             self.live_pill.configure(text=f'●  SKANNER  {len(self.controller.active)}', bg='#7cc4ff', fg='#04121f')
         elif live:
@@ -477,7 +495,7 @@ class App:
             self.live_pill.configure(text='○  INGEN LIVE-KAMPER', bg=PANEL2, fg=DIM)
         box = self.store.outbox_counts()
         pending = box.get('venter', 0) + box.get('sender', 0)
-        self.summary.configure(text=f'{len(jobs)} kamper  ·  {pending} i utboks  ·  {box.get("sendt", 0)} målinger publisert'
+        self.summary.configure(text=f'{len(current)} kamper  ·  {len(archived)} i arkiv  ·  {pending} i utboks  ·  {box.get("sendt", 0)} målinger publisert'
                                     f'  ·  versjon {__version__}')
         self.footer.configure(text='Tider vises i norsk tid. Ledige = observerte ledige sitteplasser i valgt '
                                    'billettkategori, ikke bekreftet salg. Ingen skanning starter før du aktiverer en kamp.')

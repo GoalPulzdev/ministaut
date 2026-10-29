@@ -80,6 +80,11 @@ class ModelTests(unittest.TestCase):
     def test_kickoff_requires_timezone(self):
         with self.assertRaises(ValueError):parse_utc('2026-11-01T14:30:00')
         self.assertEqual(parse_utc('2026-11-01T14:30:00+01:00').hour,13)
+    def test_match_archived_two_hours_after_kickoff(self):
+        with tempfile.TemporaryDirectory() as td:
+            j=sample(Path(td));k=j.kickoff()
+            self.assertFalse(j.finished(k+timedelta(minutes=119)))
+            self.assertTrue(j.finished(k+timedelta(hours=2)))
     def test_profile_locks_event(self):
         with tempfile.TemporaryDirectory() as td:
             j=sample(Path(td))

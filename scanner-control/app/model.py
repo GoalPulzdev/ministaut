@@ -7,6 +7,8 @@ from urllib.parse import urlsplit
 import re
 
 START_GRACE = timedelta(minutes=2)
+# A match moves to the archive this long after kickoff (the web page uses the same rule).
+ARCHIVE_AFTER = timedelta(hours=2)
 EVENT = re.compile(r'^[A-Za-z0-9_-]{8,100}$')
 PROFILES = {'koteng_v24', 'lerkendal_v23', 'lerkendal_legacy'}
 # Engines the control program runs as one unattended scan per job.
@@ -92,6 +94,10 @@ class Job:
 
     def kickoff(self) -> datetime:
         return parse_utc(self.kickoff_at)
+
+    def finished(self, now: datetime) -> bool:
+        """Played: shown in the archive instead of among the scanned matches."""
+        return now >= self.kickoff() + ARCHIVE_AFTER
 
     def last_start(self) -> datetime:
         """Planned slot of the last scan."""

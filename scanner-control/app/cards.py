@@ -143,7 +143,7 @@ class CardGrid(tk.Frame):
         self.canvas.itemconfigure(self.window, width=width)
         self._scroll_region()
 
-    def sync(self, data: list[dict], selected: str | None):
+    def sync(self, data: list[dict], selected: str | None, empty: str | None = None):
         keys = [d['key'] for d in data]
         for key in list(self.cards):
             if key not in keys:
@@ -161,4 +161,5 @@ class CardGrid(tk.Frame):
         if keys:
             self.empty.grid_forget()
         else:
+            self.empty.configure(text=empty or 'Ingen kamper ennå. Trykk «+ Legg til kamp».')
             self.empty.grid(row=0, column=0, sticky='w', pady=20)
