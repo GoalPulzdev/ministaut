@@ -88,6 +88,14 @@ button:focus-visible, a:focus-visible, .chart-wrap svg:focus-visible {
 .tile-spark svg { width: 100%; height: 100%; display: block; }
 .tile-foot { grid-area: meta; color: var(--subtle); font-size: 12px; line-height: 1.4; overflow-wrap: break-word; }
 .match-tile[data-stale="true"] .tile-foot { color: #dec48d; }
+.played-archive { margin-top: 18px; border-top: 1px solid var(--stroke); padding-top: 14px; }
+.played-archive > summary { cursor: pointer; list-style: none; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; color: var(--secondary); font-size: 15px; font-weight: 760; }
+.played-archive > summary::-webkit-details-marker { display: none; }
+.played-archive > summary::after { content: "Vis ▾"; color: var(--subtle); font-size: 12px; font-weight: 600; }
+.played-archive[open] > summary::after { content: "Skjul ▴"; }
+.played-archive .match-list { margin-top: 12px; }
+.match-tile[data-played="true"] { opacity: .78; }
+.match-tile[data-played="true"]:hover, .match-tile[data-played="true"][aria-pressed="true"] { opacity: 1; }
 .results { scroll-margin-top: 16px; margin-top: 34px; }
 .details-head { display: flex; justify-content: space-between; align-items: end; gap: 18px; margin-bottom: 15px; }
 .details-head h2 { margin: 6px 0 5px; font-size: clamp(23px,2.8vw,29px); font-weight: 780; letter-spacing: -.035em; line-height: 1.18; }
@@ -843,6 +851,10 @@ body{background:#070707}
   <section class="picker-section" aria-labelledby="picker-title">
     <div class="section-heading"><h2 id="picker-title" class="section-title">Kommende hjemmekamper</h2><span class="section-help">Trykk på et kampkort for å se utviklingen</span></div>
     <div class="match-list" id="matchCards" role="group" aria-label="Velg kamp for valgt lag"><div class="empty">Henter kampene …</div></div>
+    <details id="playedSection" class="played-archive" hidden>
+      <summary id="playedTitle">Spilte kamper</summary>
+      <div class="match-list" id="playedCards" role="group" aria-label="Spilte kamper for valgt lag"></div>
+    </details>
     <div id="womenPending" class="women-pending" hidden>
       <div class="overline">RBK KVINNER · KOTENG ARENA</div>
       <h3>RBK Kvinner · billetter</h3>
@@ -997,6 +1009,9 @@ function crestFor(title){
 const WOMEN_KEYS=new Set(['6aaceecebfe408c38e1712dd']);
 function categoryFor(match){return match.team_category==='women'?'women':match.team_category==='men'?'men':WOMEN_KEYS.has(match.event_key)?'women':'men';}
 function venueFor(match){return match.venue_id==='koteng_arena'||match.venue_id==='lerkendal'?match.venue_id:WOMEN_KEYS.has(match.event_key)?'koteng_arena':'lerkendal';}
+// A match counts as played this long after kickoff (same rule as Scanner Control's archive).
+const PLAYED_AFTER_MS=2*3600000;
+function isPlayed(match,now=Date.now()){const k=Date.parse(match?.kickoff_at||'');return Number.isFinite(k)&&now>=k+PLAYED_AFTER_MS;}
 function teamFromURL(items){
   try{const q=new URLSearchParams(window.location.search),linked=items.find(m=>m.event_key===q.get('kamp'));return linked?categoryFor(linked):q.get('lag')==='kvinner'?'women':'men';}catch{return 'men';}
 }
@@ -1004,8 +1019,9 @@ let allMatches=[],matches=[],activeTeam='men',selectedVenue='lerkendal',teamInit
 let current=null,cards=new Map(),cardSignature='',selectionVersion=0,refreshPromise=null,lastObservedAt=null,selectedKickoff=null,sectionSelection=null;
 function updateAgeIndicator(){
   const badge=$('age');
-  badge.textContent=ageLabel(lastObservedAt);
-  badge.setAttribute('data-stale',String(overdue(lastObservedAt)));
+  const played=isPlayed(matches.find(m=>m.id===current));
+  badge.textContent=played?'Kampen er spilt · arkiv':ageLabel(lastObservedAt);
+  badge.setAttribute('data-stale',String(!played&&overdue(lastObservedAt)));
 }
 
 async function load(path){
@@ -1362,13 +1378,15 @@ function render(scans){
 }
 
 function createCard(match){
+  const played=isPlayed(match);
   const button=document.createElement('button');
   button.type='button';button.className='match-tile';button.dataset.matchId=match.id;
+  if(played)button.dataset.played='true';
   button.setAttribute('aria-label','Vis billettstatus for '+match.title);
   button.setAttribute('aria-pressed','false');
   const top=document.createElement('span');top.className='tile-top';
-  const kickoff=document.createElement('span');kickoff.textContent=match.kickoff_at?'Avspark '+date(match.kickoff_at):'Kampstart kommer';top.append(kickoff);
-  const pill=document.createElement('span');pill.className='tile-pill';pill.textContent='SE KAMP';top.append(pill);
+  const kickoff=document.createElement('span');kickoff.textContent=match.kickoff_at?(played?'Spilt ':'Avspark ')+date(match.kickoff_at):'Kampstart kommer';top.append(kickoff);
+  const pill=document.createElement('span');pill.className='tile-pill';pill.textContent=played?'SPILT':'SE KAMP';top.append(pill);
   const matchup=document.createElement('span');matchup.className='tile-matchup';
   const title=document.createElement('span');title.className='tile-title';title.textContent=match.title;
   const crestGroup=document.createElement('span');crestGroup.className='tile-crest-group';
@@ -1407,26 +1425,31 @@ function createCard(match){
       $('match-details').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
     }
   });
-  return {button,pill,value,foot,spark};
+  return {button,pill,value,foot,spark,played};
 }
 
 function updateSelectedCards(){
   for(const [id,item] of cards){
     const selected=id===current;
     item.button.setAttribute('aria-pressed',String(selected));
-    item.pill.textContent=selected?'VALGT KAMP':'SE KAMP';
+    item.pill.textContent=selected?'VALGT KAMP':item.played?'SPILT':'SE KAMP';
   }
 }
 
 function buildCards(){
-  const signature=matches.map(m=>m.id+'|'+m.title+'|'+m.kickoff_at).join(';');
+  const signature=matches.map(m=>m.id+'|'+m.title+'|'+m.kickoff_at+'|'+isPlayed(m)).join(';');
   if(signature===cardSignature){updateSelectedCards();return;}
   cardSignature=signature;
   cards=new Map();
-  const target=$('matchCards');
-  target.replaceChildren();
-  if(!matches.length){const empty=document.createElement('p');empty.className='empty';empty.textContent='Ingen kamper er publisert ennå.';target.append(empty);return;}
-  for(const m of matches){const card=createCard(m);cards.set(m.id,card);target.append(card.button);}
+  const target=$('matchCards'),archive=$('playedCards');
+  target.replaceChildren();archive.replaceChildren();
+  // Played matches move to the archive below, newest first.
+  const upcoming=matches.filter(m=>!isPlayed(m)),played=matches.filter(m=>isPlayed(m)).reverse();
+  $('playedSection').hidden=!played.length;
+  $('playedTitle').textContent='Spilte kamper ('+played.length+')';
+  if(!upcoming.length){const empty=document.createElement('p');empty.className='empty';empty.textContent=matches.length?'Ingen kommende kamper akkurat nå. Se spilte kamper under.':'Ingen kamper er publisert ennå.';target.append(empty);}
+  for(const m of upcoming){const card=createCard(m);cards.set(m.id,card);target.append(card.button);}
+  for(const m of played){const card=createCard(m);cards.set(m.id,card);archive.append(card.button);}
   updateSelectedCards();
 }
 
@@ -1458,9 +1481,9 @@ async function refreshCardData(){
       if(cards.get(match.id)!==card)return;
       if(!data.length){
         card.value.textContent='—';
-        card.foot.textContent='Venter på første telling';
+        card.foot.textContent=card.played?'Ingen målinger':'Venter på første telling';
         card.spark.replaceChildren();card.spark.dataset.series='';
-        card.button.setAttribute('data-stale','true');
+        card.button.setAttribute('data-stale',String(!card.played));
         return;
       }
       const latest=data[0],previous=data[1];
@@ -1469,10 +1492,11 @@ async function refreshCardData(){
       const wording=delta===null?''
         :delta<0?' · '+fmt(-delta)+' færre ledige'
         :delta>0?' · '+fmt(delta)+' flere ledige':' · Uendret';
-      card.foot.textContent='Målt '+date(latest.observed_at)+wording+(overdue(latest.observed_at)?' · avventer ny telling':'');
+      const stale=!card.played&&overdue(latest.observed_at);
+      card.foot.textContent=(card.played?'Siste måling ':'Målt ')+date(latest.observed_at)+wording+(stale?' · avventer ny telling':'');
       const sameConfig=data.filter(p=>comparable(p,latest)).reverse();
       drawSparkline(card.spark,sameConfig);
-      card.button.setAttribute('data-stale',String(overdue(latest.observed_at)));
+      card.button.setAttribute('data-stale',String(stale));
     }catch(error){card.foot.textContent='Oppdatering ikke tilgjengelig';}
   }));
 }
@@ -1903,6 +1927,7 @@ async function selectMatch(id){
   $('ticketLabel').textContent='Finn din plass på '+(selectedVenue==='koteng_arena'?'Koteng Arena':'Lerkendal');
   $('campaignHeading').textContent='Ses på '+(selectedVenue==='koteng_arena'?'Koteng Arena!':'Lerkendal!');
   current=id;updateSelectedCards();
+  if(isPlayed(match))$('playedSection').open=true;
   $('selectedMatchTitle').textContent=match.title;
   $('matchEyebrow').textContent=selectedVenue==='koteng_arena'?'KOTENG ARENA · BILLETTOVERSIKT':'LERKENDAL · BILLETTOVERSIKT';
   selectedKickoff=match.kickoff_at||null;
@@ -1931,8 +1956,9 @@ async function showTeam(next,{share=true}={}){
   matches=allMatches.filter(m=>categoryFor(m)===activeTeam);
   $('teamMen').setAttribute('aria-pressed',String(activeTeam==='men'));
   $('teamWomen').setAttribute('aria-pressed',String(activeTeam==='women'));
-  $('teamMenCount').textContent=allMatches.filter(m=>categoryFor(m)==='men').length+' kamper';
-  $('teamWomenCount').textContent=allMatches.filter(m=>categoryFor(m)==='women').length+' kamper';
+  const upcomingCount=team=>allMatches.filter(m=>categoryFor(m)===team&&!isPlayed(m)).length+' kommende';
+  $('teamMenCount').textContent=upcomingCount('men');
+  $('teamWomenCount').textContent=upcomingCount('women');
   $('teamOverline').textContent=activeTeam==='women'?'BILLETTSTATUS · RBK KVINNER':'BILLETTSTATUS · RBK';
   $('page-title').innerHTML=activeTeam==='women'?'Følg billettsalget<br>til <em>RBK Kvinner.</em>':'Følg billettsalget<br>til <em>Rosenborg.</em>';
   $('teamDescription').textContent=activeTeam==='women'
@@ -1945,7 +1971,8 @@ async function showTeam(next,{share=true}={}){
   cardSignature='';buildCards();
   if(share)updateShareLink(null);
   if(!matches.length){current=null;return;}
-  const chosen=matches.some(m=>m.id===current)?current:(chooseByLink(matches)||matches[0].id);
+  // Default to the next match; the archive is only picked when nothing is coming up.
+  const chosen=matches.some(m=>m.id===current)?current:(chooseByLink(matches)||(matches.find(m=>!isPlayed(m))||matches[matches.length-1]).id);
   await Promise.all([selectMatch(chosen),refreshCardData()]);
 }
 for(const b of document.querySelectorAll('[data-chart-hours]'))b.addEventListener('click',()=>{
