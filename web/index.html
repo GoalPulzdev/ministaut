@@ -889,6 +889,8 @@ body{background:#070707}
 .share-dialog textarea{width:100%;margin-top:10px;background:#171717;color:#f7f7f7;border:1px solid #403b33;border-radius:8px;padding:8px;font:inherit;font-size:13px;resize:vertical}
 .share-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .share-actions .pill{cursor:pointer}
+#projection-subtitle:empty,#projection-label:empty{display:none}
+.stack[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -912,7 +914,7 @@ body{background:#070707}
     <button id="teamWomen" class="team-choice" type="button" aria-pressed="false"><span class="team-symbol">RBK</span><span class="team-copy"><strong>RBK Kvinner</strong><small>Koteng Arena og bortekamper</small></span><span class="team-count" id="teamWomenCount">—</span></button>
   </nav>
   <section class="picker-section" aria-labelledby="picker-title">
-    <div class="section-heading"><h2 id="picker-title" class="section-title">Kommende hjemmekamper</h2><span class="section-help">Trykk på et kampkort for å se utviklingen</span></div>
+    <div class="section-heading"><h2 id="picker-title" class="section-title">Kommende hjemmekamper</h2></div>
     <div class="match-list" id="matchCards" role="group" aria-label="Velg kamp for valgt lag"><div class="empty">Henter kampene …</div></div>
     <details id="playedSection" class="played-archive" hidden>
       <summary id="playedTitle">Spilte kamper</summary>
@@ -926,7 +928,7 @@ body{background:#070707}
     </div>
   </section>
   <section class="season-board" id="seasonBoard" aria-labelledby="seasonTitle" hidden>
-    <div class="section-heading"><h2 id="seasonTitle" class="section-title">Sesongen så langt</h2><span class="section-help">Fra alle kampene vi følger</span></div>
+    <div class="section-heading"><h2 id="seasonTitle" class="section-title">Sesongen så langt</h2></div>
     <div id="seasonTiles" class="season-tiles"></div>
   </section>
   <section class="results" id="match-details" aria-labelledby="selectedMatchTitle">
@@ -944,12 +946,12 @@ body{background:#070707}
     </div>
     <div class="summary" id="stats">
       <article class="card primary">
-        <div id="availabilityCaption" class="caption">Ledige sitteplasser</div><div id="available" class="big">—</div><p class="availability-footnote">Tilgjengelige sitteplasser ved siste oppdatering</p>
+        <div id="availabilityCaption" class="caption">Ledige sitteplasser</div><div id="available" class="big">—</div>
         <div class="pulse-insights" aria-live="polite"><div id="dailyPulse" class="daily-pulse" hidden></div><div id="weekPulse" class="daily-pulse" hidden></div><div id="pulseMomentum" class="daily-pulse" hidden></div><div id="pressureIndex" class="daily-pulse" hidden></div></div>
       </article>
-      <div class="stack">
-        <article class="card small-card"><div class="caption">Siden vi startet å følge kampen</div><div class="value" id="sinceFirst">—</div><div class="minor" id="sinceFirstNote">Venter på flere målinger</div></article>
-        <article class="card small-card"><div class="caption">Siden forrige måling</div><div class="value" id="delta">—</div><div class="minor" id="deltaNote">Venter på flere målinger</div></article>
+      <div class="stack" hidden>
+        <article class="card small-card"><div class="caption">Totalt så langt</div><div class="value" id="sinceFirst">—</div><div class="minor" id="sinceFirstNote">Venter på flere målinger</div></article>
+        <article class="card small-card"><div class="caption">Siden sist</div><div class="value" id="delta">—</div><div class="minor" id="deltaNote">Venter på flere målinger</div></article>
       </div>
     </div>
 
@@ -960,9 +962,8 @@ body{background:#070707}
         <span id="fullVerdictReason"></span>
       </div>
       <div class="forecast-lead">
-        <span class="forecast-eyebrow">MOT AVSPARK</span>
         <h3 id="projection-title">Hvor mange plasser er igjen på kampdag?</h3>
-        <p id="projection-subtitle">Vi følger utviklingen før vi kan gi et forsiktig anslag.</p>
+        <p id="projection-subtitle"></p>
       </div>
       <div class="forecast-result">
         <span class="forecast-label" id="projection-label">PROGNOSE VED AVSPARK</span>
@@ -988,8 +989,8 @@ body{background:#070707}
     <section class="card graph" aria-labelledby="chart-title">
       <div class="graph-header">
         <div><div id="chart-title" class="caption">Ledige plasser over tid</div>
-          <p class="graph-desc">Følg ledige plasser over tid. Trykk på grafen for detaljer.</p></div>
-        <span id="chartCount" class="graph-count">Oppdateres med nye tall</span>
+          </div>
+        <span id="chartCount" class="graph-count" hidden></span>
       </div>
       <div class="chart-window" role="group" aria-label="Tidsperiode for graf"><button type="button" data-chart-hours="24" aria-pressed="false">24 timer</button><button type="button" data-chart-hours="168" aria-pressed="true">7 dager</button><button type="button" data-chart-hours="720" aria-pressed="false">30 dager</button><button type="button" data-chart-hours="0" aria-pressed="false">Alle</button></div>
       <div class="chart-legend" id="chartLegend" hidden><span><i class="legend-real"></i> Målt</span><span><i class="legend-projected"></i> <span id="chartForecastLabel">Prognose</span></span><span><i class="legend-band"></i> Mulig spenn</span></div>
@@ -1001,9 +1002,9 @@ body{background:#070707}
       </div>
     </section>
     <section class="card sections-panel" aria-labelledby="sections-title">
-      <div class="section-heading"><h2 id="sections-title" class="section-title">Tribuneoversikt</h2><span class="section-help" id="sectionStatus">Henter tribunekart …</span></div>
-      <p class="section-intro" id="stadiumIntro">Velg et felt for å se hvor mange sitteplasser som er ledige.</p>
-      <div class="stadium-map-shell"><div class="map-switch"><strong id="stadiumHeading">LERKENDAL · SITTEFELT <span class="map-revision"></span></strong><span class="section-help">Trykk på et felt</span></div><div class="insight-switch"><button id="viewAvailability" type="button" aria-pressed="true">Ledige nå</button><button id="viewHeat" type="button" aria-pressed="false">Endring siste døgn</button><span id="heatStatus"></span></div><div id="stadiumMap" aria-label="Interaktiv skjematisk stadionoversikt"></div><div id="legendAvailability" class="map-legend" aria-label="Andel ledige sitteplasser">
+      <div class="section-heading"><h2 id="sections-title" class="section-title">Tribuneoversikt</h2><span class="section-help" id="sectionStatus" hidden>Henter tribunekart …</span></div>
+      <p class="section-intro" id="stadiumIntro" hidden>Velg et felt for å se hvor mange sitteplasser som er ledige.</p>
+      <div class="stadium-map-shell"><div class="map-switch"><strong id="stadiumHeading">LERKENDAL · SITTEFELT <span class="map-revision"></span></strong></div><div class="insight-switch"><button id="viewAvailability" type="button" aria-pressed="true">Ledige nå</button><button id="viewHeat" type="button" aria-pressed="false">Endring siste døgn</button><span id="heatStatus"></span></div><div id="stadiumMap" aria-label="Interaktiv skjematisk stadionoversikt"></div><div id="legendAvailability" class="map-legend" aria-label="Andel ledige sitteplasser">
   <span class="map-key"><i style="background:#318b5f"></i>Mange ledige (50 % +)</span>
   <span class="map-key"><i style="background:#a4af42"></i>Noen ledige (20–49 %)</span>
   <span class="map-key"><i style="background:#de983d"></i>Få ledige (8–19 %)</span>
@@ -1018,17 +1019,17 @@ body{background:#070707}
   <span class="map-key"><i style="background:#4e896a"></i>Uendret</span>
   <span class="map-key"><i style="background:#4783b2"></i>Flere ledige</span>
   <span class="map-key"><i style="background:#4a4c52"></i>Ukjent</span>
-</div><p class="map-note">Fargene viser andelen ledige sitteplasser i hvert felt. Ståplasser er ikke med. Kartet er veiledende – sjekk eksakt plass hos RBK før du kjøper.</p></div>
+</div><p class="map-note">Ståplasser er ikke med. Sjekk eksakt plass hos RBK før du kjøper.</p></div>
       <div class="stand-summary" id="standSummary" aria-live="polite"><div class="stand-summary-loading">Henter tribuneoversikten …</div></div>
       <details class="field-browser"><summary>Se alle sittefelt <span aria-hidden="true">+</span></summary><div class="section-grid" id="sectionGrid"><p class="section-loading">Henter ledige plasser …</p></div></details>
       <div id="sectionDetail" class="section-detail" aria-live="polite">Velg et felt i kartet for å se ledige plasser.</div>
       <div id="sectionAlert" class="section-alert" hidden></div>
-      <details class="insight-details"><summary>Mer statistikk <span aria-hidden="true">+</span></summary><div id="sectionRecords" class="insight-records" aria-live="polite"></div></details>
+      <details class="insight-details" hidden><summary>Mer statistikk <span aria-hidden="true">+</span></summary><div id="sectionRecords" class="insight-records" aria-live="polite"></div></details>
     </section>
     <section class="card compare-panel" id="comparePanel" aria-labelledby="compareTitle" hidden>
       <div class="graph-header">
         <div><div id="compareTitle" class="caption">Sammenlignet med tidligere kamper</div>
-          <p class="graph-desc">Ledige sitteplasser målt mot tiden som var igjen til avspark.</p></div>
+          <p class="graph-desc">Ledige plasser mot tid igjen til avspark.</p></div>
       </div>
       <div id="compareChart" class="chart-wrap"></div>
       <div id="compareLegend" class="compare-legend"></div>
@@ -1045,7 +1046,7 @@ body{background:#070707}
         <h4>Skal dere være flere?</h4>
         <div id="togetherSize" class="chart-window" data-size="4" role="group" aria-label="Hvor mange skal sitte sammen"><button type="button" data-size="2" aria-pressed="false">2</button><button type="button" data-size="3" aria-pressed="false">3</button><button type="button" data-size="4" aria-pressed="true">4</button><button type="button" data-size="6" aria-pressed="false">6</button><button type="button" data-size="8" aria-pressed="false">8</button><button type="button" data-size="12" aria-pressed="false">12</button></div>
         <ol id="togetherList" class="advice-list"></ol>
-        <p class="fast-note">Feltene med flest ledige gir størst sjanse for seter ved siden av hverandre. Vi ser ikke enkeltseter, så sjekk i billettkartet.</p>
+        <p class="fast-note">Flest ledige gir best sjanse for plasser sammen.</p>
       </div>
       <div id="timingBlock" class="advice-block" hidden>
         <h4>Når bør du kjøpe?</h4>
@@ -1383,27 +1384,25 @@ function renderForecast(records){
   panel.dataset.status=result.stale?'stale':result.status;
   const label=$('projection-label');
   if(result.status!=='projected'){
-    label.textContent='PROGNOSE VED AVSPARK';
-    $('projection-value').textContent='Avventer nye tall';
-    $('projection-range').textContent=result.reason||'Vi følger utviklingen fram mot avspark.';
-    $('projection-subtitle').textContent='Når datagrunnlaget er godt nok, vises et forsiktig anslag.';
+    label.textContent='';
+    $('projection-value').textContent='For tidlig å si';
+    // Data-quantity reasons are for us; supporters get a plain promise instead.
+    $('projection-range').textContent=/^(Kampen|Mer enn 60)/.test(result.reason||'')?result.reason:'Kommer når vi har fulgt salget litt lenger.';
+    $('projection-subtitle').textContent='';
     return;
   }
   if(result.stale){
     const measuredAt=date(result.measuredAt);
     label.textContent='SISTE PROGNOSE · IKKE OPPDATERT';
-    $('projection-subtitle').textContent='Beregnet fra siste telling '+measuredAt+'. Venter på en ny telling for en oppdatert prognose.';
+    $('projection-subtitle').textContent='Fra telling '+measuredAt+'.';
     $('projection-value').textContent=fmt(result.center)+' ledige';
-    $('projection-range').textContent='Tidligere scenario: '+fmt(result.low)+'–'+fmt(result.high)+' ledige ved avspark. Kan ha endret seg.';
+    $('projection-range').textContent='Trolig '+fmt(result.low)+'–'+fmt(result.high)+' ledige';
     return;
   }
-  label.textContent='PROGNOSE VED AVSPARK';
-  $('projection-subtitle').textContent=result.early
-    ?'Tidlig utviklingsscenario. Mye kan endre seg før kampstart.'
-    :result.low===0?'Det kan bli få sitteplasser tilgjengelige før avspark. Følg utviklingen!'
-    :'Basert på tempoet i tidligere tellinger, ikke et garantert resultat.';
+  label.textContent='';
+  $('projection-subtitle').textContent=result.early?'Tidlig anslag. Mye kan endre seg.':result.low===0?'Det kan bli svært få plasser igjen.':'';
   $('projection-value').textContent=result.early&&result.materiallyUncertain?'Tidlig anslag':fmt(result.center)+' ledige';
-  $('projection-range').textContent=(result.early?'Foreløpig spenn: ':'Mulig spenn: ')+fmt(result.low)+'–'+fmt(result.high)+' ledige sitteplasser · '+(result.early?'stor usikkerhet':'grovt scenario');
+  $('projection-range').textContent='Trolig '+fmt(result.low)+'–'+fmt(result.high)+' ledige';
 }
 
 // Use an actual prior observed scan near 24 hours ago, never treat a
@@ -1599,27 +1598,26 @@ async function refreshCardData(){
     try{
       const table=categoryFor(match)==='women'?'ministaut_koteng_scans':'ministaut_scans';
     const statusFilter=categoryFor(match)==='women'?'in.(observed,accepted)':'eq.accepted';
-      const data=await load(table+'?select=observed_at,available_seated,locked_fields&reading_status='+statusFilter+'&match_id=eq.'+encodeURIComponent(match.id)+'&order=observed_at.desc&limit=24');
+      const data=await load(table+'?select=observed_at,available_seated,locked_fields&reading_status='+statusFilter+'&match_id=eq.'+encodeURIComponent(match.id)+'&order=observed_at.desc&limit=40');
       if(cards.get(match.id)!==card)return;
       if(!data.length){
         card.value.textContent='—';
-        card.foot.textContent=card.played?'Ingen målinger':'Venter på første telling';
+        card.foot.textContent=card.played?'':'Tall kommer snart';
         card.spark.replaceChildren();card.spark.dataset.series='';
         card.button.setAttribute('data-stale',String(!card.played));
         return;
       }
-      const latest=data[0],previous=data[1];
+      const latest=data[0];
       card.value.textContent=fmt(latest.available_seated);
-      const delta=comparable(latest,previous)?latest.available_seated-previous.available_seated:null;
-      const wording=delta===null?''
-        :delta<0?' · '+fmt(-delta)+' færre ledige'
-        :delta>0?' · '+fmt(delta)+' flere ledige':' · Uendret';
+      const day=dayDrops(data).at(-1);
       const stale=!card.played&&overdue(latest.observed_at);
-      card.foot.textContent=(card.played?'Siste måling ':'Målt ')+date(latest.observed_at)+wording+(stale?' · avventer ny telling':'');
+      card.foot.textContent=card.played?'ledige ved avspark'
+        :(day?(day.sold>0?fmt(day.sold)+' færre siste døgn':day.sold<0?fmt(-day.sold)+' flere siste døgn':'Uendret siste døgn'):'')
+          +(stale?(day?' · ':'')+'venter på ny telling':'');
       const sameConfig=data.filter(p=>comparable(p,latest)).reverse();
       drawSparkline(card.spark,sameConfig);
       card.button.setAttribute('data-stale',String(stale));
-    }catch(error){card.foot.textContent='Oppdatering ikke tilgjengelig';}
+    }catch(error){card.foot.textContent='';}
   }));
 }
 
@@ -1956,7 +1954,7 @@ function renderStandSummary(rows){
    const percent=document.createElement('span');percent.className='stand-summary-percent';percent.textContent=pct+' % ledige';
    row.append(labels,meter,percent);target.append(row);
  }
- const note=document.createElement('p');note.className='stand-summary-note';note.textContent='Andel ledige sitteplasser i feltene som vises i kartet.';target.append(note);
+
 }
 function renderSections(rows,scan){
   const grid=$('sectionGrid'),status=$('sectionStatus'),detail=$('sectionDetail');
@@ -2202,7 +2200,7 @@ function renderFastSections(ranked,refsUsed){
     button.addEventListener('click',()=>{activateStadiumSection(s.code);$('stadiumMap').scrollIntoView({behavior:'smooth',block:'center'});});
     li.append(button);list.append(li);
   }
-  $('fastSectionsNote').textContent='Fra '+refsUsed.join(', ')+'. Felt som allerede var tomme da vi begynte å måle, er ikke med.';
+  $('fastSectionsNote').textContent='Basert på kampen mot '+refsUsed.join(' og ')+'.';
 }
 async function renderComparison(match,scans,version,id){
   const panel=$('comparePanel');
@@ -2235,10 +2233,8 @@ async function renderComparison(match,scans,version,id){
         return 'Mot '+r.title+' var det '+fmt(r.v)+' på samme tidspunkt ('+(d===0?'likt':d<0?fmt(-d)+' færre ledige nå':fmt(d)+' flere ledige nå')+')';
       }).join('. ')+'.';
     }else{
-      const first=playedRefs.map(r=>r.title+' ble fulgt fra '+hoursText(r.points[0].h)+' før avspark').join(', ');
-      $('compareNow').textContent=first
-        ?first+'. Sammenligning på samme tidspunkt kommer når det er like lenge igjen. Nå: '+hoursText(now.h)+' til avspark.'
-        :'Ingen spilte kamper å sammenligne med ennå.';
+      const from=Math.max(0,...playedRefs.map(r=>r.points[0].h));
+      $('compareNow').textContent=from?'Sammenligningen starter '+hoursText(from)+' før avspark.':'';
     }
   }
   lastHistory=played?null:historyForecast(now,playedRefs);
@@ -2383,8 +2379,8 @@ function fullVerdict({available,mapped,forecast,hist,pace,played}){
   if(available<=mapped*0.01)return {level:'hot',answer:'Nesten utsolgt',reason:'Bare '+fmt(available)+' sitteplasser er ledige nå.'};
   if(pace?.status==='before_kickoff')return {level:'hot',answer:'Kan bli utsolgt',reason:'Med tempoet de siste 12 timene kan sitteplassene være borte før avspark.'};
   const est=hist?hist.center:forecast?.status==='projected'?forecast.center:null;
-  if(est===null||!Number.isFinite(est))return {level:'unknown',answer:'For tidlig å si',reason:'Vi trenger flere målinger fram mot avspark før vi kan svare.'};
-  const share=est/mapped,why='Anslag ved avspark: ca. '+fmt(est)+' ledige ('+Math.round(share*100)+' % av sitteplassene)'+(hist?', basert på tidligere kamper.':', basert på tempoet nå.');
+  if(est===null||!Number.isFinite(est))return {level:'unknown',answer:'For tidlig å si',reason:'Svaret kommer nærmere kampen.'};
+  const share=est/mapped,why='Rundt '+Math.max(1,Math.round(share*100))+' % av sitteplassene ser ut til å bli ledige ved avspark.';
   if(share<=0.01)return {level:'hot',answer:'Kan bli utsolgt',reason:why};
   if(share<=0.05)return {level:'warm',answer:'Det blir trangt',reason:why};
   if(share<=0.2)return {level:'mild',answer:'Godt salg, men plasser igjen',reason:why};
@@ -2450,7 +2446,7 @@ function renderPressure(match,scans,baseline){
   el.hidden=!p;
   if(!p)return null;
   el.dataset.trend=p.value>=125?'down':p.value<75?'up':'flat';
-  el.textContent='Trøkk · '+p.label+' ('+p.value+')';
+  el.textContent='Trøkk · '+p.label;
   el.title='100 = et vanlig salgsdøgn på denne arenaen ('+fmt(p.base)+' færre ledige). Siste døgn: '+fmt(p.sold)+'.';
   return p;
 }
@@ -2487,7 +2483,7 @@ function renderTiming(refs){
     const li=document.createElement('li');
     const name=document.createElement('strong');name.textContent=t.name;
     const info=document.createElement('span');
-    info.textContent=(t.finalShare<0.01?'nesten fullt':Math.round(t.finalShare*100)+' % ledige')+' ved avspark mot '+t.title
+    info.textContent=(t.finalShare<0.01?'nesten fullt':Math.round(t.finalShare*100)+' % ledige')+' ved avspark'
       +(t.share24!==null?' · '+Math.round(t.share24*100)+' % av salget siste døgn':'');
     li.append(name,info);list.append(li);
   }
@@ -2495,7 +2491,8 @@ function renderTiming(refs){
   const lateShare=late.length?median(late.map(t=>t.share24)):null;
   const fullest=rows[0];
   $('timingAdvice').textContent=(fullest.finalShare<0.15?'Vil du sitte på '+fullest.name+', bør du kjøpe tidlig. Den var '+(fullest.finalShare<0.01?'nesten full':'bare '+Math.round(fullest.finalShare*100)+' % ledig')+' ved avspark. ':'')
-    +(lateShare!==null&&lateShare>=0.4?'Mye av salget kommer det siste døgnet, så de beste plassene forsvinner gjerne da.':'');
+    +(lateShare!==null&&lateShare>=0.4?'Mye av salget kommer det siste døgnet, så de beste plassene forsvinner gjerne da.':'')
+    +' Basert på kampen mot '+[...new Set(rows.map(t=>t.title))].join(' og ')+'.';
 }
 function renderMatchday(match,points){
   const box=$('matchdayBlock');
@@ -2546,13 +2543,11 @@ async function renderSeason(){
   const bestDay=drops.reduce((a,d)=>!a||d.sold>a.sold?d:a,null);
   const moved=all.map(r=>{const s=r.scans.slice().sort((a,b)=>Date.parse(a.observed_at)-Date.parse(b.observed_at));return {title:r.title,n:s[0].available_seated-s.at(-1).available_seated};})
     .reduce((a,x)=>!a||x.n>a.n?x:a,null);
-  const scans=all.reduce((a,r)=>a+r.scans.length,0);
   const hot=all.filter(r=>!isPlayed(r.match)).map(r=>({title:r.title,p:pressureIndex(r.scans,drops)})).filter(x=>x.p).sort((a,b)=>b.p.value-a.p.value)[0];
   const tiles=[
-    ['Kamper fulgt',fmt(all.length),fmt(scans)+' målinger'],
-    ['Største salgsdøgn',bestDay&&bestDay.sold>0?fmt(bestDay.sold):'—',bestDay&&bestDay.sold>0?bestDay.title+' · '+date(bestDay.at):'Kommer etter et døgn med målinger'],
-    ['Mest solgt siden start',moved&&moved.n>0?fmt(moved.n):'—',moved&&moved.n>0?moved.title:'—'],
-    ['Hetest nå',hot?hot.p.label:'—',hot?hot.title+' · trøkk '+hot.p.value:'Trenger flere målinger']];
+    ['Største salgsdøgn',bestDay&&bestDay.sold>0?fmt(bestDay.sold):'—',bestDay&&bestDay.sold>0?'mot '+bestDay.title:''],
+    ['Mest solgt så langt',moved&&moved.n>0?fmt(moved.n):'—',moved&&moved.n>0?'mot '+moved.title:''],
+    ['Hetest nå',hot?hot.p.label:'—',hot?hot.title:'']];
   const grid=$('seasonTiles');grid.replaceChildren();
   for(const [k,v,n] of tiles){
     const d=document.createElement('div');d.className='season-tile';
@@ -2575,7 +2570,7 @@ function shareText(){
   const lines=[match.title+(match.kickoff_at?' · '+date(match.kickoff_at):''),
     (isPlayed(match)?'Ledige sitteplasser ved siste måling: ':'Ledige sitteplasser nå: ')+fmt(last.available_seated)
       +(day&&day.sold>0?' ('+fmt(day.sold)+' færre siste døgn)':'')];
-  if(currentPressure)lines.push('Trøkk: '+currentPressure.label+' ('+currentPressure.value+')');
+  if(currentPressure)lines.push('Trøkk: '+currentPressure.label);
   if(verdict)lines.push('Blir det fullt? '+verdict);
   lines.push('Følg billettsalget: '+shareURL());
   return lines.join('\n');
@@ -2600,7 +2595,7 @@ function shareImage(){
   let y=730;
   const line=(t)=>{g.fillStyle='#f7f7f7';g.font=font(700,42);g.fillText(t,100,y,880);y+=66;};
   if(day&&day.sold>0)line(fmt(day.sold)+' færre ledige siste døgn');
-  if(currentPressure)line('Trøkk: '+currentPressure.label+' ('+currentPressure.value+')');
+  if(currentPressure)line('Trøkk: '+currentPressure.label);
   if(!$('fullVerdict').hidden)line('Blir det fullt? '+$('fullVerdictAnswer').textContent);
   // Recent curve as a faint band above the footnote.
   const pts=lastRecords.slice(-48).map(r=>r.available_seated);
