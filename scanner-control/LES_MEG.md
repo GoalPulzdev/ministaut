@@ -2,6 +2,16 @@
 
 **Dette er en reell første versjon av et samlet kontrollprogram, ikke ferdig fullautonom skanning av enhver arena.** Kjernen er en lokal tkinter-applikasjon med SQLite, kampregister, kvalitetskontroll, Koteng-timeskanning og Lerkendal-arvemotor.
 
+## Ny kamp på ett minutt
+
+1. Trykk **+ Legg til kamp**. Velg **lag**: RBK Herrer gir Lerkendal-motoren, RBK Kvinner gir Koteng-motoren (arena og mappe settes automatisk).
+2. Skriv kampnavn (f.eks. «Rosenborg – Lyn»), lim inn **billettlenken** fra billett.rbk.no (sporingsparametere og skråstrek til slutt fjernes automatisk), og avsparkets dato og klokkeslett i norsk tid.
+3. Trykk **Lagre og aktiver**. Kampen skannes nå lokalt etter planen, uten publisering.
+4. Når en testskanning ser riktig ut: **Live av/på**. Kampen **publiseres da automatisk på nettsiden** (tittel og avspark, også for Koteng) via `engines/register_match.py`, som leser tokenet i motormappen på samme måte som sendingen. Feiler publiseringen, får du velge om Live likevel skal slås på.
+5. Spilte kamper flyttes selv til **Arkiv** 2 timer etter avspark, både her og på nettsiden.
+
+Drift: **ministaut-web.vercel.app/status** viser hver kamp med alder på siste måling, hull, uvanlige hopp, tall som står stille og manglende felt.
+
 ## Nytt i 0.2
 
 - **Publisering går gjennom kontrollprogrammets egen etterkontroll.** I 0.1 lastet Koteng-motoren opp (`--upload`) *før* kontrollprogrammet hadde verifisert rapporten. Nå kjøres motoren alltid uten opplasting. Bare en diagnostikk som består etterkontrollen legges i en **varig utboks** (SQLite) og sendes med `sync_koteng.py --send`.

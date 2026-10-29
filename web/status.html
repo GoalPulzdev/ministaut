@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" type="image/png" href="/icon-192.png">
+<meta name="robots" content="noindex,nofollow">
+<title>Ministaut · Drift</title>
+<style>
+:root{color-scheme:dark;--page:#070707;--panel:#141414;--stroke:#343434;--ink:#f7f7f7;--muted:#a8a8a8;--gold:#d8b875;--ok:#4e896a;--warn:#de983d;--bad:#c84a44}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font:14px/1.5 "Segoe UI",system-ui,sans-serif}
+main{max-width:1180px;margin:0 auto;padding:24px 16px 48px}
+h1{margin:0;font-size:24px}
+.lead{color:var(--muted);margin:4px 0 18px}
+.summary{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.summary div{padding:10px 14px;border:1px solid var(--stroke);border-radius:10px;background:var(--panel)}
+.summary strong{display:block;font-size:22px;color:var(--gold)}
+.match{border:1px solid var(--stroke);border-left:4px solid var(--ok);border-radius:12px;background:var(--panel);padding:14px 16px;margin-bottom:12px}
+.match[data-state="warn"]{border-left-color:var(--warn)}
+.match[data-state="bad"]{border-left-color:var(--bad)}
+.match[data-state="idle"]{border-left-color:#5a5a5a;opacity:.75}
+.head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:baseline}
+.head h2{margin:0;font-size:17px}
+.pill{font-size:11px;font-weight:800;letter-spacing:.05em;padding:3px 9px;border-radius:999px;border:1px solid currentColor}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}.idle{color:var(--muted)}
+.facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px 14px;margin:10px 0 6px;color:var(--muted);font-size:13px}
+.facts b{display:block;color:var(--ink);font-size:15px}
+ul{margin:6px 0 0;padding-left:18px}
+li{margin:2px 0}
+footer{color:var(--muted);font-size:12px;margin-top:20px}
+a{color:var(--gold)}
+@media(max-width:600px){main{padding:16px}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Drift · skanner og data</h1>
+  <p class="lead">Helsesjekk av hver publiserte kamp, laget ut fra målingene alene. Oppdateres hvert 2. minutt. <a href="/">Til nettsiden</a></p>
+  <div class="summary" id="summary"></div>
+  <div id="matches">Henter …</div>
+  <footer id="stamp"></footer>
+</main>
+<script>
+const DB='https://khetbokxbcujwcurvviu.supabase.co',KEY='sb_publishable_0JuYQgbiXWfx103zy7j85Q_muDiicIL';
+const H=3600000,EXPECTED={lerkendal:60,koteng_arena:6};
+const $=id=>document.getElementById(id);
+const fmt=n=>new Intl.NumberFormat('nb-NO').format(n);
+const when=t=>new Date(t).toLocaleString('nb-NO',{timeZone:'Europe/Oslo',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+const ago=ms=>ms<120000?'nå':ms<2*H?Math.round(ms/60000)+' min':ms<48*H?Math.round(ms/H)+' t':Math.round(ms/86400000)+' d';
+async function load(path){
+  const r=await fetch(DB+'/rest/v1/'+path,{headers:{apikey:KEY},cache:'no-store'});
+  if(!r.ok)throw new Error('Datakilden svarte '+r.status);
+  return r.json();
+}
+const median=a=>{const s=[...a].sort((x,y)=>x-y),m=s.length>>1;return s.length?(s.length%2?s[m]:(s[m-1]+s[m])/2):null;};
+const locks=s=>JSON.stringify([...(s.locked_fields||[])].sort());
+// Expected interval from the scanner plan: hourly, 15 min in the last 90 min before kickoff.
+function expectedGap(kickoff,t){return kickoff-t<=90*60000?15*60000:60*60000;}
+function check(match,scans,sections,now){
+  const k=Date.parse(match.kickoff_at||''),issues=[],notes=[];
+  const s=scans.slice().sort((a,b)=>Date.parse(a.observed_at)-Date.parse(b.observed_at));
+  const last=s.at(-1);
+  const played=Number.isFinite(k)&&now>k+2*H;
+  if(!last)return {state:played?'idle':'bad',issues:played?[]:['Ingen godkjente målinger'],notes,last:null,day:0};
+  const age=now-Date.parse(last.observed_at);
+  const day=s.filter(x=>now-Date.parse(x.observed_at)<=24*H);
+  const gaps=[];
+  for(let i=1;i<s.length;i++)gaps.push(Date.parse(s[i].observed_at)-Date.parse(s[i-1].observed_at));
+  if(!played){
+    const limit=expectedGap(k,now)*2+10*60000;
+    if(age>limit)issues.push('Siste måling er '+ago(age)+' gammel (forventet hvert '+Math.round(expectedGap(k,now)/60000)+'. min)');
+  }
+  // Gaps over 3 h in the last two days, while the match is being followed.
+  for(let i=1;i<s.length;i++){
+    const t=Date.parse(s[i].observed_at),g=t-Date.parse(s[i-1].observed_at);
+    if(now-t<=48*H&&g>3*H&&t<=k)notes.push('Hull på '+ago(g)+' før '+when(s[i].observed_at));
+  }
+  // Implausible jumps between comparable scans.
+  let releases=0;
+  for(let i=1;i<s.length;i++){
+    const a=s[i-1],b=s[i];
+    if(locks(a)!==locks(b)){notes.push('Låste felt endret '+when(b.observed_at)+': '+((b.locked_fields||[]).join(', ')||'ingen'));continue;}
+    const d=b.available_seated-a.available_seated;
+    if(Math.abs(d)>Math.max(800,a.available_seated*0.08))issues.push('Uvanlig hopp '+(d>0?'+':'')+fmt(d)+' kl. '+when(b.observed_at));
+    else if(d>=20)releases++;
+  }
+  if(releases)notes.push(releases+' økning(er) på 20+ (billetter sluppet/frigitt)');
+  // Same number many scans in a row while kickoff is near: possibly a stale page.
+  const tail=s.slice(-8);
+  if(!played&&tail.length===8&&tail.every(x=>x.available_seated===tail[0].available_seated)&&k-now<7*86400000)
+    notes.push('Uendret i de siste 8 målingene ('+fmt(tail[0].available_seated)+')');
+  if((last.locked_fields||[]).length)notes.push('Låste felt nå: '+last.locked_fields.join(', '));
+  if(sections){
+    const expected=EXPECTED[match.venue_id],count=sections.length+(last.locked_fields||[]).length;
+    const sum=sections.reduce((a,r)=>a+r.free,0);
+    if(count!==expected)issues.push('Siste måling har '+count+' av '+expected+' felt');
+    if(sum!==last.available_seated)issues.push('Feltsum '+fmt(sum)+' ≠ totalt '+fmt(last.available_seated));
+  }
+  const state=played?'idle':issues.length?'bad':notes.some(n=>n.startsWith('Hull')||n.startsWith('Uendret'))?'warn':'ok';
+  return {state,issues,notes,last,age,day:day.length,interval:median(gaps.slice(-24)),count:s.length,played};
+}
+function card(match,r){
+  const el=document.createElement('article');el.className='match';el.dataset.state=r.state;
+  const label={ok:'OK',warn:'SJEKK',bad:'FEIL',idle:'SPILT'}[r.state];
+  el.innerHTML='<div class="head"><h2></h2><span class="pill '+r.state+'">'+label+'</span></div><div class="facts"></div><ul></ul>';
+  el.querySelector('h2').textContent=match.title+' · '+(match.venue_id==='koteng_arena'?'Koteng':'Lerkendal');
+  const facts=[['Avspark',match.kickoff_at?when(match.kickoff_at):'—'],['Siste måling',r.last?when(r.last.observed_at)+' ('+ago(r.age)+')':'—'],
+    ['Ledige nå',r.last?fmt(r.last.available_seated):'—'],['Målinger siste døgn',String(r.day)],
+    ['Typisk intervall',r.interval?Math.round(r.interval/60000)+' min':'—'],['Målinger totalt',String(r.count||0)]];
+  const f=el.querySelector('.facts');
+  for(const [k,v] of facts){const d=document.createElement('div');d.textContent=k;const b=document.createElement('b');b.textContent=v;d.append(b);f.append(d);}
+  const ul=el.querySelector('ul');
+  for(const t of [...r.issues.map(x=>'⚠ '+x),...r.notes]){const li=document.createElement('li');li.textContent=t;ul.append(li);}
+  if(!ul.children.length)ul.remove();
+  return el;
+}
+async function run(){
+  const now=Date.now();
+  try{
+    const [men,women]=await Promise.all([
+      load('ministaut_matches?select=id,event_key,title,kickoff_at&is_published=eq.true&order=kickoff_at.asc'),
+      load('ministaut_koteng_matches?select=id,event_key,title,kickoff_at,venue_id&is_published=eq.true&order=kickoff_at.asc')]);
+    const all=men.map(m=>({...m,venue_id:'lerkendal',scans:'ministaut_scans',sec:'ministaut_section_measurements',status:'eq.accepted'}))
+      .concat(women.map(m=>({...m,venue_id:'koteng_arena',scans:'ministaut_koteng_scans',sec:'ministaut_koteng_section_measurements',status:'in.(observed,accepted)'})));
+    const results=await Promise.all(all.map(async m=>{
+      const scans=await load(m.scans+'?select=id,observed_at,available_seated,locked_fields&reading_status='+m.status+'&match_id=eq.'+m.id+'&order=observed_at.desc&limit=300');
+      const sections=scans[0]?await load(m.sec+'?select=section_code,free&scan_id=eq.'+scans[0].id+'&limit=80'):null;
+      return {m,r:check(m,scans,sections,now)};
+    }));
+    const order={bad:0,warn:1,ok:2,idle:3};
+    results.sort((a,b)=>order[a.r.state]-order[b.r.state]||Date.parse(a.m.kickoff_at)-Date.parse(b.m.kickoff_at));
+    $('matches').replaceChildren(...results.map(x=>card(x.m,x.r)));
+    const n=s=>results.filter(x=>x.r.state===s).length;
+    $('summary').innerHTML='';
+    for(const [k,v] of [['Aktive kamper',results.filter(x=>!x.r.played).length],['OK',n('ok')],['Sjekk',n('warn')],['Feil',n('bad')],['Spilt',n('idle')]]){
+      const d=document.createElement('div');d.textContent=k;const b=document.createElement('strong');b.textContent=v;d.prepend(b);$('summary').append(d);
+    }
+    $('stamp').textContent='Sjekket '+when(now)+'. Bare offentlige, godkjente målinger er med.';
+  }catch(e){$('matches').textContent='Kunne ikke hente data: '+e.message;}
+}
+run();setInterval(run,120000);
+</script>
+</body>
+</html>
