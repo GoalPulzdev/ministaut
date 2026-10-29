@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#070707">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/icon-192.png">
   <meta name="description" content="Følg billettsalget før Rosenborgs hjemmekamper. Se ledige sitteplasser, utviklingen og finn din plass på tribunen.">
   <title>Ministaut · Følg billettsalget</title>
   <style>
@@ -826,6 +828,33 @@ body{background:#070707}
 .forecast-panel[data-status="stale"] .forecast-label{color:#f1d59c}
 .forecast-panel[data-status="stale"] .forecast-number{color:#f3e1b9}
 .forecast-panel[data-status="stale"] .forecast-range{color:#d0c0a1;line-height:1.55}
+.results>.compare-panel{grid-column:1/-1;grid-row:auto;margin:0}
+.compare-panel{margin-top:13px;padding:18px 18px 16px;background:#111}
+.compare-panel[hidden]{display:none}
+.compare-legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:8px 0 0;font-size:12px;color:#c5c5c5}
+.compare-legend span{display:inline-flex;align-items:center;gap:6px}
+.compare-legend i{width:16px;height:3px;border-radius:2px;display:inline-block}
+.compare-now{margin:12px 0 0;font-size:14px;line-height:1.55;color:#e9d9bb;max-width:75ch}
+.fast-sections{margin-top:16px;border-top:1px solid #343434;padding-top:14px}
+.fast-sections[hidden]{display:none}
+.fast-sections h4{margin:0 0 4px;font-size:15px;color:#f7f7f7}
+.fast-sections ol{list-style:none;margin:10px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.fast-sections li button{width:100%;text-align:left;display:flex;flex-direction:column;gap:3px;padding:10px 12px;border:1px solid #403b33;border-radius:10px;background:#171717;color:#f7f7f7;cursor:pointer;font:inherit}
+.fast-sections li button:hover{border-color:#b59862}
+.fast-sections li strong{font-size:14px}
+.fast-sections li span{font-size:12px;color:#c5c5c5}
+.fast-note{margin:10px 0 0;font-size:12px;color:#949494}
+.alert-row{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.alert-row[hidden]{display:none}
+.alert-pill{align-self:flex-start;cursor:pointer}
+.alert-pill[aria-pressed="true"]{background:#dbbd80;border-color:#dbbd80;color:#101010}
+.alert-pill:disabled{opacity:.6;cursor:default}
+.alert-status{font-size:12px;color:#c5c5c5;min-height:1em}
+.section-alert{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:#c5c5c5}
+.section-alert[hidden]{display:none}
+.section-alert select{margin:0 4px;background:#171717;color:#f7f7f7;border:1px solid #403b33;border-radius:6px;padding:2px 4px;font:inherit}
+.sections-panel>.section-alert{grid-column:2;grid-row:6;margin:0}
+@media(max-width:850px){.sections-panel>.section-alert{grid-column:1;grid-row:auto}}
 </style>
 </head>
 <body>
@@ -903,6 +932,15 @@ body{background:#070707}
         <strong id="paceForecastDate" class="pace-forecast-date"></strong>
         <span id="paceForecastRate" class="pace-forecast-rate"></span>
       </div>
+      <div id="historyForecast" class="pace-forecast" hidden aria-live="polite">
+        <span class="forecast-label">HVIS SALGET FØLGER TIDLIGERE KAMPER</span>
+        <strong id="historyForecastValue" class="pace-forecast-date"></strong>
+        <span id="historyForecastNote" class="pace-forecast-rate"></span>
+      </div>
+      <div id="alertRow" class="alert-row" hidden>
+        <button id="alertRelease" class="pill alert-pill" type="button" aria-pressed="false">🔔 Varsle meg når nye billetter slippes</button>
+        <span id="alertStatus" class="alert-status" role="status"></span>
+      </div>
     </section>
     <section class="card graph" aria-labelledby="chart-title">
       <div class="graph-header">
@@ -941,7 +979,22 @@ body{background:#070707}
       <div class="stand-summary" id="standSummary" aria-live="polite"><div class="stand-summary-loading">Henter tribuneoversikten …</div></div>
       <details class="field-browser"><summary>Se alle sittefelt <span aria-hidden="true">+</span></summary><div class="section-grid" id="sectionGrid"><p class="section-loading">Henter ledige plasser …</p></div></details>
       <div id="sectionDetail" class="section-detail" aria-live="polite">Velg et felt i kartet for å se ledige plasser.</div>
+      <div id="sectionAlert" class="section-alert" hidden></div>
       <details class="insight-details"><summary>Mer statistikk <span aria-hidden="true">+</span></summary><div id="sectionRecords" class="insight-records" aria-live="polite"></div></details>
+    </section>
+    <section class="card compare-panel" id="comparePanel" aria-labelledby="compareTitle" hidden>
+      <div class="graph-header">
+        <div><div id="compareTitle" class="caption">Sammenlignet med tidligere kamper</div>
+          <p class="graph-desc">Ledige sitteplasser målt mot tiden som var igjen til avspark.</p></div>
+      </div>
+      <div id="compareChart" class="chart-wrap"></div>
+      <div id="compareLegend" class="compare-legend"></div>
+      <p id="compareNow" class="compare-now" aria-live="polite"></p>
+      <div id="fastSections" class="fast-sections" hidden>
+        <h4>Felt som gikk først sist</h4>
+        <ol id="fastSectionList"></ol>
+        <p id="fastSectionsNote" class="fast-note"></p>
+      </div>
     </section>
   </section>
   <footer class="fan-footer">MINISTAUT · En uavhengig supporteroversikt. <span class="premium-bottom">Stadionfoto: Einar Fredriksen, <a href="https://commons.wikimedia.org/wiki/File:Lerkendal_stadion_at_night.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>, <a href="https://creativecommons.org/licenses/by-sa/2.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 2.0</a>. Bearbeidet til sort-hvitt.</span></footer>
@@ -1789,6 +1842,7 @@ function activateStadiumSection(code){
  if(sector)sector.setAttribute('aria-pressed','true');
  const row=stadiumByCode.get(code);
  const detail=$('sectionDetail');
+ renderSectionAlert(code);
  if(!row){detail.textContent='Felt '+code+': ikke avlest eller bekreftet låst. Ingen ledighet kan fastslås.';return;}
  const pct=Math.round(100*row.free/row.capacity);
  const change=sectionDeltas.get(code)||{};
@@ -1916,6 +1970,312 @@ async function loadSections(scan,version,id,scans){
 }
 $('viewAvailability').addEventListener('click',()=>chooseSectionMode('availability'));
 $('viewHeat').addEventListener('click',()=>chooseSectionMode('heat'));
+// --- Earlier matches: same clock, history-based forecast, fields that go first ---
+// Matches are lined up on hours before kickoff, so a curve from another match
+// can be read at the same point in its sales period.
+const HOUR=3600000;
+const REF_TTL=10*60000;
+const refScanCache=new Map(),refSectionCache=new Map();
+const opponentName=title=>String(title||'').split(/\s[–-]\s/).pop().trim()||String(title||'');
+const sectionName=code=>code==='VIP'?'VIP':code.startsWith('FELT-')?'Felt '+code.slice(5):'Felt '+code;
+const hoursText=h=>h<48?Math.round(h)+' t':(Math.round(h/24*10)/10).toString().replace('.',',')+' døgn';
+function curve(scans,kickoffUtc){
+  const k=Date.parse(kickoffUtc||'');
+  if(!Number.isFinite(k))return [];
+  // Keep the scan taken just after kickoff (the last planned slot), drop later ones.
+  return scans.map(s=>({h:(k-Date.parse(s.observed_at))/HOUR,v:Number(s.available_seated)}))
+    .filter(p=>Number.isFinite(p.h)&&Number.isFinite(p.v)&&p.h>=-0.25).sort((a,b)=>b.h-a.h);
+}
+// Linear reading of a curve at h hours before kickoff; null outside the measured
+// period or across a gap too long to interpolate honestly.
+function valueAt(points,h){
+  if(!points.length||h>points[0].h||h<points.at(-1).h)return null;
+  const exact=points.find(p=>p.h===h);
+  if(exact)return exact.v;
+  for(let i=0;i<points.length-1;i++){
+    const a=points[i],b=points[i+1];
+    if(a.h>=h&&h>=b.h){
+      if(a.h-b.h>12)return null;
+      return a.h===b.h?b.v:Math.round(a.v+(b.v-a.v)*(a.h-h)/(a.h-b.h));
+    }
+  }
+  return null;
+}
+// What happened in earlier matches from the same point to kickoff, applied to now.
+// Two readings per match: the same share of seats left, and the same seat count sold.
+function historyForecast(now,refs){
+  if(!now||now.h<=0.5)return null;
+  const basis=[];
+  for(const r of refs){
+    const at=valueAt(r.points,now.h),last=r.points.at(-1);
+    if(at===null||!last||last.h>2||at<=0)continue;
+    const ratio=Math.min(now.v,Math.max(0,Math.round(now.v*last.v/at)));
+    const diff=Math.min(now.v,Math.max(0,now.v+last.v-at));
+    basis.push({title:r.title,at,final:last.v,ratio,diff});
+  }
+  if(!basis.length)return null;
+  const all=basis.flatMap(b=>[b.ratio,b.diff]);
+  return {center:Math.round(median(basis.map(b=>(b.ratio+b.diff)/2))),low:Math.min(...all),high:Math.max(...all),basis};
+}
+// Rank fields by how early they ran out in earlier matches. A field already at 0
+// when tracking began is left out: we cannot tell when it went.
+function rankFastSections(refs){
+  const stats=new Map();
+  for(const r of refs){
+    for(const [code,series] of r.sections){
+      if(!series.length||series[0].free===0||code==='PRESSE')continue;
+      const empty=series.find(p=>p.free===0),last=series.at(-1);
+      const s=stats.get(code)||{code,emptyHours:[],finalShare:[],titles:[]};
+      if(empty)s.emptyHours.push(empty.h);
+      s.finalShare.push(last.capacity?last.free/last.capacity:1);
+      s.titles.push(r.title);
+      stats.set(code,s);
+    }
+  }
+  return [...stats.values()].map(s=>({code:s.code,n:s.titles.length,titles:s.titles,emptyCount:s.emptyHours.length,
+      emptyHours:s.emptyHours.length?median(s.emptyHours):null,finalShare:median(s.finalShare)}))
+    .filter(s=>s.emptyCount>0||s.finalShare<0.1)
+    .sort((a,b)=>b.emptyCount/b.n-a.emptyCount/a.n||(b.emptyHours??-1)-(a.emptyHours??-1)||a.finalShare-b.finalShare);
+}
+function scanTables(match){
+  const women=categoryFor(match)==='women';
+  return {scans:women?'ministaut_koteng_scans':'ministaut_scans',
+    sections:women?'ministaut_koteng_section_measurements':'ministaut_section_measurements',
+    status:women?'in.(observed,accepted)':'eq.accepted'};
+}
+function cached(cache,key,ttl,make){
+  const hit=cache.get(key);
+  if(hit&&(ttl===null||Date.now()-hit.at<ttl))return hit.promise;
+  const promise=make().catch(error=>{cache.delete(key);throw error;});
+  cache.set(key,{at:Date.now(),promise});
+  return promise;
+}
+function refScans(match){
+  const t=scanTables(match);
+  // A played match no longer changes; upcoming ones are refreshed now and then.
+  return cached(refScanCache,match.id,isPlayed(match)?null:REF_TTL,()=>load(t.scans+'?select=id,observed_at,available_seated&reading_status='+t.status+'&match_id=eq.'+encodeURIComponent(match.id)+'&order=observed_at.asc&limit=1000'));
+}
+function refSections(match,scans){
+  const t=scanTables(match),k=Date.parse(match.kickoff_at);
+  return cached(refSectionCache,match.id,null,async()=>{
+    const ids=scans.filter(s=>Date.parse(s.observed_at)<=k+15*60000).map(s=>s.id);
+    const when=new Map(scans.map(s=>[s.id,(k-Date.parse(s.observed_at))/HOUR]));
+    const batches=[];
+    for(let i=0;i<ids.length;i+=15)batches.push(ids.slice(i,i+15));
+    const rows=(await Promise.all(batches.map(b=>load(t.sections+'?select=scan_id,section_code,free,capacity&scan_id=in.('+b.join(',')+')&limit=1000')))).flat();
+    const sections=new Map();
+    for(const r of rows){
+      if(!sections.has(r.section_code))sections.set(r.section_code,[]);
+      sections.get(r.section_code).push({h:when.get(r.scan_id),free:r.free,capacity:r.capacity});
+    }
+    for(const series of sections.values())series.sort((a,b)=>b.h-a.h);
+    return sections;
+  });
+}
+const COMPARE_COLORS=['#4783b2','#4e896a','#c9c9c9','#c08a4a','#8a8a8a'];
+function drawCompare(mine,refs,title,span){
+  const W=760,Ht=270,L=56,R=18,T=16,B=34;
+  const inWindow=pts=>pts.filter(p=>p.h<=span);
+  const lines=[...refs.map((r,i)=>({title:r.title,color:COMPARE_COLORS[i%COMPARE_COLORS.length],pts:inWindow(r.points),mine:false})),
+    {title,color:'#e9d9bb',pts:inWindow(mine),mine:true}].filter(l=>l.pts.length);
+  const top=Math.max(1,...lines.flatMap(l=>l.pts.map(p=>p.v)))*1.08;
+  const x=h=>L+(span-h)/span*(W-L-R),y=v=>T+(1-v/top)*(Ht-T-B);
+  const step=span<=72?12:span<=168?24:48;
+  let svg='<svg viewBox="0 0 '+W+' '+Ht+'" width="100%" role="img" aria-label="Ledige sitteplasser målt mot timer før avspark">';
+  for(let i=0;i<=4;i++){
+    const v=top/1.08*i/4;
+    svg+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v).toFixed(1)+'" y2="'+y(v).toFixed(1)+'" stroke="#2c2c2c"/>'
+      +'<text x="'+(L-8)+'" y="'+(y(v)+4).toFixed(1)+'" text-anchor="end" fill="#8d8d8d" font-size="11">'+fmt(Math.round(v))+'</text>';
+  }
+  for(let h=0;h<=span;h+=step){
+    svg+='<text x="'+x(h).toFixed(1)+'" y="'+(Ht-12)+'" text-anchor="middle" fill="#8d8d8d" font-size="11">'+(h===0?'Avspark':'−'+hoursText(h))+'</text>';
+  }
+  svg+='<line x1="'+x(0)+'" x2="'+x(0)+'" y1="'+T+'" y2="'+(Ht-B)+'" stroke="#6d5731" stroke-dasharray="3 4"/>';
+  for(const l of lines){
+    const d=l.pts.map((p,i)=>(i?'L':'M')+x(p.h).toFixed(1)+' '+y(p.v).toFixed(1)).join(' ');
+    const end=l.pts.at(-1);
+    svg+='<path d="'+d+'" fill="none" stroke="'+l.color+'" stroke-width="'+(l.mine?3:1.8)+'" stroke-linejoin="round" stroke-linecap="round"'+(l.mine?'':' opacity=".85"')+'/>'
+      +'<circle cx="'+x(end.h).toFixed(1)+'" cy="'+y(end.v).toFixed(1)+'" r="'+(l.mine?4:3)+'" fill="'+l.color+'"/>';
+  }
+  $('compareChart').innerHTML=svg+'</svg>';
+  const legend=$('compareLegend');legend.replaceChildren();
+  for(const l of lines){
+    const item=document.createElement('span');
+    const swatch=document.createElement('i');swatch.style.background=l.color;
+    item.append(swatch,l.mine?title+' (denne kampen)':l.title);
+    legend.append(item);
+  }
+}
+function renderHistoryForecast(result,played){
+  const el=$('historyForecast');
+  el.hidden=!result||played;
+  if(el.hidden)return;
+  $('historyForecastValue').textContent=result.low===result.high?'ca. '+fmt(result.center)+' ledige':fmt(result.low)+'–'+fmt(result.high)+' ledige';
+  $('historyForecastNote').textContent='Basert på '+result.basis.map(b=>b.title+' ('+fmt(b.at)+' → '+fmt(b.final)+')').join(', ')
+    +'. Spennet viser to måter å regne på: samme andel solgt, og samme antall solgt.';
+}
+function renderFastSections(ranked,refsUsed){
+  const box=$('fastSections'),list=$('fastSectionList');
+  list.replaceChildren();
+  const top=ranked.slice(0,6);
+  box.hidden=!top.length;
+  if(!top.length)return;
+  for(const s of top){
+    const li=document.createElement('li');
+    const button=document.createElement('button');button.type='button';
+    const name=document.createElement('strong');name.textContent=sectionName(s.code);
+    const how=s.emptyCount?'0 ledige '+hoursText(s.emptyHours)+' før avspark'+(s.n>1?' ('+s.emptyCount+' av '+s.n+' kamper)':'')
+      :(s.finalShare<0.01?'nesten ingen':Math.round(s.finalShare*100)+' %')+' ledige ved avspark';
+    const nowRow=stadiumByCode.get(s.code);
+    const detail=document.createElement('span');
+    detail.textContent=how+(nowRow?' · nå '+fmt(nowRow.free)+' ledige':'');
+    button.append(name,detail);
+    button.addEventListener('click',()=>{activateStadiumSection(s.code);$('stadiumMap').scrollIntoView({behavior:'smooth',block:'center'});});
+    li.append(button);list.append(li);
+  }
+  $('fastSectionsNote').textContent='Fra '+refsUsed.join(', ')+'. Felt som allerede var tomme da vi begynte å måle, er ikke med.';
+}
+async function renderComparison(match,scans,version,id){
+  const panel=$('comparePanel');
+  const venue=venueFor(match),played=isPlayed(match);
+  const others=allMatches.filter(m=>m.id!==match.id&&venueFor(m)===venue&&Number.isFinite(Date.parse(m.kickoff_at||'')));
+  const mine=curve(scans,match.kickoff_at);
+  if(!others.length||mine.length<2){panel.hidden=true;$('historyForecast').hidden=true;return;}
+  let refs;
+  try{
+    refs=await Promise.all(others.map(async m=>({match:m,title:opponentName(m.title),scans:await refScans(m)})));
+  }catch{if(version===selectionVersion)panel.hidden=true;return;}
+  if(version!==selectionVersion||current!==id)return;
+  refs=refs.map(r=>({...r,points:curve(r.scans,r.match.kickoff_at)})).filter(r=>r.points.length>1);
+  if(!refs.length){panel.hidden=true;$('historyForecast').hidden=true;return;}
+  panel.hidden=false;
+  const title=opponentName(match.title);
+  const now=mine.at(-1),playedRefs=refs.filter(r=>isPlayed(r.match));
+  // Window: from now (or the earliest played reference) to kickoff, at most 30 days.
+  const span=Math.max(24,now.h+12,...playedRefs.map(r=>r.points[0].h));
+  $('compareTitle').textContent='Salgskurven mot tidligere kamper';
+  $('compareChart').hidden=span>720;$('compareLegend').hidden=span>720;
+  if(span<=720)drawCompare(mine,refs,title,span);
+  if(played){
+    $('compareNow').textContent='Kampen er spilt. '+fmt(now.v)+' ledige ved siste måling, '+(now.h>=0?hoursText(now.h)+' før avspark':'like etter avspark')+'.';
+  }else{
+    const same=playedRefs.map(r=>({title:r.title,v:valueAt(r.points,now.h)})).filter(r=>r.v!==null);
+    if(same.length){
+      $('compareNow').textContent='Nå, '+hoursText(now.h)+' før avspark: '+fmt(now.v)+' ledige. '+same.map(r=>{
+        const d=now.v-r.v;
+        return 'Mot '+r.title+' var det '+fmt(r.v)+' på samme tidspunkt ('+(d===0?'likt':d<0?fmt(-d)+' færre ledige nå':fmt(d)+' flere ledige nå')+')';
+      }).join('. ')+'.';
+    }else{
+      const first=playedRefs.map(r=>r.title+' ble fulgt fra '+hoursText(r.points[0].h)+' før avspark').join(', ');
+      $('compareNow').textContent=first
+        ?first+'. Sammenligning på samme tidspunkt kommer når det er like lenge igjen. Nå: '+hoursText(now.h)+' til avspark.'
+        :'Ingen spilte kamper å sammenligne med ennå.';
+    }
+  }
+  renderHistoryForecast(historyForecast(now,playedRefs),played);
+  if(!playedRefs.length){$('fastSections').hidden=true;return;}
+  try{
+    const withSections=await Promise.all(playedRefs.map(async r=>({title:r.title,sections:await refSections(r.match,r.scans)})));
+    if(version!==selectionVersion||current!==id)return;
+    renderFastSections(rankFastSections(withSections),withSections.map(r=>r.title));
+  }catch{$('fastSections').hidden=true;}
+}
+
+// --- Push alerts: new tickets released, or a field running low -------------
+// The browser's push endpoint is the only identifier; no account or e-mail.
+const PUSH_API=DB+'/functions/v1/ministaut-push';
+const VAPID_PUBLIC='BE_by4P9-2fSKhyeBm6Ka5VT4NWNi-xwS8PauHY0twQ9dHns-0sWaGIiD_CCdhbxneMmBkhu0Kair0001wia3as';
+const SECTION_THRESHOLDS=[10,25,50,100];
+let pushState={endpoint:null,alerts:[]};
+const pushSupported=()=>typeof navigator!=='undefined'&&'serviceWorker' in navigator&&typeof window!=='undefined'&&'PushManager' in window&&'Notification' in window;
+function vapidBytes(key){
+  const raw=atob(key.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-key.length%4)%4));
+  return Uint8Array.from(raw,c=>c.charCodeAt(0));
+}
+async function pushCall(body){
+  const res=await fetch(PUSH_API,{method:'POST',headers:{'Content-Type':'application/json',apikey:KEY},body:JSON.stringify(body)});
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok)throw new Error(data.error||'Varseltjenesten svarte '+res.status);
+  return data;
+}
+async function pushRegistration(){
+  return navigator.serviceWorker.register('/sw.js');
+}
+async function pushSubscription(ask){
+  const reg=await pushRegistration();
+  await navigator.serviceWorker.ready;
+  let sub=await reg.pushManager.getSubscription();
+  if(!sub&&ask){
+    if(await Notification.requestPermission()!=='granted')throw new Error('Varsler er blokkert i nettleseren. Tillat varsler for siden og prøv igjen.');
+    sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:vapidBytes(VAPID_PUBLIC)});
+  }
+  return sub;
+}
+async function loadPushState(){
+  if(!pushSupported()||Notification.permission!=='granted')return;
+  try{
+    const sub=await pushSubscription(false);
+    if(!sub)return;
+    const data=await pushCall({action:'list',subscription:sub.toJSON()});
+    pushState={endpoint:sub.endpoint,alerts:data.alerts||[]};
+    renderAlerts();
+  }catch{/* Alerts are optional; the page works without them. */}
+}
+const hasAlert=(kind,code='')=>pushState.alerts.some(a=>a.match_id===current&&a.kind===kind&&(a.section_code||'')===code);
+function alertStatus(text){$('alertStatus').textContent=text;}
+async function toggleAlert(kind,code='',threshold=null){
+  const on=hasAlert(kind,code);
+  try{
+    const sub=await pushSubscription(!on);
+    if(!sub)throw new Error('Fant ingen varselregistrering i denne nettleseren.');
+    const data=await pushCall({action:on?'unsubscribe':'subscribe',subscription:sub.toJSON(),match_id:current,kind,section_code:code,threshold});
+    pushState={endpoint:sub.endpoint,alerts:data.alerts||[]};
+    alertStatus(on?'Varsel slått av.':kind==='release'?'Du får varsel når nye billetter slippes.':'Du får varsel når '+sectionName(code)+' har '+threshold+' eller færre ledige.');
+  }catch(error){alertStatus(error.message||'Kunne ikke endre varselet nå.');}
+  renderAlerts();
+}
+function renderAlerts(){
+  const match=matches.find(m=>m.id===current);
+  const row=$('alertRow'),button=$('alertRelease');
+  const usable=!!match&&!isPlayed(match)&&Date.parse(match.kickoff_at||'')>Date.now();
+  row.hidden=!usable;
+  if(!usable)return;
+  if(!pushSupported()){
+    button.disabled=true;
+    button.textContent='Varsler støttes ikke her';
+    alertStatus(/iPhone|iPad/.test(navigator.userAgent)?'På iPhone: Del → «Legg til på Hjem-skjerm», og åpne Ministaut derfra.':'Nettleseren støtter ikke varsler.');
+    return;
+  }
+  const on=hasAlert('release');
+  button.setAttribute('aria-pressed',String(on));
+  button.textContent=on?'🔔 Varsler om nye billetter · på':'🔔 Varsle meg når nye billetter slippes';
+  if(stadiumSelected)renderSectionAlert(stadiumSelected.dataset.code);
+}
+function renderSectionAlert(code){
+  const box=$('sectionAlert');box.replaceChildren();
+  const match=matches.find(m=>m.id===current),row=stadiumByCode.get(code);
+  box.hidden=!code||!row||!match||isPlayed(match)||!pushSupported();
+  if(box.hidden)return;
+  const active=pushState.alerts.find(a=>a.match_id===current&&a.kind==='section'&&a.section_code===code);
+  if(active){
+    const off=document.createElement('button');off.type='button';off.className='pill alert-pill';off.setAttribute('aria-pressed','true');
+    off.textContent='🔔 Varsel ved '+active.threshold+' ledige i '+sectionName(code)+' · slå av';
+    off.addEventListener('click',()=>void toggleAlert('section',code));
+    box.append(off);return;
+  }
+  const options=SECTION_THRESHOLDS.filter(t=>t<row.free);
+  if(!options.length){box.hidden=true;return;}
+  const label=document.createElement('label');label.textContent='Varsle meg når '+sectionName(code)+' har ';
+  const select=document.createElement('select');select.setAttribute('aria-label','Antall ledige seter');
+  for(const t of options){const o=document.createElement('option');o.value=String(t);o.textContent=String(t);select.append(o);}
+  select.value=String(options.includes(25)?25:options[0]);
+  label.append(select,' eller færre ledige');
+  const go=document.createElement('button');go.type='button';go.className='pill alert-pill';go.textContent='🔔 Slå på';
+  go.addEventListener('click',()=>void toggleAlert('section',code,Number(select.value)));
+  box.append(label,go);
+}
+$('alertRelease').addEventListener('click',()=>void toggleAlert('release'));
+
 async function selectMatch(id){
   const match=matches.find(m=>m.id===id);
   if(!match)return;
@@ -1934,7 +2294,8 @@ async function selectMatch(id){
   $('kickoff').textContent=match.kickoff_at?'Avspark '+date(match.kickoff_at):'Avspark ikke registrert';
   const key=String(match.event_key||'');
   $('tickets').href=/^[A-Za-z0-9_-]{8,100}$/.test(key)?'https://billett.rbk.no/checkout/'+key:'https://billett.rbk.no/';
-  if(changed){$('error').textContent='';render([]);renderSectionRecords([]);renderSections(null,null);}
+  if(changed){$('error').textContent='';render([]);renderSectionRecords([]);renderSections(null,null);$('comparePanel').hidden=true;$('historyForecast').hidden=true;$('sectionAlert').hidden=true;alertStatus('');}
+  renderAlerts();
   $('stats').setAttribute('aria-busy','true');
   try{
     const table=categoryFor(match)==='women'?'ministaut_koteng_scans':'ministaut_scans';
@@ -1944,6 +2305,7 @@ async function selectMatch(id){
     render(data);
     renderSectionRecords(data);
     await loadSections(data[0]||null,version,id,data);
+    void renderComparison(match,data,version,id);
   }catch(error){if(version===selectionVersion)$('error').textContent='Kunne ikke hente tall for valgt kamp. Prøv Oppdater.';}
   finally{if(version===selectionVersion)$('stats').removeAttribute('aria-busy');}
 }
@@ -2007,6 +2369,7 @@ $('refresh').addEventListener('click',()=>{
   });
 });
 void refresh();
+void loadPushState();
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)void refresh();});
 setInterval(()=>{updateAgeIndicator();if(!document.hidden)void refresh();},60000);
 
