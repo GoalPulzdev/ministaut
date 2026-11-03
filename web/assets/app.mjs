@@ -2717,7 +2717,10 @@ async function showTeam(next, { share = true } = {}) {
     activeTeam === "women"
       ? "BILLETTSTATUS · RBK KVINNER"
       : "BILLETTSTATUS · RBK";
-  $("page-title").textContent = "Tettere på tribunen.";
+  $("page-title").innerHTML =
+    activeTeam === "women"
+      ? "Følg billettsalget<br>til <em>RBK Kvinner.</em>"
+      : "Følg billettsalget<br>til <em>Rosenborg.</em>";
   $("teamDescription").textContent =
     activeTeam === "women"
       ? "Følg ledige sitteplasser til RBK Kvinners kamper."

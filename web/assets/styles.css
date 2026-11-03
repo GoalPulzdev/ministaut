@@ -170,19 +170,19 @@ h4 {
 .hero {
   position: relative;
   isolation: isolate;
-  min-height: 140px;
-  padding: 26px 0 18px;
+  min-height: 280px;
+  padding: 36px 0 28px;
   overflow: hidden;
 }
 .hero::before {
   content: "";
   position: absolute;
   z-index: -2;
-  inset: 0 0 0 38%;
+  inset: 0;
   background: url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Lerkendal_stadion_at_night.jpg?width=1280")
     center 52% / cover;
-  filter: grayscale(1) brightness(0.6);
-  opacity: 0.72;
+  filter: grayscale(1) brightness(1.65) contrast(1.1);
+  opacity: 1;
 }
 .hero::after {
   content: "";
@@ -190,8 +190,8 @@ h4 {
   z-index: -1;
   inset: 0;
   background:
-    linear-gradient(90deg, var(--page) 30%, #090a0bba 57%, #090a0b00 84%),
-    linear-gradient(0deg, var(--page), #090a0b00 50%);
+    linear-gradient(90deg, #050505f9 0%, #060606e8 19%, #070707bb 36%, #07070750 56%, #07070715 78%, #05050526 100%),
+    linear-gradient(0deg, #090a0be6 0%, #090a0b00 24%, #090a0b00 78%, #05050520 100%);
 }
 .hero h1 {
   font-size: clamp(35px, 3.3vw, 50px);
@@ -203,6 +203,10 @@ h4 {
   margin-bottom: 0;
   color: var(--secondary);
   font-size: 16px;
+}
+.hero h1 em {
+  color: var(--accent);
+  font-style: normal;
 }
 .team-selector {
   display: inline-flex;
@@ -1386,12 +1390,17 @@ summary::-webkit-details-marker {
     min-height: 44px;
   }
   .hero {
-    min-height: 0;
+    min-height: 260px;
     padding: 26px 0 22px;
   }
   .hero::before {
     left: 0;
-    opacity: 0.2;
+    opacity: 1;
+  }
+  .hero::after {
+    background:
+      linear-gradient(90deg, #050505ee, #0505058c 65%, #05050555),
+      linear-gradient(0deg, #090a0bc7, #090a0b00 48%);
   }
   .hero h1 {
     font-size: clamp(31px, 8.5vw, 40px);
