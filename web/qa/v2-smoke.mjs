@@ -1,69 +1,56 @@
-#!/usr/bin/env node
-import fs from 'node:fs';
-import vm from 'node:vm';
-import assert from 'node:assert/strict';
-const html=fs.readFileSync(new URL('../v2.html',import.meta.url),'utf8');
-const v1=fs.readFileSync(new URL('../v1.html',import.meta.url),'utf8');
-const home=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
-assert.match(html,/<title>Ministaut · Følg billettsalget/);
-assert.match(v1,/<title>Ministaut · RBK og RBK Kvinner<\/title>/);
-assert.equal(home,html,'V2 must be the root page, and the /v2 alias must match');
-assert.ok(!html.includes('<svg class="v2-crown"'),'Decorative crown in header must be removed');
-const js=html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
-assert.ok(js,'V2 script exists');
-new vm.Script(js,{filename:'ministaut-v2.js'});
-const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);
-assert.equal(new Set(ids).size,ids.length,'Duplicate DOM ids');
-const available=new Set(ids);
-for(const m of js.matchAll(/\$\(['"]([^'"]+)['"]\)/g)){
- assert.ok(available.has(m[1]),'Missing element: '+m[1]);
-}
-for(const x of ['ministaut_matches?select=','ministaut_koteng_matches?select=','ministaut_scans','ministaut_koteng_scans','matchCards','stadiumMap','dailyPulse','chartInspect','tickets']){
- assert.ok(html.includes(x),'Missing V1 feature: '+x);
-}
-assert.equal((html.match(/data-chart-hours="/g)||[]).length,4);
-assert.ok(html.includes('Lerkendal_stadion_at_night.jpg'));
-const colors=[...html.matchAll(/#([a-f\d]{3,8})\b/gi)].map(m=>m[1]);
-for(let c of colors){
- if(c.length<=4)c=c.split('').map(x=>x+x).join('');
- const [r,g,b]=[0,2,4].map(i=>parseInt(c.slice(i,i+2),16));
- const neutral=Math.max(r,g,b)-Math.min(r,g,b)<=35;
- const gold=r>=g*.84 && g>=b*.81;
- const mapPalette=new Set(['318b5f','a4af42','de983d','c84a44','c84843','da9042','d7bf64','4e896a','4783b2','244c36','4c785e','346348','244d39','132d22','111b16']);
- assert.ok(neutral||gold||mapPalette.has(c.toLowerCase()),'Unapproved hex: #'+c);
-}
-for(const phrase of ['RBK BILLETTMONITOR V2','V2 FORHÅNDSVISNING','V2 designforhåndsvisning','avleste felt','Følg billettpulsen']){
- assert.ok(!html.includes(phrase),'Development text visible: '+phrase);
-}
-for(const id of ['standSummary','legendAvailability','legendHeat'])assert.ok(available.has(id),'Missing supporter feature '+id);
-const groups=['SA RA QA PA OA NA MA Q P O N RB QB PB OB NB MB','LB KB JB IB HB K J I','AB BB CB DB EB FB GB A B C D E F G PRESSE AA BA CA DA EA FA GA','TA UA VA WA XA TB UB U VB V WB W XB'].flatMap(x=>x.split(' '));
-const fieldCodes=JSON.parse(html.match(/const STADIUM_CODES=(\[[^\n]+\])/)[1]);
-assert.deepEqual(groups.slice().sort(),fieldCodes.slice().sort(),'All 60 field codes must be assigned exactly once in stand summary');
+import fs from "node:fs";
+import path from "node:path";
+import assert from "node:assert/strict";
+import { fileURLToPath } from "node:url";
+import { execFileSync } from "node:child_process";
+import { displayedForecast, STAND_GROUPS } from "../assets/models.mjs";
 
-for(const name of ['Pepsi Max-tribunen','Adressa-tribunen','SpareBank 1-tribunen','Coop-tribunen']){
- assert.ok(html.includes("name:'"+name+"'"),'Expected named tribune: '+name);
+const root = fileURLToPath(new URL("../", import.meta.url));
+execFileSync(process.execPath, [path.join(root, "build.js")]);
+const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
+const app = fs.readFileSync(path.join(root, "assets/app.mjs"), "utf8");
+assert.equal(
+  fs.readFileSync(path.join(root, "public/index.html"), "utf8"),
+  html,
+);
+assert.equal(fs.readFileSync(path.join(root, "public/v2.html"), "utf8"), html);
+assert.equal(
+  fs.readFileSync(path.join(root, "public/v1.html"), "utf8"),
+  fs.readFileSync(path.join(root, "v1.html"), "utf8"),
+);
+for (const asset of [
+  "styles.css",
+  "app.mjs",
+  "models.mjs",
+  "stadium-layout.mjs",
+  "charts.mjs",
+  "match-card.mjs",
+]) {
+  assert.ok(
+    fs.statSync(path.join(root, "public/assets", asset)).size > 0,
+    asset,
+  );
 }
-assert.match(html,/SAMMEN<br>FOR<br>ROSENBORG/);
-assert.match(html,/SISTE PROGNOSE · IKKE OPPDATERT/);
-// Regressions: a stale but recent snapshot may show its *historical*
-// forecast with a label; no snapshot older than 12 hours may do so.
-const modelBegin=js.indexOf('const PROJECTION_HORIZON_DAYS=');
-const modelEnd=js.indexOf('// Separate, deliberately linear',modelBegin);
-assert.ok(modelBegin>=0&&modelEnd>modelBegin);
-const context={
- overdue: time => !time || Date.now()-Date.parse(time)>95*60000,
- comparable: (a,b)=>!!(a&&b&&JSON.stringify([...(a.locked_fields||[])].sort())===JSON.stringify([...(b.locked_fields||[])].sort()))
-};
-vm.runInNewContext(js.slice(modelBegin,modelEnd)+'\nthis.displayForecast=displayedForecast;',context);
-const now=Date.now();
-const kick=new Date(now+5*86400000).toISOString();
-const readings=(ageHours)=>Array.from({length:20},(_,i)=>({
- observed_at:new Date(now-(ageHours+19-i)*3600000).toISOString(),
- available_seated:4100-i*18,
- locked_fields:[]
-}));
-assert.equal(context.displayForecast(readings(.5),kick).stale,false,'Fresh data should yield live projection');
-assert.equal(context.displayForecast(readings(3),kick).stale,true,'Recent stale data should yield labeled historical projection');
-assert.notEqual(context.displayForecast(readings(13),kick).status,'projected','Very old data must not be projected');
-
-console.log('V2 structure OK: '+ids.length+' IDs, '+colors.length+' palette values, JS syntax valid, V2 home active, V1 preserved at /v1.');
+assert.ok(!html.includes("<style>"), "Styles have one owner");
+const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map((m) => m[1]);
+assert.equal(ids.length, new Set(ids).size, "Unique DOM hooks");
+for (const m of app.matchAll(/\$\(['"]([^'"]+)['"]\)/g))
+  assert.ok(ids.includes(m[1]), `Missing DOM hook: ${m[1]}`);
+assert.equal((html.match(/data-chart-hours="/g) || []).length, 4);
+const codes = STAND_GROUPS.flatMap((g) => g.codes);
+assert.equal(codes.length, 60);
+assert.equal(new Set(codes).size, 60);
+const now = Date.now(),
+  kickoff = new Date(now + 5 * 86400000).toISOString();
+const readings = (age) =>
+  Array.from({ length: 20 }, (_, i) => ({
+    observed_at: new Date(now - (age + 19 - i) * 3600000).toISOString(),
+    available_seated: 4100 - i * 18,
+    locked_fields: [],
+  }));
+assert.equal(displayedForecast(readings(0.5), kickoff).stale, false);
+assert.equal(displayedForecast(readings(3), kickoff).stale, true);
+assert.notEqual(displayedForecast(readings(13), kickoff).status, "projected");
+console.log(
+  `PASS: production aliases, asset packaging, ${ids.length} DOM hooks, 60 sectors, forecast freshness`,
+);

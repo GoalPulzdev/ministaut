@@ -1,10 +1,12 @@
-# Ministaut · UX-standard (Impeccable-vurdering, 2026-10-23)
+# Ministaut · UX-standard
+
+Oppdatert 03.11.2026: Gjeldende retning er sort/hvitt og dempet gull med kompakt masthead. Stilene har én kilde i `assets/styles.css`. Kampdetaljer prioriteres foran arkiv og sesongrekorder når kommende kamper finnes. Se `README.md` og `V2_VISUAL_QA.md` for implementasjon og verifikasjon. Datadefinisjonene og tilgjengelighetskravene under gjelder fortsatt.
 
 **Publikum:** RBK-supportere som følger billettutviklingen på mobil og PC.  
 **Oppgave:** Se hvor mange sitteplasser som faktisk er tilgjengelige, velge Rosenborg-kamp, følge endring over tid og gå direkte til RBKs billettsalg.
 
 ## Konsekvent designretning
-- Mørk, stadioninspirert visning med rolig grønn fargebruk, myk kontrast og ett tydelig lyst kjøps-CTA.
+- Mørk, stadioninspirert visning med sort/hvitt, dempet gull, god kontrast og én tydelig billettknapp. Kartet bruker grønn/gul/rød tilgjengelighetspalett.
 - Én kampvelger: de store kampkortene. Ikke innfør en ekstra dropdown.
 - Hovedmålet er `ledige sitteplasser`. Dette er bekreftede skanninger, ikke antall solgte billetter.
 - Vis **færre/flere ledige sitteplasser** i stedet for negative tall uten forklaring. Skill mellom tilbakegang og økning i tilgjengelighet.

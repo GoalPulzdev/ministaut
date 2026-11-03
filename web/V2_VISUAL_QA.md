@@ -1,35 +1,21 @@
-# Ministaut V2 - visuell kvalitetskontroll mot mockbilder
+# Ministaut visuell QA — 3. november 2026
 
-Primærreferanse: første sort-hvitt-gull mockbilde av Ministaut. Sekundærreferanse: kompakt dashboard fra mockbilde 2. Ingen demonstrasjonstall fra mockbilder skal brukes; data må komme fra Supabase og godkjente skanninger.
+Retning: sort/hvitt og dempet gull, redaksjonell typografi, kompakt kampvalg og stor, lesbar billettutvikling. Eksisterende stadionfoto og korrekt stadiongeometri beholdes; illustrerte konseptkart brukes aldri som datakilde eller feltoppsett.
 
-## Kriterier for 95 prosent likhet
+## Kontroller
 
-Dette er et mål, ikke en målt score. Det krever ekte sammenlignbare nettleser-screenshots av V2 mot bildene.
+- Ekte offentlige lesedata: herrelag og RBK Kvinner, kommende og spilte kamper.
+- Desktop 1536 × 1024, nettbrett 820 × 844, mobil 390 × 844 og 320 × 844.
+- Ingen horisontal side-overflow; kampvelger og forstørret kart har avgrenset egen scrolling.
+- Grafens viewBox følger tilgjengelig bredde. Aksetekst krymper ikke fra en fast 920-enheters tegning.
+- Grafperioder, tastaturinspeksjon, kartets to modi, feltvalg og bevart markering.
+- Kartforstørring med original geometri; feltlisten gir større trykkflater.
+- Delingsdialog, Escape og lenker som følger aktuell vert.
+- Arkiv har «Ledige ved siste måling» og skjuler kjøp/framtidsprognose.
+- `/ministaut/` med moduler og lagvalg via query.
+- Total 503-feil viser forståelig tilstand og synlig «Prøv igjen»; nytt forsøk kan hente data.
+- Lint, beregningstester, geometritester, ferskhetstester og byggpakke kontrolleres i CI.
 
-- Hero, stadionfoto, lys, typografi og kronemerke: 20 prosent
-- Navigasjon, spacing og sort/hvitt/gull/grå palett: 15 prosent
-- Kampkort med dato, faktiske klubbmerker, ledige plasser: 15 prosent
-- Dashboardgeometri, hovedtall, graf og prognose: 25 prosent
-- Stadionkart, felt og lesbar tribuneoversikt: 15 prosent
-- Responsiv mobil og tilgjengelighet: 10 prosent
+## Avgrensning
 
-Hvert område vurderes 0-100. Vektet sum minst 95 av 100, pluss full funksjonskontroll, kreves før merge. Oppdiktede statistikker eller feil kampmetadata er alltid blokkere.
-
-## Gjennomført på V2-grenen
-
-- Autentisk Lerkendal-hero med CC BY-SA-fotokreditering, gull/krem og sort-hvitt.
-- Kronemerke og premium navigasjon.
-- Kompakte lagvalg, kampkort med klubbmerker.
-- Billettstatus, graf med valg 24t/7d/30d/alle, prognose og interaktiv tribuneoversikt.
-- Opprinnelig V1, backend og skannermotor beholdt uendret.
-
-## Test på PC
-
-1. Opprett Vercel preview fra feature-grenen; ikke merge rett til main.
-2. Fra repo-roten: node web/qa/v2-smoke.mjs. Fra web-mappen: npm run build.
-3. Ta Edge eller Chromium-screenshots ved 1440x1080, 1280x800, 768x1024, 390x844.
-4. Test valgene for RBK, RBK Kvinner, kampnavn, ekte avspark i norsk tid, historikkgrafer, valgt tidsrom, alle kartsektorer, feiltilstander og billettlink.
-5. Legg faktisk V2-screenshot side ved side med godkjente mockbilder. Score komponentene ovenfor.
-6. Publiser først når designscoren er minst 95/100 og funksjonelle tester er bestått.
-
-Ingen faktisk screenshot av V2 ble verifisert i denne sesjonen. Vercel ga tidligere 403/404. 95 prosent er derfor ikke meldt oppnådd.
+Chromium-validering erstatter ikke en siste kontroll på fysisk iPhone/Safari og Android. Varsellevering og opprettelse av abonnement er ikke utløst i QA. Ingen vilkårlig prosent- eller «10/10»-score brukes som bevis for visuell kvalitet.
