@@ -26,7 +26,7 @@ GoalPulz Sql tabeller og Edge Function er opprettet. Publiseringsstatus i Vercel
 - V1 ligger uendret i `web/v1.html` og blir publisert på `/v1` som reserve.
 - `web/build.js` lager `public/index.html`, `public/v2.html` og `public/v1.html`.
 - Tipspanelet `/ministaut` har Next.js rewrite til `https://ministaut-web.vercel.app/`, så byttet aktiverer live-forsiden på begge adresser.
-- Videre designendringer må gjøres i `web/index.html` og synkroniseres med `web/v2.html` slik at de to adressene viser identisk side.
+- Oppdatert 03.11.2026: Hovedkilden er `web/index.html` med moduler og ett stilark i `web/assets/`. Bygget lager `/v2` fra samme kilde; ingen manuell synkronisering. Se `web/README.md` for bygg, kontroller og innbygging under `/ministaut/`.
 - Ingen endring av billettskanner, Supabase-mottak eller datadefinisjoner.
 
 ## Supporter-, medie- og driftsfunksjoner (fra 29.10.2026)

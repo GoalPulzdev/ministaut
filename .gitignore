@@ -20,6 +20,7 @@ __pycache__/
 .venv/
 node_modules/
 .vercel/
+web/public/
 .DS_Store
 # Supabase CLI local state
 supabase/.temp/
