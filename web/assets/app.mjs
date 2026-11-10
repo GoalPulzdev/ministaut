@@ -587,7 +587,9 @@ function updateSelectedCards() {
       ? "VALGT KAMP"
       : item.played
         ? "SPILT"
-        : "SE KAMP";
+        : isSeasonPass(matches.find((m) => m.id === id))
+          ? "SESONGKORT"
+          : "SE KAMP";
   }
 }
 
