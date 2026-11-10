@@ -8,6 +8,7 @@ import {
   categoryFor,
   venueFor,
   isPlayed,
+  isSeasonPass,
   teamFromURL,
   median,
   displayedForecast,
@@ -592,7 +593,7 @@ function updateSelectedCards() {
 
 function buildCards() {
   const signature = matches
-    .map((m) => m.id + "|" + m.title + "|" + m.kickoff_at + "|" + isPlayed(m))
+    .map((m) => m.id + "|" + m.title + "|" + m.kickoff_at + "|" + isPlayed(m) + "|" + isSeasonPass(m))
     .join(";");
   if (signature === cardSignature) {
     updateSelectedCards();
@@ -605,23 +606,33 @@ function buildCards() {
   target.replaceChildren();
   archive.replaceChildren();
   // Played matches move to the archive below, newest first.
-  const upcoming = matches.filter((m) => !isPlayed(m)),
-    played = matches.filter((m) => isPlayed(m)).reverse();
+  const upcoming = matches.filter((m) => !isSeasonPass(m) && !isPlayed(m)),
+    seasonPasses = matches.filter(isSeasonPass),
+    played = matches.filter((m) => !isSeasonPass(m) && isPlayed(m)).reverse();
   // Keep the current match above secondary history. With no upcoming matches,
   // the archive becomes the primary selector and stays next to the team tabs.
-  if (upcoming.length) $("seasonBoard").before($("playedSection"));
+  if (upcoming.length || seasonPasses.length) $("seasonBoard").before($("playedSection"));
   else target.after($("playedSection"));
   $("playedSection").hidden = !played.length;
   $("playedTitle").textContent = "Spilte kamper (" + played.length + ")";
   if (!upcoming.length) {
     const empty = document.createElement("p");
     empty.className = "empty";
-    empty.textContent = matches.length
-      ? "Ingen kommende kamper akkurat nå. Se spilte kamper under."
-      : "Ingen kamper er publisert ennå.";
+    empty.textContent = seasonPasses.length
+      ? "Ingen kommende kamper registrert akkurat nå."
+      : played.length
+        ? "Ingen kommende kamper akkurat nå. Se spilte kamper under."
+        : "Ingen kamper er publisert ennå.";
     target.append(empty);
   }
   for (const m of upcoming) {
+    const card = createCard(m);
+    cards.set(m.id, card);
+    target.append(card.button);
+  }
+  // Season-card inventory is a long-running ticket product, not a fixture.
+  // Keep it visible without putting it in the played-match archive.
+  for (const m of seasonPasses) {
     const card = createCard(m);
     cards.set(m.id, card);
     target.append(card.button);
@@ -660,8 +671,6 @@ async function refreshCardData() {
         if (!data.length) {
           card.value.textContent = "—";
           card.foot.textContent = card.played ? "" : "Tall kommer snart";
-          card.spark.replaceChildren();
-          card.spark.dataset.series = "";
           card.button.setAttribute("data-stale", String(!card.played));
           return;
         }
@@ -2168,7 +2177,7 @@ function renderVerdict() {
 }
 function renderPressure(match, scans, baseline) {
   const el = $("pressureIndex");
-  const p = isPlayed(match) ? null : pressureIndex(scans, baseline);
+  const p = isPlayed(match) || isSeasonPass(match) ? null : pressureIndex(scans, baseline);
   el.hidden = !p;
   if (!p) return null;
   el.dataset.trend = p.value >= 125 ? "down" : p.value < 75 ? "up" : "flat";
@@ -2313,7 +2322,7 @@ async function renderSupporter(match, scans, version, id) {
     .sort((a, b) => Date.parse(a.observed_at) - Date.parse(b.observed_at));
   renderTogether();
   const venue = venueFor(match),
-    same = allMatches.filter((m) => venueFor(m) === venue);
+    same = allMatches.filter((m) => venueFor(m) === venue && !isSeasonPass(m));
   let all;
   try {
     all = await Promise.all(
@@ -2330,13 +2339,13 @@ async function renderSupporter(match, scans, version, id) {
   const baseline = all.flatMap((r) => dayDrops(r.scans));
   currentPressure = renderPressure(match, scans, baseline);
   renderMatchday(match, curve(scans, match.kickoff_at));
-  renderVerdict();
+  if (isSeasonPass(match)) $("fullVerdict").hidden = true;
   $("advicePanel").hidden =
     $("togetherBlock").hidden &&
     $("matchdayBlock").hidden &&
     $("timingBlock").hidden;
   const played = all.filter(
-    (r) => r.match.id !== match.id && isPlayed(r.match),
+    (r) => r.match.id !== match.id && !isSeasonPass(r.match) && isPlayed(r.match),
   );
   if (!played.length) {
     $("timingBlock").hidden = true;
@@ -2365,7 +2374,7 @@ async function renderSupporter(match, scans, version, id) {
 async function renderSeason() {
   const board = $("seasonBoard"),
     team = activeTeam;
-  const list = matches.slice();
+  const list = matches.filter((m) => !isSeasonPass(m));
   if (!list.length) {
     board.hidden = true;
     return;
@@ -2617,13 +2626,15 @@ async function selectMatch(id) {
     selectedVenue === "koteng_arena"
       ? "Velg et felt for å se ledige sitteplasser på Koteng Arena. Ståplassene er ikke med i oversikten."
       : "Velg et felt for å se ledige sitteplasser på Lerkendal.";
-  $("ticketLabel").textContent = "Finn billetter";
+  $("ticketLabel").textContent = isSeasonPass(match) ? "Se sesongkort hos RBK" : "Finn billetter";
   $("tickets").hidden = isPlayed(match);
-  document.querySelector(".forecast-panel").hidden = isPlayed(match);
+  document.querySelector(".forecast-panel").hidden = isPlayed(match) || isSeasonPass(match);
   document.querySelector(".results").dataset.played = String(isPlayed(match));
-  $("availabilityCaption").textContent = isPlayed(match)
-    ? "Ledige ved siste måling"
-    : "Ledige sitteplasser";
+  $("availabilityCaption").textContent = isSeasonPass(match)
+    ? "Registrerte tilgjengelige sitteplasser i sesongkortkartet"
+    : isPlayed(match)
+      ? "Ledige ved siste måling"
+      : "Ledige sitteplasser";
   $("shareMatch").disabled = true;
   $("campaignHeading").textContent =
     "Ses på " +
@@ -2637,9 +2648,11 @@ async function selectMatch(id) {
       ? "KOTENG ARENA · BILLETTOVERSIKT"
       : "LERKENDAL · BILLETTOVERSIKT";
   selectedKickoff = match.kickoff_at || null;
-  $("kickoff").textContent = match.kickoff_at
-    ? (isPlayed(match) ? "Spilt " : "Avspark ") + date(match.kickoff_at)
-    : "Avspark ikke registrert";
+  $("kickoff").textContent = isSeasonPass(match)
+    ? "Sesongkort · ingen kampstart"
+    : match.kickoff_at
+      ? (isPlayed(match) ? "Spilt " : "Avspark ") + date(match.kickoff_at)
+      : "Avspark ikke registrert";
   const key = String(match.event_key || "");
   $("tickets").href = /^[A-Za-z0-9_-]{8,100}$/.test(key)
     ? "https://billett.rbk.no/checkout/" + key
@@ -2709,7 +2722,7 @@ async function showTeam(next, { share = true } = {}) {
   $("teamMen").setAttribute("aria-pressed", String(activeTeam === "men"));
   $("teamWomen").setAttribute("aria-pressed", String(activeTeam === "women"));
   const upcomingCount = (team) =>
-    allMatches.filter((m) => categoryFor(m) === team && !isPlayed(m)).length +
+    allMatches.filter((m) => categoryFor(m) === team && !isSeasonPass(m) && !isPlayed(m)).length +
     " kommende";
   $("teamMenCount").textContent = upcomingCount("men");
   $("teamWomenCount").textContent = upcomingCount("women");
@@ -2749,7 +2762,8 @@ async function showTeam(next, { share = true } = {}) {
   const chosen = matches.some((m) => m.id === current)
     ? current
     : chooseByLink(matches) ||
-      (matches.find((m) => !isPlayed(m)) || matches[matches.length - 1]).id;
+      (matches.find((m) => !isSeasonPass(m) && !isPlayed(m)) ||
+        matches.find(isSeasonPass) || matches[matches.length - 1]).id;
   await Promise.all([selectMatch(chosen), refreshCardData()]);
 }
 for (const b of document.querySelectorAll("[data-chart-hours]"))
