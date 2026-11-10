@@ -604,8 +604,10 @@ function buildCards() {
   cardSignature = signature;
   cards = new Map();
   const target = $("matchCards"),
+    seasonTarget = $("seasonPassCards"),
     archive = $("playedCards");
   target.replaceChildren();
+  seasonTarget.replaceChildren();
   archive.replaceChildren();
   // Played matches move to the archive below, newest first.
   const upcoming = matches.filter((m) => !isSeasonPass(m) && !isPlayed(m)),
@@ -616,6 +618,7 @@ function buildCards() {
   if (upcoming.length || seasonPasses.length) $("seasonBoard").before($("playedSection"));
   else target.after($("playedSection"));
   $("playedSection").hidden = !played.length;
+  $("seasonPassSection").hidden = !seasonPasses.length;
   $("playedTitle").textContent = "Spilte kamper (" + played.length + ")";
   if (!upcoming.length) {
     const empty = document.createElement("p");
@@ -637,7 +640,7 @@ function buildCards() {
   for (const m of seasonPasses) {
     const card = createCard(m);
     cards.set(m.id, card);
-    target.append(card.button);
+    seasonTarget.append(card.button);
   }
   for (const m of played) {
     const card = createCard(m);
