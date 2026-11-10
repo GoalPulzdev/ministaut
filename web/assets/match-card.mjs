@@ -12,15 +12,18 @@ export function createMatchCard(match, { played, formatDate, onSelect }) {
   if (played) button.dataset.played = "true";
   button.setAttribute("aria-label", "Vis billettstatus for " + match.title);
   button.setAttribute("aria-pressed", "false");
+  const seasonPass = /sesongkort/i.test(match.title || "");
   const top = el("span", "tile-top");
-  const pill = el("span", "tile-pill", played ? "SPILT" : "SE KAMP");
+  const pill = el("span", "tile-pill", played ? "SPILT" : seasonPass ? "SESONGKORT" : "SE KAMP");
   top.append(
     el(
       "span",
       "",
-      match.kickoff_at
-        ? (played ? "Spilt " : "Avspark ") + formatDate(match.kickoff_at)
-        : "Kampstart kommer",
+      seasonPass
+        ? "Sesongkort · løpende overvåking"
+        : match.kickoff_at
+          ? (played ? "Spilt " : "Avspark ") + formatDate(match.kickoff_at)
+          : "Kampstart kommer",
     ),
     pill,
   );

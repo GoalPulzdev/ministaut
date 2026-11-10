@@ -70,6 +70,12 @@ function isPlayed(match, now = Date.now()) {
   const k = Date.parse(match?.kickoff_at || "");
   return Number.isFinite(k) && now >= k + PLAYED_AFTER_MS;
 }
+// Season passes share the verified seat inventory but have no kickoff or match forecast.
+// The scanner currently records them in the same match table; do not treat a
+// missing kickoff alone as proof that an event is a season pass.
+function isSeasonPass(match) {
+  return String(match?.title || "").toLocaleLowerCase("nb-NO").includes("sesongkort");
+}
 function teamFromURL(items, search = "") {
   try {
     const q = new URLSearchParams(search),
@@ -727,6 +733,7 @@ export {
   venueFor,
   PLAYED_AFTER_MS,
   isPlayed,
+  isSeasonPass,
   teamFromURL,
   PROJECTION_HORIZON_DAYS,
   median,

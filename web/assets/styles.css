@@ -360,6 +360,12 @@ h4 {
 .match-tile[data-stale="true"] .tile-foot {
   color: var(--accent);
 }
+.season-pass-section {
+  margin-top: 24px;
+}
+.season-pass-section .section-heading {
+  margin-bottom: 10px;
+}
 .played-archive {
   margin-top: 15px;
 }
