@@ -29,4 +29,9 @@ assert.equal(
   "women",
 );
 assert.equal(f.venueFor({ venue_id: "koteng_arena" }), "koteng_arena");
-console.log("PASS: metadata, legacy matches and deep-link team selection");
+assert.equal(f.isSeasonPass({ title: "Sesongkort Lerkendal 2027", kickoff_at: null }), true);
+assert.equal(f.isSeasonPass({ title: "RBK Sesongkort 2027" }), true);
+assert.equal(f.isSeasonPass({ title: "Rosenborg – Molde", kickoff_at: null }), false);
+assert.equal(f.isSeasonPass(null), false);
+assert.equal(f.isPlayed({ title: "Sesongkort Lerkendal 2027", kickoff_at: null }), false);
+console.log("PASS: metadata, legacy matches, season passes and deep-link team selection");
