@@ -37,3 +37,24 @@ Rapporten skal inneholde:
 - Resultatet av kontrollspørringen.
 - Utdraget fra curl-kallet i steg 3.
 - Eventuelle avvik.
+
+---
+
+# Tillegg: Sesongkort Koteng Arena 2027
+
+Mål: sesongkortet for damene (event_key `6acc9e4a3549bc0f9595cfb4`) skal vises på nettsiden under RBK Kvinner. Scanner Control skanner det allerede, og en lokal test ga 517 ledige med 6/6 felt. Edge-funksjonen svarer 503 til raden finnes.
+
+1. Sjekk om `kickoff_at` kan være null:
+   ```sql
+   select is_nullable from information_schema.columns
+   where table_schema='public' and table_name='ministaut_koteng_matches' and column_name='kickoff_at';
+   ```
+2. Kjør `supabase/koteng_sesongkort_2027.sql`. Hvis kolonnen ikke tillater null, bruk `'2026-12-31T23:00:00Z'` i stedet for null.
+3. Verifiser at sesongkortet vises sammen med kampene:
+   ```bash
+   curl -s 'https://khetbokxbcujwcurvviu.supabase.co/rest/v1/ministaut_koteng_matches?select=event_key,title,kickoff_at&is_published=eq.true' \
+     -H 'apikey: sb_publishable_0JuYQgbiXWfx103zy7j85Q_muDiicIL'
+   ```
+4. Vent på neste timesmåling fra operatør-PC-en (opptil cirka 60 min). Bekreft deretter at det finnes en rad i `ministaut_koteng_scans` med `reading_status='observed'` for sesongkortet.
+
+Ikke endre funksjonen, andre rader eller RLS.
