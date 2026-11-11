@@ -6,6 +6,7 @@ Edge profile is started automatically when needed. Never clicks on a seat.
 from __future__ import annotations
 import argparse,csv,html,json,os,re,subprocess,sys,threading
 from datetime import datetime,timezone
+from zoneinfo import ZoneInfo
 from pathlib import Path
 from time import monotonic,sleep
 from urllib.parse import urlparse
@@ -19,6 +20,7 @@ from targets_v16 import confirmed_load,field_candidates,round_robin_recovery,rec
 from publication import publish, TOTAL_PLACES, event_labels, event_key, load_history
 from match_config import SEATS,load_locked,save_locked,normalize_locked,check_map_against_reference
 from schedule_control import ScanSchedule
+from event_registry import EventRegistry
 from analytics import forecast,save_chart,scoped_records
 
 ROOT=Path(__file__).resolve().parent
@@ -115,6 +117,26 @@ def panel_show(page,data):
     js = r"""data => {const root=document.getElementById('rbk-v16-live-panel');if(!root)return false;
       const put=(id,v)=>{const e=root.querySelector('#'+id);if(e)e.textContent=String(v)};
       const number=v=>Number(v).toLocaleString('nb-NO');
+      const list=root.querySelector('#rbk-saved-events');
+      if(list){
+        const selection=list.value;
+        const items=data.registered_events||[];
+        const signature=JSON.stringify(items);
+        if(list.dataset.signature!==signature){
+          list.dataset.signature=signature;
+          list.replaceChildren();
+          const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='Velg lagret kamp';list.append(placeholder);
+          for(const event of items){
+            const option=document.createElement('option');option.value=event.key;
+            const state=event.status==='finished'?' · ferdig':event.status==='awaiting_kickoff'?' · angi avspark':event.status==='awaiting_map'?' · kartlegging':' · aktiv';
+            option.textContent=event.title+state;
+            list.append(option);
+          }
+          const current=items.find(e=>e.key===data.event_key);
+          if(items.some(e=>e.key===selection))list.value=selection;
+          else if(current)list.value=current.key;
+        }
+      }
       put('rbk-title',data.title||'Rosenborg · Billettstatus');
       put('rbk-match-id',data.match_date||data.event_key||'');
       put('rbk-mode',data.mode);put('rbk-found',(data.covered??data.found??0)+'/'+data.total);
@@ -269,6 +291,35 @@ def run(args):
                      'auto_recovery_fields':0,'bundled_confirmed_fields':len(CONFIRMED_POINTS)}
     counter=Counts();nprobe=0;collector=Collector()
     schedule=ScanSchedule(ROOT/'monitorinnstillinger.json',hours=args.auto_hours,enabled=not args.no_auto)
+    registry=EventRegistry(ROOT/'monitor_kamper.json')
+    # The user's women-team link is discoverable now, but cannot be scanned
+    # using Lerkendal's unverified 60-section profile.
+    women_url='https://billett.rbk.no/checkout/6aaceecebfe408c38e1712dd'
+    if not registry.get(event_key(women_url)):
+        registry.add(women_url,'RBK Kvinner · kartlegging kreves','koteng_arena')
+    # Retain both confirmed 2026 Lerkendal fixtures on first installation.
+    known_fixtures=[
+        ('6a9a7e3f3f93920b289b0675','Rosenborg – Molde'),
+        ('6a9a7c2b15599587216e21f3','Rosenborg – Start')]
+    for key,title in known_fixtures:
+        if not registry.get(key):
+            registry.add('https://billett.rbk.no/checkout/'+key,title)
+    if checkout_url(url) and not registry.get(event_key(url)):
+        registry.add(url,event_labels(url)[0])
+    for key,kickoff in [('6a9a7e3f3f93920b289b0675','2026-11-28T18:00'),
+                        ('6a9a7c2b15599587216e21f3','2026-11-07T18:00')]:
+        item=registry.get(key)
+        if item and not item.get('kickoff_at'):
+            registry.update(key,kickoff_at=datetime.fromisoformat(kickoff).replace(tzinfo=ZoneInfo('Europe/Oslo')).isoformat())
+    last_auto_by_event={}
+    if checkout_url(url):
+        event=registry.get(event_key(url))
+        if event and event['venue']!='lerkendal':
+            print('Denne kampen krever en egen verifisert arenaprofil. Ingen Lerkendal-skanning utføres.')
+            return 2
+        if event and registry.status(event)=='finished':
+            print('Kampstart passert. Denne kampen er arkivert og skal ikke skannes.')
+            return 2
     if args.no_auto and schedule.enabled:schedule.enable(False)
     expected=set(SEATS);scan_expected=expected-set(locked);cap=dict(SEATS);standing={'SB','ØVRE ØST'};source='stadionreferanse';last=''
     map_verified=False;map_issues={};locked_conflicts={}
@@ -383,7 +434,8 @@ def run(args):
                   'forecast':{k:projection.get(k) for k in ('state','value','low','high','daily_change','message','hours_until','kickoff_utc')},
                   'chart_points':projection['points'][-30:],
                   'auto_enabled':schedule.enabled,'auto_remaining':schedule.seconds_remaining(),
-                  'clock':datetime.now().strftime('%H:%M:%S'),'busy':busy}
+                  'clock':datetime.now().strftime('%H:%M:%S'),'busy':busy,
+                  'registered_events':[{**e,'status':registry.status(e)} for e in registry.items]}
             panel_show(page,data)
             return data
         def register(hit,manual=None,goal=None,phase=None):
@@ -484,6 +536,13 @@ def run(args):
                                  ensure_ascii=False,indent=2),encoding='utf-8')
             final=save_reports(out,counter,expected,cap,standing,url,source,nprobe,'final',pitch,metrics(),locked,map_verified,map_issues,locked_conflicts)
             finalized_revision=revision
+            # A scan may have started just before kickoff. Archive its local
+            # diagnostics, but never upload a post-kickoff seat count.
+            event=registry.get(event_key(url)) if checkout_url(url) else None
+            if event and registry.status(event)=='finished':
+                print('Kamp startet: ingen ny publisering etter avspark')
+                update('Kampstart passert · historikken er avsluttet')
+                return False
             print('Måling:',final['captured_fields'],'avlest +',len(locked),'låst av 60. Ledige:',final['free_confirmed_fields'])
             try:
                 post=publish(final,out,ROOT/'historikk',browser=browser,header_text=match_header)
@@ -604,10 +663,53 @@ def run(args):
                             deadline=monotonic()+args.manual_seconds if args.manual_seconds>0 else float('inf')
                             prior_signature=None;stable=0;last_pointer=mouse_location(page)['t']
                         continue
+                    elif command.startswith('register:'):
+                        try:
+                            destination,venue=command.split(':',1)[1].rsplit('|',1)
+                            registry.add(destination,venue=venue)
+                            update('Kamp lagret · registrer avspark for automatisk telling')
+                        except ValueError as ex:update('Kunne ikke lagre kamp: '+str(ex)[:80])
+                        continue
+                    elif command.startswith('kickoff:'):
+                        try:
+                            key,local=command.split(':',1)[1].split('|',1)
+                            dt=datetime.fromisoformat(local).replace(tzinfo=ZoneInfo('Europe/Oslo'))
+                            registry.update(key,kickoff_at=dt.isoformat())
+                            update('Kampstart lagret')
+                        except (ValueError,IndexError) as ex:update('Feil kampstart: '+str(ex)[:70])
+                        continue
+                    elif command.startswith('select_registered:'):
+                        key=command.split(':',1)[1]
+                        entry=registry.get(key)
+                        if not entry:
+                            update('Kamp finnes ikke i listen');continue
+                        state=registry.status(entry)
+                        if state=='awaiting_kickoff':
+                            update('Mangler kampstart · velg kampen og lagre avspark i panelet');continue
+                        if state=='finished':
+                            update('Kampstart er passert · sjekk eller korriger dato og klokkeslett');continue
+                        if state=='awaiting_map':
+                            update('Koteng Arena avventer kontrollert skannerprofil');continue
+                        if entry['venue']!='lerkendal':
+                            update('Koteng må kartlegges før skanning kan aktiveres');continue
+                        finalize_cycle()
+                        if start_next_cycle(next_url=entry['url']):
+                            update('Kampbytte utført · '+entry['title'])
+                            deadline=monotonic()+args.manual_seconds if args.manual_seconds>0 else float('inf')
+                            prior_signature=None;stable=0;last_pointer=mouse_location(page)['t']
+                        continue
                     elif command.startswith('switch:'):
                         destination=command.split(':',1)[1]
                         update('Lagrer måling · åpner ny kamp …')
                         if checkout_url(destination):
+                            candidate=registry.get(event_key(destination))
+                            if candidate and registry.status(candidate)!='scheduled':
+                                update('Lagre kampstart før skanning');continue
+                            if candidate and candidate['venue']!='lerkendal':
+                                update('Koteng-kamp lagret, men krever egen skannerprofil');continue
+                            # A new URL becomes a reusable saved fixture, not a one-off switch.
+                            try:registry.add(destination)
+                            except ValueError:pass
                             finalize_cycle()
                             if start_next_cycle(next_url=destination):
                                 deadline=monotonic()+args.manual_seconds if args.manual_seconds>0 else float('inf')
@@ -663,15 +765,32 @@ def run(args):
                                 for hit in sampler.hover(x,y,'v16-clicked-missing'):
                                     register(hit,goal=name,phase='rescue')
                     if schedule.due():
-                        print('Automatisk timesjekk starter:',datetime.now().isoformat(timespec='seconds'),flush=True)
-                        update('Automatisk sjekk · laster inn ferskt billettkart')
-                        finalize_cycle()
-                        if start_next_cycle():
-                            deadline=monotonic()+args.manual_seconds if args.manual_seconds>0 else float('inf')
-                            prior_signature=None;stable=0;last_pointer=mouse_location(page)['t']
-                        else:
-                            schedule.postpone_after_error()
-                            update('Automatisk kontroll mislyktes · prøver igjen om 15 min')
+                        # Each configured match is independent; finished events are archived.
+                        active=registry.eligible()
+                        tick=monotonic()
+                        due=[e for e in active if tick-last_auto_by_event.get(e['key'],-1e12)>=schedule.seconds]
+                        due.sort(key=lambda e:last_auto_by_event.get(e['key'],-1e12))
+                        target=due[0] if due else None
+                        if target:
+                            current_key=event_key(url) if checkout_url(url) else ''
+                            current_entry=registry.get(current_key)
+                            if current_entry and registry.status(current_entry)=='scheduled':
+                                finalize_cycle()
+                                last_auto_by_event[current_key]=monotonic()
+                            if start_next_cycle(next_url=target['url']):
+                                last_auto_by_event[target['key']]=monotonic()
+                                deadline=monotonic()+args.manual_seconds if args.manual_seconds>0 else float('inf')
+                                prior_signature=None;stable=0;last_pointer=mouse_location(page)['t']
+                            else:schedule.postpone_after_error()
+                        elif not active:
+                            update('Ingen aktive kamper · avventer nye')
+                        schedule.scan_finished()
+                        # Drain other due fixtures promptly, without overlapping scans.
+                        if registry.eligible() and any(
+                            monotonic()-last_auto_by_event.get(e['key'],-1e12)>=schedule.seconds
+                            for e in registry.eligible()
+                        ):
+                            schedule.next_due=monotonic()+8
                         continue
                     mouse=mouse_location(page)
                     hits=parse_visible_texts(read_text(page),'v16-manual',mouse['x'],mouse['y'])
